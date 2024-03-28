@@ -1,85 +1,42 @@
+<template>
+  <div class="h-full w-full">
+
+    <RouterView v-slot="{ Component }">
+      <Component :is="layout">
+        <Component :is="Component" />
+      </Component>
+    </RouterView>
+
+    <!-- <header class="bg-white text-gray-600">
+        <div class="container mx-auto flex items-center justify-between py-2 px-6">
+          <RouterLink to="/">
+            <img alt="Kommun logo" class="h-12" src="@/assets/logo_kommun.svg"  />
+          </RouterLink>
+          <div class="hidden md:flex items-center space-x-4">
+            <RouterLink to="/">features</RouterLink>
+            <RouterLink to="/">About us</RouterLink>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button class="bg-transparent text-gray-100 py-2 px-4 border border-gray-100 hover:border-transparent rounded transition duration-200">Login</button>
+            <button class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600 transition duration-200">Registro</button>
+          </div>
+          <div class="md:hidden flex items-center">
+            <button id="menu-toggle" class="text-gray-200 focus:outline-none">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+        </div>
+    </header>
+    <RouterView /> -->
+  </div>
+  
+</template>
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { useLayout } from '/src/composables/useLayout';
+
+// layout
+    const layout = useLayout('div');
 </script>
 
-<template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
-</template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
