@@ -1,17 +1,32 @@
 <template>
-    <div class="h-full w-full">
-        <header class="bg-white text-gray-600">
+    <div class="h-full w-full relative">
+        <header class="absolute top-0 w-full text-slate-950">
             <div class="container mx-auto flex items-center justify-between py-2 px-6">
                 <RouterLink to="/">
                     <img alt="Kommun logo" class="h-12" src="@/assets/logo_kommun.svg"  />
                 </RouterLink>
                 <div class="hidden md:flex items-center space-x-4">
-                    <RouterLink to="/">features</RouterLink>
-                    <RouterLink to="/">About us</RouterLink>
+                    <RouterLink :to="{name:'features'}">
+                        <vs-button color="dark" type="transparent" >Features</vs-button>
+                    </RouterLink>
+                    <RouterLink :to="{name:'features'}">
+                        <vs-button color="dark" type="transparent" >About</vs-button>
+                    </RouterLink>
+                    <RouterLink :to="{name:'features'}">
+                        <vs-button color="dark" type="transparent" >Pricing</vs-button>
+                    </RouterLink>
+                    <RouterLink :to="{name:'features'}">
+                        <vs-button color="dark" type="transparent" >Contact</vs-button>
+                    </RouterLink>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button class="bg-transparent text-gray-100 py-2 px-4 border border-gray-100 hover:border-transparent rounded transition duration-200">Login</button>
-                    <button class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600 transition duration-200">Registro</button>
+                    <router-link :to="{name:'login'}">
+                        <vs-button color="dark" type="border">Login</vs-button>
+                    </router-link >
+                    <router-link :to="{name:'register'}">
+                        <vs-button color="dark">Registro</vs-button>
+                    </router-link>
+ 
                 </div>
                 <div class="md:hidden flex items-center">
                     <button id="menu-toggle" class="text-gray-200 focus:outline-none">
@@ -20,7 +35,15 @@
                 </div>
             </div>
         </header>
-        <RouterView />
+        <!-- <RouterView /> -->
+        <Home/>
     </div>
 </template>
-<script setup></script>
+<script setup>
+import Home from "/src/views/Home.vue"
+defineOptions({
+    name: 'Guests',
+        
+    });
+
+</script>
