@@ -4,7 +4,7 @@
         <div class="bg-white w-96 rounded-2xl shadow-2xl p-4">
             <div class="">
                 <RouterLink to="/">
-                    <vs-button color="dark" type="transparent" size="small">back</vs-button>
+                    <vs-button color="dark" type="transparent" size="small"><IconArrowBack class="scale-75 mr-1"/> back</vs-button>
                 </RouterLink>
             </div>
             <div class="w-full flex justify-center">
@@ -24,14 +24,19 @@
                     block
                 />
             </div>
+            <div class="flex justify-center items-center mt-2">
+                <RouterLink :to="{name:'recovery'}">
+                    <span class="text-xs text-cyan-500  hover:underline transition-all duration-300">forget password</span>
+                </RouterLink>
+                <span class="text-slate-500 text-xs mx-[4px]">or</span>
+                <RouterLink :to="{name:'register'}">
+                    <span class="text-xs text-cyan-500  hover:underline transition-all duration-300">create account</span>
+                </RouterLink>
+            </div>
             <div class="flex justify-center mt-4">
                 <vs-button color="dark">Sign in</vs-button>
             </div>
-            <div class="flex justify-center">
-                <RouterLink to="/recovery">
-                    <vs-button  type="transparent" size="mini">forget password</vs-button>
-                </RouterLink>
-            </div>
+            
             
             
         </div>
@@ -39,9 +44,11 @@
 </template>
 <script setup>
 import { ref } from 'vue';
-
+import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
+//import Authenticated from '/src/layouts/Authenticated.vue';
     defineOptions({
         name: 'login',
+        //layout:Authenticated
     });
     const email = ref('');
     const password = ref('');

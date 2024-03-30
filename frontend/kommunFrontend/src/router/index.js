@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Features from '../views/Features.vue'
+import Landing from '../views/Landing.vue'
 import Login from '../views/auth/Login.vue'
 import Recovery from '../views/auth/Recovery.vue'
 import Register from '../views/auth/Register.vue'
@@ -11,8 +10,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      name: 'Landing',
+      component: Landing
     },{
       path: '/login',
       name: 'login',
@@ -28,11 +27,7 @@ const router = createRouter({
       name: 'recovery',
       component: Recovery
     },
-    {
-      path: '/features',
-      name: 'features',
-      component: Features
-    },
+
     {
       path: '/about',
       name: 'about',
