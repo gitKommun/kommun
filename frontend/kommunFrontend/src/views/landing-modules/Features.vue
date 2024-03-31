@@ -1,10 +1,10 @@
 <template>
-    <section id="landing-features" class="bg-slate-950 flex flex-col items-center py-12">
+    <section class="bg-slate-950 flex flex-col items-center py-12">
         <div class=" max-w-[1280px] flex flex-col justify-center items-center py-6 mb-8">
             <h2 class="text-2xl mb-3 text-white font-bold">Lorem ipsum dolor sit amet, consectetur adipiscing elit</h2>
             <p class="text-white">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
         </div>
-        <div class="max-w-[1280px] container mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="max-w-[1280px] container mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
             <div 
                 v-for="(feature, index) in features" :key="index" 
                 class="flex flex-col bg-slate-900 hover:bg-slate-800 border border-slate-700 group rounded-2xl shadow-md p-4  hover:shadow-xl transition-all durations-300"
