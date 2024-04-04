@@ -1,5 +1,5 @@
 <template>
-    <div class="h-screen w-screen bg-gradient-to-tr from-indigo-400 via-blue-300 to-teal-300  flex justify-center items-center">
+    <div class="h-screen w-screen flex justify-center items-center">
         
         <div class="bg-white w-96 rounded-2xl shadow-2xl p-4">
             <div class="">
@@ -34,7 +34,10 @@
                 </RouterLink>
             </div>
             <div class="flex justify-center mt-4">
-                <vs-button color="dark">Sign in</vs-button>
+                <RouterLink :to="{name:'members'}">
+                    <vs-button color="dark">Sign in</vs-button>
+                </RouterLink>
+                
             </div>
             
             
@@ -45,10 +48,10 @@
 <script setup>
 import { ref } from 'vue';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
-//import Authenticated from '/src/layouts/Authenticated.vue';
+import Authentication from '/src/layouts/Authentication.vue';
     defineOptions({
         name: 'login',
-        //layout:Authenticated
+        layout:Authentication
     });
     const email = ref('');
     const password = ref('');

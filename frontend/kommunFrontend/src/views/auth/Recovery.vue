@@ -1,6 +1,6 @@
 
 <template>
-    <div class="h-screen w-screen bg-gradient-to-tr from-indigo-400 via-blue-300 to-teal-300  flex justify-center items-center">
+    <div class="h-screen w-screen  flex justify-center items-center">
         
         <div class="bg-white w-96 rounded-2xl shadow-2xl p-4">
             <div class="flex justify-center mb-4">
@@ -22,7 +22,7 @@
                 <RouterLink to="/">
                     <vs-button color="dark" type="transparent"> <IconArrowBack class="mr-1 "/> Back to home</vs-button>
                 </RouterLink>
-                <vs-button color="dark">Send</vs-button>
+                <vs-button @click="openNotification" color="dark">Send</vs-button>
             </div>       
         </div>
     </div>
@@ -30,11 +30,22 @@
 <script setup>
 import { ref } from 'vue';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
+import { VsNotification } from 'vuesax-alpha'
+import Authentication from '/src/layouts/Authentication.vue';
 
     defineOptions({
         name: 'recovery',
+        layout:Authentication
     });
     const email = ref('');
-
+    const openNotification = () => {
+        VsNotification({
+            position: 'top-right',
+        color:'success',
+        title: 'Te hemos enviado un mail',
+        content:
+        'Revisa tu bandeja de correo y sigue las innstrucciones para recuperar tu acceso',
+    })
+}
     
 </script>

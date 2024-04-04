@@ -12,8 +12,7 @@
                 <div class="flex justify-between mb-4">
                     <div class="h-10 w-10  text-white flex justify-center items-center rounded-2xl"
                         :class="`bg-${feature.color}-500 shadow-${feature.color}-500`">
-                        <!-- <component :is="feature.icon"/> -->
-                        <IconFinance/>
+                        <Component :is="feature.icon" />
                     </div>
                     <Tag v-if="!feature.available" class="opacity-50">Soon</Tag>
                 </div>
@@ -31,72 +30,76 @@
         </div>
     </section>   
 </template>
+
 <script setup >
-    import { ref } from 'vue'
-import Guests from '/src/layouts/Guests.vue';
+    import { ref, shallowRef } from 'vue'
+    import Guests from '/src/layouts/Guests.vue';
     import Tag from "/src/components/Tag.vue"
-import IconArrowRight from "/src/components/icons/IconArrowRight.vue"
+    import IconArrowRight from "/src/components/icons/IconArrowRight.vue"
     import IconUsers from "/src/components/icons/IconUsers.vue"
     import IconFinance from "/src/components/icons/IconFinance.vue"
     import IconSpeakerphone from "/src/components/icons/IconSpeakerphone.vue"
     import IconFolders from "/src/components/icons/IconFolders.vue"
     import IconTool from "/src/components/icons/IconTool.vue"
-    import IconSurvey from "/src/components/icons/IconSurvey.vue"
+import IconSurvey from "/src/components/icons/IconSurvey.vue"
+        import IconPin from "/src/components/icons/IconPin.vue"
+    import IconWorker from "/src/components/icons/IconWorker.vue"
 
     defineOptions ({
         name: 'Features'
     });
   
-const features = ref([
+const features = shallowRef([
     {
         title: 'Reuniones',
         description: 'Convoca y gestiona las reuniones de vecinos con eficacia y facilidad.',
-        icon: 'IconUsers',
+        icon: IconUsers,
         available: true,
         color:'blue'
     }, {
         title: 'Finanzas',
         description: 'Controla los presupuestos y las finanzas de tu comunidad en tiempo real.',
-        icon: 'IconFinance',
+        icon: IconFinance,
         available: true,
         color:'pink'
     }, {
         title: 'Incidencias',
         description: 'Recibe asistencia y soporte dedicado para garantizar el buen funcionamiento de tu comunidad.',
-        icon: 'IconTool',
+        icon: IconTool,
         available: true,
         color:'amber'
     }, {
         title: 'Documentación',
         description: 'Accede a todos los documentos importantes de tu comunidad cuando lo necesites.',
-        icon: 'IconFolders',
+        icon: IconFolders,
         available: true,
         color:'lime'
     }, {
         title: 'Votaciones',
         description: 'Realiza votaciones online y obtén resultados instantáneos para tomar decisiones rápidas.',
-        icon: 'IconSurvey',
+        icon: IconSurvey,
         available: true,
         color:'violet'
     }, {
         title: 'Comunicación',
         description: 'Mantén a todos los vecinos informados y comunícate de manera efectiva.',
-        icon: 'IconSpeakerphone',
+        icon: IconSpeakerphone,
         available: true,
         color:'teal'
     }, {
         title: 'Reserva de espacios',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-        icon: 'IconPlus',
+        icon: IconPin,
         available: false,
         color:'fuchsia'
     },{
         title: 'Proveedores',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-        icon: 'IconPlus',
+        icon: IconWorker,
         available: false,
         color:'orange'
 
     },
 ]);
+
 </script>

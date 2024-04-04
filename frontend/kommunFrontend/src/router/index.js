@@ -1,9 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Landing from '../views/Landing.vue'
-import Login from '../views/auth/Login.vue'
-import Recovery from '../views/auth/Recovery.vue'
-import Register from '../views/auth/Register.vue'
-
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,31 +6,65 @@ const router = createRouter({
     {
       path: '/',
       name: 'Landing',
-      component: Landing
+      component: () => import('../views/Landing.vue')
     },{
       path: '/login',
       name: 'login',
-      component: Login
-    },
-    {
+      component: () => import('../views/auth/Login.vue')
+    },{
       path: '/register',
       name: 'register',
-      component: Register
-    },
-     {
+      component: () => import('../views/auth/Register.vue')
+    },{
       path: '/recovery',
       name: 'recovery',
-      component: Recovery
+      component: () => import('../views/auth/Recovery.vue')
+    },{
+      path: '/members',
+      name: 'members',
+      component: () => import('../views/admin/Members.vue')
+    },{
+      path: '/documents',
+      name: 'documents',
+      component: () => import('../views/admin/Documents.vue')
+    },{
+      path: '/incidences',
+      name: 'incidences',
+      component: () => import('../views/admin/Incidences.vue')
+    },{
+      path: '/surveys',
+      name: 'surveys',
+      component: () => import('../views/admin/Surveys.vue')
+    },{
+      path: '/finance',
+      name: 'finance',
+      component: () => import('../views/admin/Finance.vue')
+    },{
+      path: '/communication',
+      name: 'communication',
+      component: () => import('../views/admin/Communication.vue')
+    },{
+      path: '/bookings',
+      name: 'bookings',
+      component: () => import('../views/admin/Bookings.vue')
+    },{
+      path: '/providers',
+      name: 'providers',
+      component: () => import('../views/admin/Providers.vue')
+    },{
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/admin/Settings.vue')
     },
 
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    }
+    // {
+    //   path: '/about',
+    //   name: 'about',
+    //   // route level code-splitting
+    //   // this generates a separate chunk (About.[hash].js) for this route
+    //   // which is lazy-loaded when the route is visited.
+    //   component: () => import('../views/AboutView.vue')
+    // }
   ]
 })
 

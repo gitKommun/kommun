@@ -1,6 +1,6 @@
 
 <template>
-    <div class="h-screen w-screen bg-gradient-to-tr from-indigo-400 via-blue-300 to-teal-300  flex justify-center items-center">
+    <div class="h-screen w-screen  flex justify-center items-center">
         
         <div class="flex flex-col bg-white  rounded-2xl shadow-2xl overflow-hidden p-4">
   
@@ -71,10 +71,13 @@
 </template>
 <script setup>
     import { computed, ref } from 'vue';
-    import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
+import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
+import Authentication from '/src/layouts/Authentication.vue';
+
 
     defineOptions({
         name: 'register',
+        layout:Authentication
     });
     const name = ref('');
     const surname = ref('');

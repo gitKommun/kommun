@@ -5,3 +5,7 @@
 body {
   font-family: 'Poppins', sans-serif;
 }
+
+.bounce-transition {
+    transition-timing-function: cubic-bezier(0.39, 0.93, 0.37, 1.18);
+}
