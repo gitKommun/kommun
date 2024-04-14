@@ -34,26 +34,42 @@
                 </RouterLink>
             </div>
             <div class="flex justify-center mt-4">
-                <RouterLink :to="{name:'members'}">
-                    <vs-button color="dark">Sign in</vs-button>
-                </RouterLink>
+            <div class="flex justify-center mt-4">
+                <vs-button color="dark" @click="login">Sign in</vs-button>
+            </div>
                 
             </div>
-            
-            
-            
+    
         </div>
     </div>
 </template>
+
+
+
+
 <script setup>
 import { ref } from 'vue';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
-    defineOptions({
-        name: 'login',
-        layout:Authentication
+import axios from 'axios'; 
+import { API_BASE_URL } from '/config.js'
+
+const email = ref('');
+const password = ref('');
+
+const login = async () => {
+  try {
+    console.log('Realizando solicitud POST a la API...');
+    await axios.post(`${ API_BASE_URL }members/login/`, {
+      email: email.value,
+      password: password.value,
     });
-    const email = ref('');
-    const password = ref('');
-    
+    console.log('Login exitoso');
+    //window.location.href = '/';
+  } catch (error) {
+    console.error('Error en la solicitud POST:', error);
+    // Manejar el error de autenticación
+  }
+}
 </script>
+
