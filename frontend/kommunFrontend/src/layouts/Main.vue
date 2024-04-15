@@ -133,6 +133,7 @@ import IconWorker from "/src/components/icons/IconWorker.vue"
 import IconSettings from "/src/components/icons/IconSettings.vue"
 import IconChevronRight from "/src/components/icons/IconChevronRight.vue"
 import IconChevronLeft from "/src/components/icons/IconChevronLeft.vue"
+import IconBuilding from "/src/components/icons/IconBuilding.vue"
 import Dropdown from "/src/components/Dropdown.vue"
 defineOptions({
   name:'home'
@@ -170,11 +171,17 @@ const isLinkActive = (routeName) => {
 
 const features = shallowRef([
     {
-        title: 'Miembros',
+        title: 'Propiedades',
+        icon: IconBuilding,
+        available: true,
+        color: 'indigo',
+        to:'/properties'
+    }, {
+        title: 'Propietarios',
         icon: IconUsers,
         available: true,
         color: 'blue',
-        to:'/members'
+        to:'/owners'
     }, {
         title: 'Finanzas',
         icon: IconFinance,

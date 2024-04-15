@@ -1,12 +1,15 @@
 <template>
   <div class="h-full w-full">
-    <div class="text-slate-950 text-3xl font-bold truncate pl-4 md:pl-16 py-6 flex flex-col">
-      {{title}}
-      <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
+    <div class="pl-4 md:pl-16 py-6 flex">
+      <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
+          {{title}}
+          <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
+      </div>
+      <div class="w-full p-4 flex justify-end">
+        <vs-button color="dark" class="inline">Añadir Propietarios</vs-button>
+      </div>
     </div>
-    <div class="w-full p-4 flex justify-end">
-      <vs-button color="dark">Añadir miembros</vs-button>
-    </div>
+    
     <div class="px-4">
         <!-- <div ref="table"></div> -->
         <vs-table>
@@ -74,7 +77,7 @@ defineOptions({
   name: 'members',
   layout: Main
 })
-const title = ref('Miembros')
+const title = ref('Propietarios')
 const users = ref([
    { 
     id: 1,

@@ -34,7 +34,7 @@
                 </RouterLink>
             </div>
             <div class="flex justify-center mt-4">
-                <RouterLink :to="{name:'members'}">
+                <RouterLink :to="{name:'onboarding'}">
                     <vs-button color="dark">Sign in</vs-button>
                 </RouterLink>
                 

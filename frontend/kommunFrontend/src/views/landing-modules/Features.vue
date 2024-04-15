@@ -14,7 +14,7 @@
                         :class="`bg-${feature.color}-500 shadow-${feature.color}-500`">
                         <Component :is="feature.icon" />
                     </div>
-                    <Tag v-if="!feature.available" class="opacity-50">Soon</Tag>
+                    <Tag v-if="!feature.available">Soon</Tag>
                 </div>
                 <div class="pt-2">
                     <h3 class="font-semibold mb-2 text-white "
@@ -98,7 +98,6 @@ const features = shallowRef([
         icon: IconWorker,
         available: false,
         color:'orange'
-
     },
 ]);
 

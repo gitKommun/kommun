@@ -20,9 +20,17 @@ const router = createRouter({
       name: 'recovery',
       component: () => import('../views/auth/Recovery.vue')
     },{
-      path: '/members',
-      name: 'members',
-      component: () => import('../views/admin/Members.vue')
+      path: '/onboarding',
+      name: 'onboarding',
+      component: () => import('../views/admin/Onboarding.vue')
+    },{
+      path: '/properties',
+      name: 'properties',
+      component: () => import('../views/admin/Properties.vue')
+    },{
+      path: '/owners',
+      name: 'owners',
+      component: () => import('../views/admin/Owners.vue')
     },{
       path: '/documents',
       name: 'documents',
