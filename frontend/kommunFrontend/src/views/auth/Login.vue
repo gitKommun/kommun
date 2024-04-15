@@ -51,16 +51,20 @@
 import { ref } from 'vue';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
-import axios from 'axios'; 
-import { API_BASE_URL } from '/config.js'
+import http from '/src/http.js'; 
 
 const email = ref('');
 const password = ref('');
 
+defineOptions({
+        name: 'login',
+        layout:Authentication
+    });
+
 const login = async () => {
   try {
     console.log('Realizando solicitud POST a la API...');
-    await axios.post(`${ API_BASE_URL }members/login/`, {
+    await http.post(`members/login/`, {
       email: email.value,
       password: password.value,
     });

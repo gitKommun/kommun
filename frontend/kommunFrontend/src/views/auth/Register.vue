@@ -75,13 +75,12 @@ import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
 
 //Jakub: enlazando con API
-import axios from 'axios'; 
-import { API_BASE_URL } from '/config.js'
+import http from '/src/http.js'; 
 
 
 const registerUser = async () => {
   try {
-    const response = await axios.post(`${API_BASE_URL}members/register/`, {
+    const response = await http.post(`members/register/`, {
       name: name.value,
       surname: surname.value,
       email: email.value,
