@@ -63,7 +63,7 @@
                     <RouterLink to="/">
                         <vs-button color="dark" type="transparent"><IconArrowBack class="mr-1 "/>Back to home</vs-button>
                     </RouterLink>
-                    <vs-button color="dark" :disabled="!passConfirm">Submit</vs-button>
+                    <vs-button color="dark" :disabled="!passConfirm" @click="registerUser">Submit</vs-button>
                 </div> 
             
         </div>
@@ -74,6 +74,26 @@
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
 
+//Jakub: enlazando con API
+import axios from 'axios'; 
+import { API_BASE_URL } from '/config.js'
+
+
+const registerUser = async () => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}members/register/`, {
+      name: name.value,
+      surname: surname.value,
+      email: email.value,
+      password: password_1.value
+      // Agrega aquí los demás campos del formulario que desees enviar
+    });
+    console.log(response.data); // Maneja la respuesta del servidor aquí
+  } catch (error) {
+    console.error(error);
+  }
+};
+//Jakub: fin
 
     defineOptions({
         name: 'register',
