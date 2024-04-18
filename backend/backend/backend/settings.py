@@ -25,13 +25,20 @@ SECRET_KEY = 'django-insecure-25_=x#g77g03@^d(u)^=m+0hcu+e=4o988t(2ln&354i4cw2$v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+#CORS_ORIGIN_ALLOW_ALL = True
 
-#CORS_ORIGIN_ALLOW_ALL = False
-#CORS_ORIGIN_WHITELIST = [
-#    'http://localhost:8080',  # Reemplazar con URL del front cuando este disponible
-#]
+CORS_ALLOW_CREDENTIALS = True
+SESSION_COOKIE_SAMESITE = 'None'  # Permitir cookies en cross-origin
+#SESSION_COOKIE_SECURE = True      # Requerido si SameSite=None
+
+
+CORS_ORIGIN_ALLOW_ALL = False
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:5173',  
+    'http://localhost:8080',
+]
 
 # Application definition
 
@@ -60,15 +67,16 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'backend.middleware.LogMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
 
 ]
 
