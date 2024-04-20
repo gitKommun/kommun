@@ -100,7 +100,7 @@ class UserLoginView(APIView):
   
 from rest_framework.permissions import AllowAny
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class UserLogoutAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -126,6 +126,7 @@ def check_auth_status(request):
 
 @api_view(['GET'])
 def get_user_email(request):
+    print(f'User que manda la request: {request.user}')
     if request.user.is_authenticated:
         user_email = request.user.email
         return Response({'email': user_email})
