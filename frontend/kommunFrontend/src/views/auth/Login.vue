@@ -64,14 +64,27 @@ defineOptions({
 const login = async () => {
   try {
     console.log('Realizando solicitud POST a la API...');
-    await http.post(`members/login/`, {
+    const response = await http.post(`members/login/`, {
       email: email.value,
       password: password.value,
     });
+
+    if (response.data.success) {
+
+      // Redirigir al usuario a otra página, por ejemplo, al dashboard
+      //location.href = '/';
+    } else {
+      // Manejar el caso en que las credenciales son inválidas
+    }
+
     console.log('Login exitoso');
     //window.location.href = '/';
   } catch (error) {
-    console.error('Error en la solicitud POST:', error);
+    if (error instanceof TypeError) {
+      console.error('Error en la solicitud POST:', error.message);
+    } else {
+      console.error('Error en la solicitud POST:', error);
+    }
     // Manejar el error de autenticación
   }
 }

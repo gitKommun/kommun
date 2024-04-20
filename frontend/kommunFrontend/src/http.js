@@ -1,8 +1,10 @@
 import axios from 'axios'; 
-const API_BASE_URL = 'http://127.0.0.1:8000/'; 
+const API_BASE_URL = 'https://burly-agreement-production.up.railway.app/'; 
 
-export default axios.create({
+const api = axios.create({
   baseURL: API_BASE_URL,
-  //timeout: 1000,
-  //headers: {'X-Custom-Header': 'foobar'}
+  withCredentials: true
+
 });
+
+export default api;
