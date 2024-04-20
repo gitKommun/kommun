@@ -26,13 +26,18 @@ SECRET_KEY = 'django-insecure-25_=x#g77g03@^d(u)^=m+0hcu+e=4o988t(2ln&354i4cw2$v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 
+                 'burly-agreement-production.up.railway.app',
+                    'http://burly-agreement-production.up.railway.app',
+    'https://burly-agreement-production.up.railway.app']
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:8080',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:8080',
+    'http://burly-agreement-production.up.railway.app',
+    'https://burly-agreement-production.up.railway.app',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -65,7 +70,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5173',  
     'http://127.0.0.1:8080',
-
+    'http://burly-agreement-production.up.railway.app',
+    'https://burly-agreement-production.up.railway.app',
 ]
 
 # Application definition
