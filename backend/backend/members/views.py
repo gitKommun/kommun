@@ -132,3 +132,22 @@ def get_user_email(request):
         return Response({'email': user_email})
     else:
         return Response({'error': 'Usuario no autenticado'}, status=401)
+
+
+@api_view(['POST'])
+def UserLogoutView(request):
+    print(f'Sesión actual antes del cierre: {request.session.items()}')
+    print(f'Usuario actual antes del cierre: {request.user.email if request.user.is_authenticated else None}')
+    request.session.flush()
+    username = None
+    if request.user.is_authenticated:
+        username = request.user.email
+    print(f'Usuario cerrado: {username}')
+    return Response({
+        'message': f'Cierre de sesión exitoso para el usuario {username}',
+        'username': username,
+        'logged_out': True
+    }, status=status.HTTP_200_OK)
+
+
+

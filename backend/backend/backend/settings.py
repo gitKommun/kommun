@@ -47,7 +47,8 @@ CSRF_TRUSTED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_COOKIE_NAME = "csrftoken"
+CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 
 SESSION_COOKIE_SECURE = True  
 CSRF_COOKIE_SECURE = True
@@ -68,6 +69,7 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'X-CSRFToken',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -110,6 +112,8 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'backend.middleware.LogMiddleware',
+    'backend.middleware.PutCSRFTokenIntoHeader', #Añade el token CSRF a los headers X-CSRFToken
+    
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 
