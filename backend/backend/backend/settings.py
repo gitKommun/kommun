@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]',
                  'burly-agreement-production.up.railway.app',
                     'http://burly-agreement-production.up.railway.app',
     'https://burly-agreement-production.up.railway.app',
-    'https://frontend-production-99a3.up.railway.app/',
+    'https://frontend-production-99a3.up.railway.app',
     'http://frontend-production-99a3.up.railway.app',
     ]
 
@@ -41,7 +41,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8080',
     'http://burly-agreement-production.up.railway.app',
     'https://burly-agreement-production.up.railway.app',
-    'https://frontend-production-99a3.up.railway.app/',
+    'https://frontend-production-99a3.up.railway.app',
     'http://frontend-production-99a3.up.railway.app',
 ]
 
@@ -77,8 +77,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8080',
     'http://burly-agreement-production.up.railway.app',
     'https://burly-agreement-production.up.railway.app',
-    'https://frontend-production-99a3.up.railway.app/',
-    'http://frontend-production-99a3.up.railway.app/',
+    'https://frontend-production-99a3.up.railway.app',
+    'http://frontend-production-99a3.up.railway.app',
 ]
 
 # Application definition
