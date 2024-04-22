@@ -98,20 +98,16 @@ class UserLoginView(APIView):
 
         return JsonResponse({'success': False, 'error': 'Credenciales inválidas'})
   
-from rest_framework.permissions import AllowAny
 
-@method_decorator(csrf_exempt, name='dispatch')
 class UserLogoutAPIView(APIView):
-    permission_classes = [AllowAny]
-
     def post(self, request):
-        print(f'Sesión actual antes del cierre: {request.session.items()}')
-        print(f'Usuario actual antes del cierre: {request.user.email if request.user.is_authenticated else None}')
+        #print(f'Sesión actual antes del cierre: {request.session.items()}')
+        #print(f'Usuario actual antes del cierre: {request.user.email if request.user.is_authenticated else None}')
         request.session.flush()
         username = None
         if request.user.is_authenticated:
             username = request.user.email
-        print(f'Usuario cerrado: {username}')
+        #print(f'Usuario cerrado: {username}')
         return Response({
             'message': f'Cierre de sesión exitoso para el usuario {username}',
             'username': username,
@@ -126,28 +122,11 @@ def check_auth_status(request):
 
 @api_view(['GET'])
 def get_user_email(request):
-    print(f'User que manda la request: {request.user}')
     if request.user.is_authenticated:
         user_email = request.user.email
         return Response({'email': user_email})
     else:
         return Response({'error': 'Usuario no autenticado'}, status=401)
-
-
-@api_view(['POST'])
-def UserLogoutView(request):
-    print(f'Sesión actual antes del cierre: {request.session.items()}')
-    print(f'Usuario actual antes del cierre: {request.user.email if request.user.is_authenticated else None}')
-    request.session.flush()
-    username = None
-    if request.user.is_authenticated:
-        username = request.user.email
-    print(f'Usuario cerrado: {username}')
-    return Response({
-        'message': f'Cierre de sesión exitoso para el usuario {username}',
-        'username': username,
-        'logged_out': True
-    }, status=status.HTTP_200_OK)
 
 
 
