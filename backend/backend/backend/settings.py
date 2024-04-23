@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,13 +26,53 @@ SECRET_KEY = 'django-insecure-25_=x#g77g03@^d(u)^=m+0hcu+e=4o988t(2ln&354i4cw2$v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 
+                 'burly-agreement-production.up.railway.app',
+                    'http://burly-agreement-production.up.railway.app',
+    'https://burly-agreement-production.up.railway.app']
 
-#CORS_ORIGIN_ALLOW_ALL = False
-#CORS_ORIGIN_WHITELIST = [
-#    'http://localhost:8080',  # Reemplazar con URL del front cuando este disponible
-#]
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://localhost:8080',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:8080',
+    'http://burly-agreement-production.up.railway.app',
+    'https://burly-agreement-production.up.railway.app',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+
+SESSION_COOKIE_SECURE = True  
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None'
+
+CSRF_COOKIE_HTTPONLY = False  
+
+CORS_EXPOSE_HEADERS = ['Set-Cookie']
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5173',  
+    'http://127.0.0.1:8080',
+    'http://burly-agreement-production.up.railway.app',
+    'https://burly-agreement-production.up.railway.app',
+]
 
 # Application definition
 
@@ -50,6 +91,7 @@ INSTALLED_APPS = [
     #Own
     'members',
     'communities',
+    'documents',
 
 ]
 
@@ -60,15 +102,16 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'backend.middleware.LogMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
 
 ]
 
@@ -107,6 +150,11 @@ DATABASES = {
     }
 }
 
+DOCUMENT_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+STATIC_URL = 'static/'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -140,11 +188,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
