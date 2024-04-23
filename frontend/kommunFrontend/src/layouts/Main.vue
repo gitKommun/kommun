@@ -39,6 +39,7 @@
             >
               <vs-avatar size="40">
                   <img src="@/assets/avatar_2.png" alt="" />
+                  
                 </vs-avatar>
               <span v-if="isAsideOpen" class="text-sm font-semibold">Jane Smith</span>    
             </div>
@@ -95,7 +96,7 @@
     <!-- menu-top -->
     <div class="w-full  flex-1 min-w-0 p-3">
       <div class="bg-white rounded-2xl shadow-xl h-full w-full relative overflow-hidden">
-        <div class="absolute ml-2 mt-7 h-8 w-8 rounded-xl hover:bg-slate-100 text-slate-400 hidden md:flex items-center justify-center" @click="asideToogle">
+        <div class="absolute z-50 ml-2 mt-7 h-8 w-8 rounded-xl hover:bg-slate-100 text-slate-400 hidden md:flex items-center justify-center" @click="asideToogle">
           <transition
           enter-active-class="transition-all transition-slow ease-out overflow-hidden"
           leave-active-class="transition-all transition-slow ease-in overflow-hidden"

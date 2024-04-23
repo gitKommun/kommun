@@ -11,7 +11,6 @@
     </div>
     
     <div class="px-4">
-        <!-- <div ref="table"></div> -->
         <vs-table>
             <template #thead>
               <vs-tr>
@@ -118,9 +117,7 @@ const users = ref([
         letter: 'A',
         credit: 2000
     }
-]); //data for table to display
-
- // users.value =
+]);
 
 </script>
 

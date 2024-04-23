@@ -35,7 +35,7 @@
             </div>
             <div class="flex justify-center mt-4">
             <div class="flex justify-center mt-4">
-                <vs-button color="dark" @click="login">Sign in</vs-button>
+                <vs-button color="dark" @click="login" :loading="loginLoading">Sign in</vs-button>
             </div>
                 
             </div>
@@ -51,10 +51,12 @@
 import { ref } from 'vue';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
+import { VsNotification } from 'vuesax-alpha'
 import http from '/src/http.js'; 
 
 const email = ref('');
 const password = ref('');
+const loginLoading = ref(false);
 
 defineOptions({
         name: 'login',
@@ -62,17 +64,25 @@ defineOptions({
     });
 
 const login = async () => {
+    loginLoading.value = true
   try {
     console.log('Realizando solicitud POST a la API...');
     await http.post(`members/login/`, {
       email: email.value,
       password: password.value,
     });
-    console.log('Login exitoso');
-    //window.location.href = '/';
+      //hacer llamada a /me
+           loginLoading.value = false
   } catch (error) {
     console.error('Error en la solicitud POST:', error);
-    // Manejar el error de autenticación
+      // Manejar el error de autenticación
+    VsNotification({
+            position: 'top-right',
+        color:'danger',
+        title: 'Error de autenticación',
+        content:error,
+    })
+    loginLoading.value = false
   }
 }
 </script>

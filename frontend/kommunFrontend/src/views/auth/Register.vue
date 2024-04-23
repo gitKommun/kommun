@@ -63,7 +63,7 @@
                     <RouterLink to="/">
                         <vs-button color="dark" type="transparent"><IconArrowBack class="mr-1 "/>Back to home</vs-button>
                     </RouterLink>
-                    <vs-button color="dark" :disabled="!passConfirm" @click="registerUser">Submit</vs-button>
+                    <vs-button color="dark"  @click="registerUser" :loading="registerLoading">Submit</vs-button>
                 </div> 
             
         </div>
@@ -73,23 +73,52 @@
     import { computed, ref } from 'vue';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
+import { VsNotification } from 'vuesax-alpha'
 
 //Jakub: enlazando con API
 import http from '/src/http.js'; 
 
-
+const registerLoading = ref(false);
 const registerUser = async () => {
-  try {
-    const response = await http.post(`members/register/`, {
-      name: name.value,
-      surname: surname.value,
-      email: email.value,
-      password: password_1.value
-      // Agrega aquí los demás campos del formulario que desees enviar
-    });
-    console.log(response.data); // Maneja la respuesta del servidor aquí
+    registerLoading.value = true
+    try {
+        if (passFormatValid.value) {
+            console.log('valido')
+            if (password_1.value===password_2.value) {
+                const response = await http.post(`members/register/`, {
+                    name: name.value,
+                    surname: surname.value,
+                    email: email.value,
+                    password: password_1.value
+                    // Agrega aquí los demás campos del formulario que desees enviar
+                    });
+                
+                console.log(response.data); // Maneja la respuesta del servidor aquí
+            } else {
+                VsNotification({
+                position: 'top-right',
+                color:'danger',
+                title: 'Las contraseñas no coinciden',
+                content:'Comprueba que has introducido la misma contraseña en los dos campos',
+                })
+            }
+        } else {
+            VsNotification({
+            position: 'top-right',
+            color:'danger',
+            title: 'Formato de contraseña no valido',
+            content:'Revisa los requisitos para tener una contraseña segura',
+            })
+        }
+        registerLoading.value = false
   } catch (error) {
-    console.error(error);
+      VsNotification({
+            position: 'top-right',
+        color:'danger',
+        title: 'Error en el registro',
+        content:error,
+    })
+    registerLoading.value = false
   }
 };
 //Jakub: fin
