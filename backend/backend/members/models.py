@@ -46,6 +46,15 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.name} {self.surnames}"
     
+    def get_user_community(self):
+        # Primero, verifica si el Owner es el mainContact de alguna comunidad
+        owner_type = ContentType.objects.get_for_model(self)
+        communities_as_main_contact = Community.objects.filter(main_contact_type=owner_type, main_contact_id=self.id)
+        if communities_as_main_contact.exists():
+            return communities_as_main_contact.first()
+
+        # Retorna None si no se encuentra ninguna asociación
+        return None    
 
 #class Owner which is an extenion of User
 class Owner(User):
@@ -62,7 +71,7 @@ class Owner(User):
     def remove_property(self, property):
         self.properties.remove(property)
 
-    def get_associated_community(self):
+    def get_owner_community(self):
         # Primero, verifica si el Owner es el mainContact de alguna comunidad
         owner_type = ContentType.objects.get_for_model(self)
         communities_as_main_contact = Community.objects.filter(main_contact_type=owner_type, main_contact_id=self.id)

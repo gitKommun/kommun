@@ -20,7 +20,7 @@ from rest_framework.decorators import api_view
 
 from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer
 from .models import User
-from communities.models import Community
+from communities.models import Community, UserCommunityRole
 from communities.serializers import CommunitySerializer
 
 
@@ -48,8 +48,19 @@ class UserMainContactCommunityRegistrationAPIView(APIView):
             community.main_contact_id = user.id
             community.save()
             
+            # Asignar el rol de administrador al usuario en la comunidad recién creada
+            UserCommunityRole.objects.create(
+                user=user,
+                community=community,
+                role='admin'  
+            )
+
             community_serializer = CommunitySerializer(community)
-            return Response(community_serializer.data, status=status.HTTP_201_CREATED)
+            return Response({
+                'user': serializer.data,
+                'community': community_serializer.data
+            }, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserListAPIView(APIView):
@@ -73,7 +84,7 @@ class UserLoginAPIView(APIView):
     
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+#@method_decorator(csrf_exempt, name='dispatch')
 @method_decorator(require_POST, name='dispatch')
 class UserLoginView(APIView):
     def post(self, request):
@@ -130,3 +141,29 @@ def get_user_email(request):
 
 
 
+
+@api_view(['GET'])
+def get_user_data(request):
+    if request.user.is_authenticated:
+        # Extraer la información del usuario
+        user = request.user
+        user_data = {
+            'userId': user.id,
+            'userName': user.name,
+            'userSurnames': user.surnames,
+            'userEmail': user.email,
+        }
+
+        # Intentar obtener la comunidad asociada como main contact
+        user_type = ContentType.objects.get_for_model(user)
+        community = Community.objects.filter(main_contact_type=user_type, main_contact_id=user.id).first()
+        
+        # Añadir communityId si existe alguna comunidad asociada
+        if community:
+            user_data['communityId'] = community.IDcommunity
+        else:
+            user_data['communityId'] = None
+
+        return Response(user_data)
+    else:
+        return Response({'error': 'Usuario no autenticado'}, status=401)

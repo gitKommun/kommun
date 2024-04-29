@@ -1,4 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
+from django.http import HttpResponseForbidden
 
 class LogMiddleware(MiddlewareMixin):
     def process_request(self, request):
@@ -24,3 +25,42 @@ class PutCSRFTokenIntoHeader(MiddlewareMixin):
             #    print("CSRF token no encontrado en las cookies.")
         #else:
         #    print("HTTP_X_CSRFTOKEN ya está presente en los headers:", request.META['HTTP_X_CSRFTOKEN'])
+
+
+
+
+class RoleBasedAccessMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.excluded_paths = [
+            '/members/',
+            '/members/register_user_community/',
+            '/members/login/',
+            '/members/logout/',    
+        ]
+
+    def __call__(self, request):
+        print(request.path)
+        # Si la ruta solicitada está en la lista de excluidos, no aplicar la lógica del middleware
+        if request.path in self.excluded_paths:
+            return self.get_response(request)
+
+        # Lógica del middleware antes de llamar a la vista
+        response = self.get_response(request)
+        # Lógica después de llamar a la vista
+        return response
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        if request.path in self.excluded_paths:
+            return None
+
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden("No estás autenticado")
+
+        community_id = view_kwargs.get('IDcommunity')
+        if community_id:
+            user_roles = request.user.roles.filter(community_id=community_id)
+            if not user_roles.exists():
+                return HttpResponseForbidden("No tienes permisos para acceder a esta comunidad")
+
+        return None

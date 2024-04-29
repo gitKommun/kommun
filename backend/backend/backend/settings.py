@@ -113,6 +113,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'backend.middleware.LogMiddleware',
     'backend.middleware.PutCSRFTokenIntoHeader', #Añade el token CSRF a los headers X-CSRFToken
+    'backend.middleware.RoleBasedAccessMiddleware', #Solo muestra la comunidad a los ususuarios asociados
     
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -155,9 +156,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'railway',
         'USER': 'postgres',
-        'PASSWORD': 'iKtkfCvlIaQmsyMtwtkTJrkbmMbVipya',
-        'HOST': 'monorail.proxy.rlwy.net',
-        'PORT': '56531',
+        'PASSWORD': 'oegfJVSCltzWbWIXMGwlVkeJtyTBQCel',
+        'HOST': 'roundhouse.proxy.rlwy.net',
+        'PORT': '12866',
     }
 }
 
