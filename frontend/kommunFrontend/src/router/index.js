@@ -63,6 +63,10 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: () => import('../views/admin/Settings.vue')
+    },{
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../views/admin/Profile.vue')
     },
 
     // {

@@ -37,10 +37,12 @@
             <div class="h-10 flex  items-center rounded-xl cursor pointer"
               :class="isAsideOpen?'w-full pl-2 gap-4':'w-10 justify-center'"
             >
-              <vs-avatar size="40">
-                  <img src="@/assets/avatar_2.png" alt="" />
-                  
+            <router-link to="/profile">
+                <vs-avatar size="40">
+                  <img src="@/assets/avatar_2.png" alt="" /> 
                 </vs-avatar>
+              </router-link>
+              
               <span v-if="isAsideOpen" class="text-sm font-semibold">Jane Smith</span>    
             </div>
       
@@ -52,13 +54,11 @@
     <div class="flex md:hidden w-full flex-col ">
       <div class="w-full flex justify-between items-center px-3">
           <img alt="Kommun logo" key="logo" class="h-16" src="@/assets/logo_kommun.svg"  />
-          <!-- <Dropdown>
-            <template #trigger></template>
-            <template #content></template>
-          </Dropdown> -->
-          <vs-avatar size="40">
-            <img src="@/assets/avatar_2.png" alt="" />
-          </vs-avatar>
+          <router-link to="/profile">
+            <vs-avatar size="40">
+              <img src="@/assets/avatar_2.png" alt="" /> 
+            </vs-avatar>
+          </router-link>
       </div>
       <div class="flex w-full h-10 px-3 gap-x-3">
         <div class="flex justify-center items-center h-10 w-10 rounded-2xl hover:bg-slate-200 transition-all duration-300"

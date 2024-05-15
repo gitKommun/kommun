@@ -18,7 +18,7 @@
                     block/>
                 <vs-input
                     v-model="password"
-                    type="password"
+                    type="text"
                     placeholder="Password"
                     label-float 
                     block
@@ -67,20 +67,24 @@ const login = async () => {
     loginLoading.value = true
   try {
     console.log('Realizando solicitud POST a la API...');
-    await http.post(`members/login/`, {
+   const response = await http.post(`members/login/`, {
       email: email.value,
       password: password.value,
     });
       //hacer llamada a /me
-           loginLoading.value = false
+      loginLoading.value = false
+      //   Guardar en pinia usuario y token
+        //redirecionar a home
+        console.log('user--->',response)
+      
   } catch (error) {
     console.error('Error en la solicitud POST:', error);
       // Manejar el error de autenticación
     VsNotification({
             position: 'top-right',
-        color:'danger',
-        title: 'Error de autenticación',
-        content:error,
+            color:'danger',
+            title: 'Error de autenticación',
+            content:error,
     })
     loginLoading.value = false
   }

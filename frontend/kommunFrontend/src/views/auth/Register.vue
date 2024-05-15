@@ -21,7 +21,7 @@
                             label-float 
                             block/>
                         <vs-input 
-                            v-model="surname" 
+                            v-model="surnames" 
                             placeholder="Surname" 
                             label-float 
                             block/>
@@ -87,7 +87,7 @@ const registerUser = async () => {
             if (password_1.value===password_2.value) {
                 const response = await http.post(`members/register/`, {
                     name: name.value,
-                    surname: surname.value,
+                    surnames: surnames.value,
                     email: email.value,
                     password: password_1.value
                     // Agrega aquí los demás campos del formulario que desees enviar
@@ -128,7 +128,7 @@ const registerUser = async () => {
         layout:Authentication
     });
     const name = ref('');
-    const surname = ref('');
+    const surnames = ref('');
     const email = ref('');
     const password_1 = ref('');
     const password_2 = ref('');
