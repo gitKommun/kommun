@@ -20,9 +20,8 @@ from rest_framework.decorators import api_view
 
 from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer
 from .models import User
-from communities.models import Community
+from communities.models import Community, UserCommunityRole
 from communities.serializers import CommunitySerializer
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserRegistrationAPIView(APIView):
@@ -48,8 +47,19 @@ class UserMainContactCommunityRegistrationAPIView(APIView):
             community.main_contact_id = user.id
             community.save()
             
+            # Asignar el rol de administrador al usuario en la comunidad recién creada
+            UserCommunityRole.objects.create(
+                user=user,
+                community=community,
+                role='admin'  
+            )
+
             community_serializer = CommunitySerializer(community)
-            return Response(community_serializer.data, status=status.HTTP_201_CREATED)
+            return Response({
+                'user': serializer.data,
+                'community': community_serializer.data
+            }, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserListAPIView(APIView):
@@ -79,6 +89,7 @@ class UserLoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
+
         print(f'Email: {email}')
         print(f'Password: {password}')
         user1 = User.objects.filter(email=email).first()
@@ -98,12 +109,50 @@ class UserLoginView(APIView):
 
         return JsonResponse({'success': False, 'error': 'Credenciales inválidas'})
   
-from rest_framework.permissions import AllowAny
+
+@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(require_POST, name='dispatch')
+class UserLoginView2(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        print(f'Email: {email}')
+        print(f'Password: {password}')
+        user1 = User.objects.filter(email=email).first()
+        if user1 is not None:
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                # Usuario autenticado correctamente
+                print('User autenticado')
+
+                login(request, user)
+                # Crear una sesión para el usuario
+                request.session.create()
+                print('Sesion creada')
+
+
+                response_data = {
+                    'success': True,
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email
+                    },
+                    'sessionid': request.session.session_key,
+                }
+
+                response = JsonResponse(response_data)
+                response.set_cookie('sessionid', request.session.session_key)
+
+                print(f"(VISTA) Sent response with session ID: {request.session.session_key}")
+
+                return response
+        print('Credenciales invalidas')
+
+        return JsonResponse({'success': False, 'error': 'Credenciales inválidas'})
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserLogoutAPIView(APIView):
-    permission_classes = [AllowAny]
-
     def post(self, request):
         print(f'Sesión actual antes del cierre: {request.session.items()}')
         print(f'Usuario actual antes del cierre: {request.user.email if request.user.is_authenticated else None}')

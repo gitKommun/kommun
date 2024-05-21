@@ -17,15 +17,16 @@ class Community(models.Model):
     )
     NIFcommunity = models.CharField(_('community nif'), max_length=20, unique=True, null=True, blank=True) #CIF Community / Opcional
     nameCommunity = models.CharField(_('community name'), max_length=40, default='Mi comunidad') #nombre residencial
-    address = models.CharField(_('address'), max_length=255) #calle, y si tiene numero 
-    city = models.CharField(_('city'), max_length=100)
-    postal_code = models.CharField(_('postal code'), max_length=12)
+    address = models.CharField(_('address'), max_length=255, null=True, blank=True) #calle, y si tiene numero 
+    city = models.CharField(_('city'), max_length=100, null=True, blank=True)
+    postal_code = models.CharField(_('postal code'), max_length=12, null=True, blank=True)
 
     #contacto principal de la comunidad
     main_contact_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
     main_contact_id = models.PositiveIntegerField(null=True, blank=True)
     mainContact = GenericForeignKey('main_contact_type', 'main_contact_id')
 
+    #onboarding -> meter userDAta
     configurationCompleted = models.BooleanField(null=True, blank=True)
     numberProperties = models.IntegerField(_('number properties'), null=True, blank=True)
     numberHouses = models.IntegerField(_('number houses'), null=True, blank=True)
@@ -49,28 +50,35 @@ class Community(models.Model):
         president = self.presidentcommunity_set.filter(startDate__gt=now).order_by('startDate').first()
         return president.president if president else None
 
+#class Property(models.Model):
+#    community = models.ForeignKey(Community, on_delete=models.CASCADE, verbose_name=_('community'))
+#    numberProperty = models.CharField(_('property number'), max_length=50)
+#    typeProperty = models.CharField(_('property type'), max_length=50, choices=[('HOUSE', _('House')), ('PARKING', _('Parking')), ('OTHER', _('Other'))])
+#    communityPropertyPercentage = models.FloatField(verbose_name=_('community property percentage'), null=True, blank=True)
+
+#    class Meta:
+#        verbose_name = _("Property")
+#        verbose_name_plural = _("Properties")
+
+#    def __str__(self):
+#        return f"{self.numberProperty} - {self.community.address} ({self.typeProperty})"
+    
 class Property(models.Model):
-    IDproperty = models.CharField(
-        _('property ID'), max_length=40, unique=True, primary_key=True
-    ) #CIF Community + property_number
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, verbose_name=_('community'))
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='properties')
+    property_id = models.PositiveIntegerField()  # Número secuencial dentro de la comunidad
     numberProperty = models.CharField(_('property number'), max_length=50)
-    owner = models.ForeignKey('members.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('owner'))
-    typeProperty = models.CharField(_('property type'), max_length=50, choices=[('HOUSE', _('House')), ('PARKING', _('Parking')), ('OTHER', _('Other'))])
-    communityPropertyPercentage = models.FloatField(verbose_name=_('community property percentage'), null=True, blank=True)
+    typeProperty = models.CharField(max_length=50, choices=[('HOUSE', 'House'), ('PARKING', 'Parking'), ('OTHER', 'Other')])
+    communityPropertyPercentage = models.FloatField(null=True, blank=True)
 
     class Meta:
+        # Clave primaria compuesta
+        unique_together = (('community', 'property_id'),)
+        ordering = ['community', 'property_id']
         verbose_name = _("Property")
         verbose_name_plural = _("Properties")
 
     def __str__(self):
-        return f"{self.numberProperty} - {self.community.address} ({self.typeProperty})"
-    
-    def save(self, *args, **kwargs):
-        if not self.IDproperty:
-            self.IDproperty = f"{self.community_id}{self.numberProperty}"
-        super(Property, self).save(*args, **kwargs)
-
+        return f"Property {self.property_id} in {self.community.name}"
     
 class PresidentCommunity(models.Model):
     presidentCommunity = models.ForeignKey('members.User', on_delete=models.CASCADE, null=True, verbose_name=_('presidentCommunity'))
@@ -92,3 +100,37 @@ class AdministratorCommunity(models.Model):
     class Meta:
         verbose_name = _("Administrator Community")
         verbose_name_plural = _("Administrators Communities")
+
+
+class PropertyRelationship(models.Model):
+    class Role(models.TextChoices):
+        OWNER = 'owner', _('Owner')
+        TENANT = 'tenant', _('Tenant')
+
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='relationships')
+    user = models.ForeignKey('members.User', on_delete=models.CASCADE, related_name='property_relationships')
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.OWNER)
+
+    def __str__(self):
+        return f"{self.user.name} - {self.role} of {self.property.number}"
+
+
+class CommunityRole(models.Model):
+    user = models.ForeignKey('members.User', on_delete=models.CASCADE)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE)
+    is_admin = models.BooleanField(default=False)
+
+
+class UserCommunityRole(models.Model):
+    USER_ROLES = (
+        ('owner', 'Propietario'),
+        ('tenant', 'Inquilino'),
+        ('admin', 'Administrador'),
+        ('temp', 'Temporal'),
+    )
+    user = models.ForeignKey('members.User', on_delete=models.CASCADE, related_name='roles')
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='user_roles')
+    role = models.CharField(max_length=10, choices=USER_ROLES)
+
+    class Meta:
+        unique_together = ('user', 'community', 'role')

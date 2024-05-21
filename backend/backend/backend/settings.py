@@ -103,6 +103,11 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'backend.middleware.LogMiddleware',
+    'backend.middleware.LogSentCookiesMiddleware',
+    'backend.middleware.InjectCsrfTokenMiddleware',
+    'backend.middleware.RoleBasedAccessMiddleware',
+    'backend.middleware.PutCSRFTokenIntoHeader',
+
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 
@@ -144,9 +149,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'railway',
         'USER': 'postgres',
-        'PASSWORD': 'iKtkfCvlIaQmsyMtwtkTJrkbmMbVipya',
-        'HOST': 'monorail.proxy.rlwy.net',
-        'PORT': '56531',
+        'PASSWORD': 'oegfJVSCltzWbWIXMGwlVkeJtyTBQCel',
+        'HOST': 'roundhouse.proxy.rlwy.net',
+        'PORT': '12866',
     }
 }
 
