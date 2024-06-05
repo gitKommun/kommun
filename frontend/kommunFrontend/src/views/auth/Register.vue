@@ -85,7 +85,7 @@ const registerUser = async () => {
         if (passFormatValid.value) {
             console.log('valido')
             if (password_1.value===password_2.value) {
-                const response = await http.post(`members/register/`, {
+                const response = await http.post(`members/register_user_community/`, {
                     name: name.value,
                     surnames: surnames.value,
                     email: email.value,
