@@ -65,6 +65,7 @@ class RoleBasedAccessMiddleware:
         self.excluded_paths = [
             '/members/',
             '/members/register_user_community/',
+            '/members/register/',
             '/members/login/',
             '/members/logout/',    
         ]
@@ -75,7 +76,7 @@ class RoleBasedAccessMiddleware:
         if request.path in self.excluded_paths:
             return self.get_response(request)
 
-        # Lógica del middleware antes de llamar a la vista
+        # Lógica del middleware antes de llamar a la vistañ
         response = self.get_response(request)
         # Lógica después de llamar a la vista
         return response

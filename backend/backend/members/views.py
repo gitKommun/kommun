@@ -20,7 +20,7 @@ from rest_framework.decorators import api_view
 
 from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer
 from .models import User
-from communities.models import Community, UserCommunityRole
+from communities.models import Community, UserCommunityRole, PropertyRelationship
 from communities.serializers import CommunitySerializer
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -83,73 +83,34 @@ class UserLoginAPIView(APIView):
     
 
 
+  
+
 @method_decorator(csrf_exempt, name='dispatch')
 @method_decorator(require_POST, name='dispatch')
 class UserLoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-
-        print(f'Email: {email}')
-        print(f'Password: {password}')
         user1 = User.objects.filter(email=email).first()
         if user1 is not None:
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 # Usuario autenticado correctamente
-                print('User autenticado')
-
                 login(request, user)
                 # Crear una sesión para el usuario
                 request.session.create()
-                print('Sesion creada')
-
-                return JsonResponse({'success': True})
-        print('Credenciales invalidas')
-
-        return JsonResponse({'success': False, 'error': 'Credenciales inválidas'})
-  
-
-@method_decorator(csrf_exempt, name='dispatch')
-@method_decorator(require_POST, name='dispatch')
-class UserLoginView2(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        print(f'Email: {email}')
-        print(f'Password: {password}')
-        user1 = User.objects.filter(email=email).first()
-        if user1 is not None:
-            user = authenticate(request, email=email, password=password)
-            if user is not None:
-                # Usuario autenticado correctamente
-                print('User autenticado')
-
-                login(request, user)
-                # Crear una sesión para el usuario
-                request.session.create()
-                print('Sesion creada')
-
 
                 response_data = {
-                    'success': True,
-                    'user': {
-                        'id': user.id,
-                        'username': user.username,
-                        'email': user.email
-                    },
                     'sessionid': request.session.session_key,
                 }
 
                 response = JsonResponse(response_data)
                 response.set_cookie('sessionid', request.session.session_key)
 
-                print(f"(VISTA) Sent response with session ID: {request.session.session_key}")
-
                 return response
-        print('Credenciales invalidas')
 
-        return JsonResponse({'success': False, 'error': 'Credenciales inválidas'})
+        return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserLogoutAPIView(APIView):
@@ -179,5 +140,53 @@ def get_user_email(request):
     if request.user.is_authenticated:
         user_email = request.user.email
         return Response({'email': user_email})
+    else:
+        return Response({'error': 'Usuario no autenticado'}, status=401)
+
+
+@api_view(['GET'])
+def get_user_data(request):
+    if request.user.is_authenticated:
+        user = request.user
+        user_data = {
+            'email': user.email,
+            'name': user.name,
+            'surnames': user.surnames,
+            'birthdate': user.birthdate,
+            'addressLetters': user.addressLetters,
+            'phoneNumber': user.phoneNumber,
+            'bankAccount': user.bankAccount,
+            'languageConf': user.languageConf,
+            'documentID': user.documentID,
+            'is_staff': user.is_staff,
+            'is_active': user.is_active,
+            'date_joined': user.date_joined,
+        }
+        user_communities = UserCommunityRole.objects.filter(user=user).select_related('community')
+        user_communities_data = []
+
+        for user_community in user_communities:
+            community = user_community.community
+            properties = PropertyRelationship.objects.filter(user=user, property__community=community).select_related('property')
+            properties_data = [
+                {
+                    'property_id': property.property.id,
+                    'property_number': property.property.numberProperty,
+                    'type': property.property.typeProperty,
+                    'role': property.role
+                } for property in properties
+            ]
+
+            user_community_data = {
+                'community_id': community.IDcommunity,
+                'community_name': community.nameCommunity,
+                'role': user_community.role,
+                'properties': properties_data
+            }
+            user_communities_data.append(user_community_data)
+
+        user_data['communities'] = user_communities_data
+
+        return Response(user_data)
     else:
         return Response({'error': 'Usuario no autenticado'}, status=401)
