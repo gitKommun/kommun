@@ -73,12 +73,37 @@ import IconFolder from "/src/components/icons/IconFolder.vue"
 import IconFolderAdd from "/src/components/icons/IconFolderAdd.vue"
 import IconFileAdd from "/src/components/icons/IconFileAdd.vue"
 import Main from '/src/layouts/Main.vue';
+
+import http from '/src/http.js'; 
+import { getCookie } from '/src/utils/cookies.js';
+
+// options
 defineOptions({
   name: 'documents',
   layout: Main
 })
+
 const title = ref('Documentos')
 const showCreateFolder = ref(false)
 const folderName = ref('')
+
+// folders
+async function getFolders() { 
+  console.log('Realizando solicitud GET a la API...');
+  try {
+    const user = JSON.parse(getCookie('user'));
+    console.log('user: ', user);
+    const response = await http.get(`documents/${user.id}/folders`);
+
+    console.log('reponse folders: ', response);
+    
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+getFolders();
+
+
 </script>
 

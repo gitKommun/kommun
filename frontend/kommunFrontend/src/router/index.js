@@ -1,83 +1,53 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import routes from './routes.js';
+import { getCookie } from '/src/utils/cookies.js';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'Landing',
-      component: () => import('../views/Landing.vue')
-    },{
-      path: '/login',
-      name: 'login',
-      component: () => import('../views/auth/Login.vue')
-    },{
-      path: '/register',
-      name: 'register',
-      component: () => import('../views/auth/Register.vue')
-    },{
-      path: '/recovery',
-      name: 'recovery',
-      component: () => import('../views/auth/Recovery.vue')
-    },{
-      path: '/onboarding',
-      name: 'onboarding',
-      component: () => import('../views/admin/Onboarding.vue')
-    },{
-      path: '/properties',
-      name: 'properties',
-      component: () => import('../views/admin/Properties.vue')
-    },{
-      path: '/owners',
-      name: 'owners',
-      component: () => import('../views/admin/Owners.vue')
-    },{
-      path: '/documents',
-      name: 'documents',
-      component: () => import('../views/admin/Documents.vue')
-    },{
-      path: '/incidences',
-      name: 'incidences',
-      component: () => import('../views/admin/Incidences.vue')
-    },{
-      path: '/surveys',
-      name: 'surveys',
-      component: () => import('../views/admin/Surveys.vue')
-    },{
-      path: '/finance',
-      name: 'finance',
-      component: () => import('../views/admin/Finance.vue')
-    },{
-      path: '/communication',
-      name: 'communication',
-      component: () => import('../views/admin/Communication.vue')
-    },{
-      path: '/bookings',
-      name: 'bookings',
-      component: () => import('../views/admin/Bookings.vue')
-    },{
-      path: '/providers',
-      name: 'providers',
-      component: () => import('../views/admin/Providers.vue')
-    },{
-      path: '/settings',
-      name: 'settings',
-      component: () => import('../views/admin/Settings.vue')
-    },{
-      path: '/profile',
-      name: 'profile',
-      component: () => import('../views/admin/Profile.vue')
-    },
+  routes: routes({ authGuard, guestGuard }),
+});
 
-    // {
-    //   path: '/about',
-    //   name: 'about',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import('../views/AboutView.vue')
-    // }
-  ]
+export default router;
+
+router.beforeEach(async (to, from, next) => {
+  // const token = getCookie('csrftoken');
+  
+	// if (token && !user) {
+	// 	await getAuthUser(next)
+	// }
+
+  next();
 })
 
-export default router
+
+
+
+function beforeEnter(routes, callback) {
+	return routes.map(route => {
+		return { ...route, beforeEnter: callback }
+	});
+}
+
+function authGuard(routes) {
+	return beforeEnter(routes, async (to, from, next) => {
+		const token = getCookie('csrftoken');
+
+		if (!token) {
+      return next({ name: 'login' });
+		}
+
+		next();
+	});
+}
+
+function guestGuard(routes) {
+  return beforeEnter(routes, async (to, from, next) => {
+    const token = getCookie('csrftoken');
+
+    if (token) {
+      return next({ name: 'properties' });
+    }
+
+    next();
+  });
+}
