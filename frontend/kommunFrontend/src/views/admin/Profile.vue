@@ -2,7 +2,7 @@
   <div class="h-full w-full overflow-y-scroll">
     <div class="pl-4 md:pl-16 py-6 flex sticky top-0  backdrop-blur z-10">
       <div class="w-full flex flex-col">
-          <span class="text-slate-950 text-3xl font-bold truncate flex items-center">{{store.name}}</span>
+          <span class="text-slate-950 text-3xl font-bold truncate flex items-center">{{user.name}}</span>
           <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
       </div>
       <div class=" p-4 flex justify-end">
@@ -20,6 +20,7 @@
             <div class="flex items-center justify-between">
               <h3 class="text-slate-950 text-lg font-semibold"> Datos generales </h3>
             </div>
+            {{ user }}
             <div class="gap-y-2">
                 <div class="">
                     <vs-input v-model="form.name" placeholder="Nombre" label-float block/>
@@ -118,14 +119,15 @@
 import { ref , shallowRef} from 'vue'
 import Main from '/src/layouts/Main.vue';
 import EmptyTask from "/src/components/emptys/EmptyTask.vue"
-import { useUserInfo } from "/src/stores/user.js"
+import { useUserStore } from '/src/stores/useUserStore.js';
 import IconHome from "/src/components/icons/IconHome.vue"
 import IconGarage from "/src/components/icons/IconGarage.vue"
 import IconWarehouse from "/src/components/icons/IconWarehouse.vue"
-import http from '@/http';
+import { useHttp } from '/src/composables/useHttp.js'; 
+import { useRouter } from 'vue-router';
 import { VsNotification } from 'vuesax-alpha'
 
-const store = useUserInfo()
+const { user } = useUserStore();
 
 defineOptions({
   name: 'Profile',
@@ -135,20 +137,27 @@ const title = ref('perfil')
 const logoutLoading = ref(false);
 
 const form = ref({
-    name: '',
-    surname: '',
-    email: '',
-    phone:'',
-    identificationNumber: '',
+    name: user.name,
+    surname: user.surnames,
+    email: user.email,
+    phone: user.phoneNumber,
+    identificationNumber: user.documentID ?user.documentID : '',
     identificationType: '',
     allowSharing:false    
 })
 
+//instancia API
+const http = useHttp();
+
+// router
+const router = useRouter();
+
 const logout = async () => {
   logoutLoading.value = true
   try {
-    await http.post(`members/logout`)
-    logoutLoading.value = false
+    await http.post(`members/logout/`)
+    logoutLoading.value = false;
+    window.location.reload();
   } catch (error) {
     VsNotification({
             position: 'top-right',

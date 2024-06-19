@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from './routes.js';
-import { getCookie } from '/src/utils/cookies.js';
+
+import { useUserStore } from '/src/stores/useUserStore.js';
+import { useHttp } from '/src/composables/useHttp.js'; 
+import { getCookie, removeCookie } from '/src/utils/cookies.js';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,16 +13,27 @@ const router = createRouter({
 export default router;
 
 router.beforeEach(async (to, from, next) => {
-  // const token = getCookie('csrftoken');
+  // user store
+  const {
+    user,
+    setUser,
+  } = useUserStore();
   
-	// if (token && !user) {
-	// 	await getAuthUser(next)
-	// }
+  const http = useHttp();
+  const token = getCookie('csrftoken');
+  
+  if (token && !user) {
+    try {
+      const me = await http.get(`members/me/`);
+      setUser(me);
+    } catch (error) {
+      removeCookie('csrftoken');
+      removeCookie('sessionid');
+    }
+	}
 
   next();
 })
-
-
 
 
 function beforeEnter(routes, callback) {

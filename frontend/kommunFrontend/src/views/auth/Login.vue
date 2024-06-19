@@ -60,7 +60,8 @@ import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
 import { VsNotification } from 'vuesax-alpha'
 import { setCookie } from '/src/utils/cookies.js';
-import http from '/src/http.js'; 
+import { useHttp } from '/src/composables/useHttp.js';
+
 
 const email = ref('');
 const password = ref('');
@@ -76,6 +77,9 @@ defineOptions({
 // router
 const router = useRouter();
 
+//instancia API
+const http = useHttp();
+
 // login
 const login = async () => {
     loginLoading.value = true;
@@ -86,23 +90,14 @@ const login = async () => {
             email: email.value,
             password: password.value,
         });
-
-        //hacer llamada a /me
-        loginLoading.value = false;
-
-        //   Guardar en pinia usuario y token
-        //redirecionar a home
-        console.log('user--->', response);
         
-        const { csrftoken, user } = response.data;
-        console.log('token--->', csrftoken);
-        console.log('user--->', user);
+        const { csrftoken, sessionid } = response.data;
+        console.log('tokens--->', csrftoken, sessionid);
 
         setCookie('csrftoken', csrftoken, 30);
-        setCookie('user', JSON.stringify(user), 30);
+        setCookie('sessionid', sessionid, 30);
 
         router.push({ name: 'properties' });
-
     } catch (error) {
         console.error('Error en la solicitud POST:', error);
         // Manejar el error de autenticación

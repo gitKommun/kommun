@@ -76,8 +76,8 @@ import Authentication from '/src/layouts/Authentication.vue';
 import { VsNotification } from 'vuesax-alpha'
 
 //Jakub: enlazando con API
-import http from '/src/http.js'; 
-
+import { useHttp } from '/src/composables/useHttp.js'; 
+const http = useHttp();
 const registerLoading = ref(false);
 const registerUser = async () => {
     registerLoading.value = true
@@ -85,7 +85,7 @@ const registerUser = async () => {
         if (passFormatValid.value) {
             console.log('valido')
             if (password_1.value===password_2.value) {
-                const response = await http.post(`members/register_user_community/`, {
+                const response = await http.post(`members/register/`, {
                     name: name.value,
                     surnames: surnames.value,
                     email: email.value,
