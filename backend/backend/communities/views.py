@@ -53,7 +53,7 @@ def list_properties(request, IDcommunity):
     serializer = PropertySerializer(properties, many=True)
     return Response(serializer.data)
 
-
+#BORRAR: antigua version no segura, permite asignar manualmente el communityID
 @api_view(['POST'])
 @community_admin_required
 def add_property_to_community(request, IDcommunity):
@@ -75,6 +75,26 @@ def add_property_to_community(request, IDcommunity):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+@community_admin_required
+def add_property_to_community2(request, IDcommunity):
+    community = get_object_or_404(Community, IDcommunity=IDcommunity)
+
+    # Asigna un número secuencial único para esta comunidad
+    next_property_number = Property.objects.filter(community=community).count() + 1
+
+    new_property = Property(
+        community=community,
+        property_id=next_property_number,
+        numberProperty=request.data.get('numberProperty'),
+        typeProperty=request.data.get('typeProperty'),
+        communityPropertyPercentage=request.data.get('communityPropertyPercentage')
+    )
+    new_property.save()
+
+    return Response(PropertySerializer(new_property).data, status=status.HTTP_201_CREATED)
     
 
 @api_view(['PUT'])

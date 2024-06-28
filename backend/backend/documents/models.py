@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+
 # Create your models here.
 
 class Folder(models.Model):
@@ -12,23 +13,24 @@ class Folder(models.Model):
     #userCreator = models.ForeignKey('members.User', on_delete=models.CASCADE, null=True, blank=True)
     #created_at = models.DateTimeField(auto_now_add=True)
 
-
 valid_formats = [
-        'application/pdf',
-        'text/plain',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'image/jpeg',
-        'image/png',
-    ]
-
-def document_path(community, filename):
-    return f'documents/{community.pk}/{filename}'
+    'pdf',
+    'txt',
+    'doc',
+    'docx',
+    'jpeg',
+    'jpg',
+    'png'
+]
+def document_path(instance, name):
+    #return f'documents/{community.pk}/{filename}'
+    return f'documents/{instance.community.pk}/{name}'
 
 class Document(models.Model):
     name = models.CharField(max_length=255)
-    file = models.FileField(upload_to=document_path, validators=[FileExtensionValidator(allowed_extensions=valid_formats)], storage=settings.DOCUMENT_STORAGE)
+    file = models.FileField(upload_to=document_path, validators=[FileExtensionValidator(allowed_extensions=valid_formats)])
     community = models.ForeignKey('communities.Community', on_delete=models.CASCADE)
+    folder = models.ForeignKey(Folder, related_name='documents', on_delete=models.CASCADE, null=True, blank=True)
     #userCreator = models.ForeignKey('members.User', on_delete=models.SET_NULL, null=True, blank=True) #TO DO añadir logica para mantener el nombre del usuario creador en caso de eliminar el usuario
     #created_at = models.DateTimeField(auto_now_add=True)
     #log = models.JSONField(null=True, blank=True)

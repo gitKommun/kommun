@@ -16,10 +16,10 @@ class LogSentCookiesMiddleware(MiddlewareMixin):
         session_id = response.cookies.get('sessionid')
         csrf_token = response.cookies.get('csrftoken')
 
-        if session_id:
-            print(f"(MIDDLEWARE)Sent response with session ID: {session_id.value}")
-        if csrf_token:
-            print(f"(MIDDLEWARE)Sent response with CSRF token: {csrf_token.value}")
+        #if session_id:
+        #    print(f"(MIDDLEWARE)Sent response with session ID: {session_id.value}")
+        #if csrf_token:
+        #    print(f"(MIDDLEWARE)Sent response with CSRF token: {csrf_token.value}")
 
         return response
 
@@ -33,7 +33,7 @@ class InjectCsrfTokenMiddleware(MiddlewareMixin):
                 response.content = json.dumps(response_data)
                 response['Content-Type'] = 'application/json'
                 response['Content-Length'] = len(response.content)
-                print(f"(MIDDLEWARE) Injected CSRF token: {csrf_token}")
+                #print(f"(MIDDLEWARE) Injected CSRF token: {csrf_token}")
             except (json.JSONDecodeError, TypeError):
                 pass
         return response
@@ -76,7 +76,7 @@ class RoleBasedAccessMiddleware:
         if request.path in self.excluded_paths:
             return self.get_response(request)
 
-        # Lógica del middleware antes de llamar a la vistañ
+        # Lógica del middleware antes de llamar a la vista
         response = self.get_response(request)
         # Lógica después de llamar a la vista
         return response

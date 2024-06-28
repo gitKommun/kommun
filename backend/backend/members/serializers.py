@@ -19,7 +19,6 @@ class UserRegistrationSerializer(serializers.Serializer):
         return user
 
 
-    
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(write_only=True)  
@@ -29,3 +28,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'name', 'surnames']
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'name', 'surnames', 'birthdate', 'addressLetters',
+            'phoneNumber', 'bankAccount', 'languageConf', 
+            'documentID', 'documentType', 'contactIsPublic'
+        ]
