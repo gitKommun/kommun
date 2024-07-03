@@ -37,6 +37,8 @@ class User(AbstractUser):
     bankAccount = models.CharField(_('bank account'), max_length=22, null=True, blank=True) #IBAN
     languageConf = models.CharField(_('language configuration'), null=True, blank=True, max_length=2, choices=[('EN', 'English'), ('ES', 'Spanish')])
     documentID = models.CharField(_('user ID'), max_length=20, null=True, blank=True)  # DNI, NIE, or passport
+    documentType = models.CharField(_('document type'), null=True, blank=True, max_length=20, choices=[('DNI', 'DNI'), ('NIE', 'NIE'), ('PASSPORT', 'Passport')])
+    contactIsPublic = models.BooleanField(_('public contact'), default=False, null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -45,7 +47,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.name} {self.surnames}"
-    
 
 #class Owner which is an extenion of User
 class Owner(User):

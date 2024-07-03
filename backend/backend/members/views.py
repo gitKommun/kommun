@@ -16,9 +16,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 
 
-from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer
+from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer, UserUpdateSerializer
 from .models import User
 from communities.models import Community, UserCommunityRole, PropertyRelationship
 from communities.serializers import CommunitySerializer
@@ -135,16 +136,6 @@ def check_auth_status(request):
 
 
 @api_view(['GET'])
-def get_user_email(request):
-    print(f'User que manda la request: {request.user}')
-    if request.user.is_authenticated:
-        user_email = request.user.email
-        return Response({'email': user_email})
-    else:
-        return Response({'error': 'Usuario no autenticado'}, status=401)
-
-
-@api_view(['GET'])
 def get_user_data(request):
     if request.user.is_authenticated:
         user = request.user
@@ -158,9 +149,10 @@ def get_user_data(request):
             'bankAccount': user.bankAccount,
             'languageConf': user.languageConf,
             'documentID': user.documentID,
-            'is_staff': user.is_staff,
-            'is_active': user.is_active,
+            'documentType': user.documentType,
             'date_joined': user.date_joined,
+            'contactIsPublic': user.contactIsPublic
+
         }
         user_communities = UserCommunityRole.objects.filter(user=user).select_related('community')
         user_communities_data = []
@@ -190,3 +182,18 @@ def get_user_data(request):
         return Response(user_data)
     else:
         return Response({'error': 'Usuario no autenticado'}, status=401)
+    
+
+
+class UserUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get_object(self):
+        return self.request.user
+
+    def put(self, request):
+        user = self.get_object()
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'members',
     'communities',
     'documents',
+    'common_areas',
 
 ]
 
@@ -144,14 +145,21 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'railway',
+#         'USER': 'postgres',
+#         'PASSWORD': 'oegfJVSCltzWbWIXMGwlVkeJtyTBQCel',
+#         'HOST': 'roundhouse.proxy.rlwy.net',
+#         'PORT': '12866',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'oegfJVSCltzWbWIXMGwlVkeJtyTBQCel',
-        'HOST': 'roundhouse.proxy.rlwy.net',
-        'PORT': '12866',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "mydatabase",
     }
 }
 
