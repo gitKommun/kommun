@@ -116,13 +116,13 @@ class UserLoginView(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class UserLogoutAPIView(APIView):
     def post(self, request):
-        print(f'Sesión actual antes del cierre: {request.session.items()}')
-        print(f'Usuario actual antes del cierre: {request.user.email if request.user.is_authenticated else None}')
+        #print(f'Sesión actual antes del cierre: {request.session.items()}')
+        #print(f'Usuario actual antes del cierre: {request.user.email if request.user.is_authenticated else None}')
         request.session.flush()
         username = None
         if request.user.is_authenticated:
             username = request.user.email
-        print(f'Usuario cerrado: {username}')
+        #print(f'Usuario cerrado: {username}')
         return Response({
             'message': f'Cierre de sesión exitoso para el usuario {username}',
             'username': username,

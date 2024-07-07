@@ -93,7 +93,9 @@ INSTALLED_APPS = [
     'communities',
     'documents',
     'common_areas',
-
+    'finance',
+    'claims',
+    'votes',
 ]
 
 REST_FRAMEWORK = {
@@ -103,8 +105,8 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
-    'backend.middleware.LogMiddleware',
-    'backend.middleware.LogSentCookiesMiddleware',
+    #'backend.middleware.LogMiddleware',
+    #'backend.middleware.LogSentCookiesMiddleware',
     'backend.middleware.InjectCsrfTokenMiddleware',
     'backend.middleware.RoleBasedAccessMiddleware',
     'backend.middleware.PutCSRFTokenIntoHeader',
