@@ -2,7 +2,7 @@
   <div class="h-full w-full overflow-y-scroll">
     <div class="pl-4 md:pl-16 py-6 flex sticky top-0  backdrop-blur z-10">
       <div class="w-full flex flex-col">
-          <span class="text-slate-950 text-3xl font-bold truncate flex items-center">{{user.name}}</span>
+          <span class="text-slate-950 text-3xl font-bold truncate flex items-center">{{user.name}} {{ user.surname }}</span>
           <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
       </div>
       <div class=" p-4 flex justify-end">
@@ -142,8 +142,8 @@ const form = ref({
     email: user.email,
     phone: user.phoneNumber,
     identificationNumber: user.documentID ?user.documentID : '',
-    identificationType: '',
-    allowSharing:false    
+    identificationType: user.documentType ?user.documentType : '',
+    allowSharing:user.contactIsPublic   
 })
 
 //instancia API

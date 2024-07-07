@@ -1,134 +1,166 @@
 <template>
-    
-</template>
-<!-- <template>
-    <OnClickOutside :do="close">
-    <div class="relative inline-block">
-        <div
-        ref="reference"
-        @click="toggle"
-        class="relative"
-        :class="referenceClass"
-        >
-        <slot name="reference" :isOpen="isOpen" />
-        </div>
-        <div
-        ref="content"
-        v-if="isOpen"
-        class="bg-red-500 rounded-2xl p-3"
+		<span ref="root" class="relative inline-block" v-bind="$attrs">
+			<div ref="reference" :class="referenceClass">
+				<slot
+					name="reference"
+					:is-open="isOpen"
+					:toggle="toggle"
+					:open="open"
+					:close="close"
+				/>
+			</div>
+
+			<div 
+        v-show="isOpen" 
+        ref="content" 
+        class="top-0 left-0 fixed mt-1 z-50" 
         :class="contentClass"
-        >
-        <slot name="content" :isOpen="isOpen" :close="close" />
-        </div>
-    </div>
-  </OnClickOutside>
+      >
+				<slot name="content" :is-open="isOpen" :close="close" />
+			</div>
+		</span>
 </template>
 
-<script setup>
-import { ref, watch, onUnmounted, nextTick, defineProps, emit } from 'vue';
-import { createPopper } from '@popperjs/core';
-import OnClickOutside from '/src/components/OnClickOutside.vue'
+<script>
+	import { createPopper } from '@popperjs/core'
+  import EventBus from '/src/utils/event-bus.js'
+	import { useOnClickOutside } from '/src/composables/useOnClickOutside.js'
 
-const reference = ref(null);
-const content = ref(null);
-const dropdown = ref(null);
-const isOpen = ref(false);
+	//import './dropdown.css'
 
-const props = defineProps({
-    placement: {
-      type: String,
-      default: 'bottom',
-    },
-    offset: {
-      type: Array,
-      default: () => [0, 8],
-    },
-    modifiers: {
-      type: Array,
-      default: () => [],
-    },
-    strategy: {
-      type: String,
-      default: 'absolute',
-    },
-    referenceClass: {
-      type: String,
-      default: '',
-    },
-    contentClass: {
-      type: String,
-      default: '',
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-})
+	export default {
+		name: 'DropdownBase',
+		// components: {
+		// 	OnClickOutside,
+		// },
+		props: {
+			show: {
+				type: Boolean,
+				default: false,
+			},
+			placement: {
+				type: String,
+				default: 'bottom',
+			},
+			offset: {
+				type: Array,
+				default: () => [0, 0],
+			},
+			modifiers: {
+				type: Array,
+				default: () => [],
+			},
+			strategy: {
+				type: String,
+				default: 'absolute',
+			},
+			referenceClass: {
+				type: String,
+				default: '',
+			},
+			contentClass: {
+				type: String,
+				default: '',
+			},
+			disabled: {
+				type: Boolean,
+				default: false,
+			},
+		},
+  emits: ['update:show'],
+		data() {
+			return {
+				isOpen: this.show,
+				dropdown: null,
+			}
+  },
+  mounted() { 
 
-const toggle = () => {
-  if (!isOpen.value) {
-    open();
-  } else {
-    close();
-  }
-};
+    useOnClickOutside(this.$refs.root, () => {
+      this.close();
+    });
+  },
+		watch: {
+			show(show) {
+				this.isOpen = show
+			},
+			isOpen(isOpen) {
+				this.$nextTick(() => {
+					isOpen ? this.createDropdown() : this.destroyDropdown()
+				})
+			},
+		},
+		beforeMount() {
+			EventBus.on('close-tag-dropdown', () => {
+				this.isOpen = false
+			})
 
-const open = () => {
-  if (!disabled.value) {
-    isOpen.value = true;
-    emit('change', true);
-  }
-};
+			EventBus.on('close-project-dropdown', () => {
+				this.isOpen = false
+			})
+		},
+		updated() {
+			if (this.isOpen) {
+				this.updateDropdown()
+			}
+		},
+		beforeUnmount() {
+			EventBus.off('close-tag-dropdown')
+			EventBus.off('close-project-dropdown')
 
-const close = () => {
-  if (!disabled.value) {
-    isOpen.value = false;
-    emit('change', false);
-  }
-};
+			this.destroyDropdown()
+		},
+		methods: {
+			toggle() {
+				if (!this.disabled) {
+					this.isOpen = !this.isOpen
+				}
+			},
+			updateShow() {
+				this.$emit('update:show', this.isOpen)
+			},
+			open() {
+				if (!this.disabled && !this.isOpen) {
+					this.isOpen = true
+					this.updateShow()
+				}
+			},
+			close() {
+				if (!this.disabled && this.isOpen) {
+					this.isOpen = false
+					this.updateShow()
+				}
+			},
+			createDropdown() {
+				const reference = this.$refs.reference
+				const content = this.$refs.content
 
-const update = () => {
-  if (dropdown.value) {
-    dropdown.value.update();
-  }
-};
-
-const setupDropdown = () => {
-  dropdown.value = createPopper(reference.value, content.value, {
-    placement: placement.value,
-    strategy: strategy.value,
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: offset.value,
-        },
-      },
-      ...modifiers.value,
-    ],
-  });
-};
-
-const destroyDropdown = () => {
-  if (dropdown.value) {
-    dropdown.value.destroy();
-  }
-};
-
-watch(isOpen, async (open) => {
-  if (open) {
-    await nextTick();
-    setupDropdown();
-  } else {
-    destroyDropdown();
-  }
-});
-
-onUnmounted(() => {
-  destroyDropdown();
-});
+				this.dropdown = createPopper(reference, content, {
+					placement: this.placement,
+					strategy: this.strategy,
+					modifiers: [
+						{
+							name: 'offset',
+							options: {
+								offset: this.offset,
+							},
+						},
+						...this.modifiers,
+					],
+				})
+			},
+			updateDropdown() {
+				if (this.dropdown) {
+					this.dropdown.update()
+				}
+			},
+			destroyDropdown() {
+				if (this.dropdown) {
+					this.dropdown.destroy()
+					this.dropdown = null
+				}
+			},
+  },
+  
+}
 </script>
-
-
-
- -->
