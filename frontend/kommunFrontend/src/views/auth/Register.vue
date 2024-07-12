@@ -74,10 +74,12 @@
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
 import { VsNotification } from 'vuesax-alpha'
-
+import { useRouter } from 'vue-router';
 //Jakub: enlazando con API
 import { useHttp } from '/src/composables/useHttp.js'; 
 const http = useHttp();
+// router
+const router = useRouter();
 const registerLoading = ref(false);
 const registerUser = async () => {
     registerLoading.value = true
@@ -93,7 +95,7 @@ const registerUser = async () => {
                     // Agrega aquí los demás campos del formulario que desees enviar
                     });
                 
-                console.log(response.data); // Maneja la respuesta del servidor aquí
+                router.push({ name: 'login' });
             } else {
                 VsNotification({
                 position: 'top-right',

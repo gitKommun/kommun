@@ -2,8 +2,8 @@
   <div class="h-full w-full overflow-y-scroll">
     <div class="pl-4 md:pl-16 py-6 flex sticky top-0  backdrop-blur z-10">
       <div class="w-full flex flex-col">
-          <span class="text-slate-950 text-3xl font-bold truncate flex items-center">{{user.name}} {{ user.surname }}</span>
-          <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
+          <span class="text-slate-950 text-3xl font-bold truncate flex items-center">{{title}}</span>
+          <span class="text-sm text-slate-500 font-medium">{{ user.communities[0]?.community_name }}</span>
       </div>
       <div class=" p-4 flex justify-end">
         <vs-button color="dark" class="inline flex-none">Guardar</vs-button>
@@ -20,7 +20,6 @@
             <div class="flex items-center justify-between">
               <h3 class="text-slate-950 text-lg font-semibold"> Datos generales </h3>
             </div>
-            {{ user }}
             <div class="gap-y-2">
                 <div class="">
                     <vs-input v-model="form.name" placeholder="Nombre" label-float block/>
@@ -54,17 +53,16 @@
               <p class="text-slate-500">Estas son las propiedades que tienes en la comunidad.</p>
             </div>
             <div class="gap-y-2">
-                <div class="w-full flex flex-col justify-center items-center">
-                  <EmptyTask/>
-                  <p class="text-sm text-slate-500 my-3">Aun no hay ninguna propiedad vinculada</p>
-                  <!-- <vs-button 
-                    color="dark" 
-                    class="inline"
-                    type="border"
-                    @click="showCreateZoneModal= true"
-                    >Crear elemento</vs-button> -->
+                <div  class="w-full flex flex-col items-center justify-center py-16">
+                  <EmptyTask class="scale-75"/>
+                  <span class="text-2xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-sky-500 to-green-300">
+                      Actualmente no hay propiedades
+                  </span>
+                  <span class="text-sm text-slate-500 max-w-80 text-center mb-3">
+                      Actualmente aun no tienes propiedades vinculadas en está comunidad
+                  </span>
                 </div>
-                <div class="flex justify-center space-x-4 ">
+                <!-- <div class="flex justify-center space-x-4 ">
                   <div class="rounded-xl p-3 bg-slate-50 w-72">
                     <div class="flex items-center justify-center flex-col">
                         <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -106,7 +104,7 @@
                         </div>
                     </div>
                   </div>
-                </div>
+                </div> -->
             </div>
           </div>
           <!-- ZONAS COMUNES -->
@@ -133,7 +131,7 @@ defineOptions({
   name: 'Profile',
   layout: Main
 })
-const title = ref('perfil')
+const title = ref('Mi perfil')
 const logoutLoading = ref(false);
 
 const form = ref({

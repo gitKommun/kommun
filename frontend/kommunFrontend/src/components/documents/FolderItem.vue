@@ -102,6 +102,8 @@
     //user store
     const { user } = useUserStore();
 
+    const emit = defineEmits(['update:items']);
+    
     // Delete Item
     function deleteFolder() {
         try {
@@ -111,7 +113,9 @@
                 color: 'success',
                 title: 'OK',
                 content: 'La carpeta se ha eliminado con exito',
+                
             });
+             
         } catch (error) {
             VsNotification({
                 position: 'top-right',
@@ -120,14 +124,16 @@
                 content: error,
             });
         }
+        emit('update:items', true);
     }
-    // Delete Item
-    
+
+
+    // Update Item
     function updateFolder() {
         folderUpdateLoading.value = true;
         if (folderName.value != '') {
             try {
-                const response = http.put(`documents/${user?.communities[0]?.community_id}/folders/${props.folder.id}/update`,
+                const response = http.put(`documents/${user?.communities[0]?.community_id}/folders/${props.folder.id}/update/`,
                     {
                         name:folderName.value
                     }
@@ -140,6 +146,8 @@
                     title: 'OK',
                     content: 'La carpeta se ha actualizado con exito',
                 });
+                 
+               
             } catch (error) {
                 VsNotification({
                     position: 'top-right',
@@ -149,6 +157,7 @@
                 });
                 folderUpdateLoading.value = false;
             }
+            emit('update:items', true);
         } else {
             folderUpdateValidated.value = true;
             folderUpdateLoading.value = false;
@@ -159,5 +168,7 @@
             folderUpdateValidated.value = false
         }
     })
+
+
 
 </script>

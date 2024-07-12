@@ -9,11 +9,11 @@
       <div class=" w-full h-full flex flex-col items-center justify-center">
         <div class="w-full flex-1 min-h-0 gap-y-3 flex flex-col items-center pt-8 overflow-y-scroll">
             <router-link 
-                v-for="(section, index) in features" 
+                v-for="(section, index) in setMenu" 
                 :key="'#'+index" 
                 :to="section.to" 
                 class="h-10 flex  items-center rounded-xl cursor pointer group transition-all duration-300"
-                :class="[isAsideOpen?'w-full pl-4 gap-4':'w-10 justify-center',{'bg-white shadow-lg':isLinkActive(section.to),'hover:bg-slate-200':!isLinkActive(section.to)}]"
+                :class="[isAsideOpen?'w-full pl-4 gap-4':'w-10 justify-center',{'bg-white':isLinkActive(section.to),'hover:bg-slate-200':!isLinkActive(section.to)}]"
                 >
                     <component 
                         :is="section.icon"
@@ -26,7 +26,9 @@
         
         </div>
         <div class="w-full gap-y-3 flex flex-col items-center pt-4 border-t border-slate-20">
-            <router-link class="h-10 flex  items-center hover:bg-slate-200 rounded-xl cursor pointer"
+            <router-link
+              v-if="isAdmin" 
+              class="h-10 flex  items-center hover:bg-slate-200 rounded-xl cursor pointer"
               :class="isAsideOpen?'w-full pl-4 gap-4':'w-10 justify-center'"
               to="/settings"
             >
@@ -69,7 +71,7 @@
         <div ref="wrapper" class="flex-1 min-w-0  flex overflow-x-scroll smoth">
           <div ref="content" class="h-full w-auto gap-x-3 whitespace-nowrap flex ">
             <router-link 
-                v-for="(section, index) in features" 
+                v-for="(section, index) in setMenu" 
                 :key="'#'+index" 
                 :to="section.to" 
                 class="h-10  px-3  flex flex-none items-center   rounded-xl cursor pointer 
@@ -136,6 +138,7 @@ import IconChevronRight from "/src/components/icons/IconChevronRight.vue"
 import IconChevronLeft from "/src/components/icons/IconChevronLeft.vue"
 import IconBuilding from "/src/components/icons/IconBuilding.vue"
 import Dropdown from "/src/components/Dropdown.vue"
+import { useUserStore } from '/src/stores/useUserStore.js';
 defineOptions({
   name:'home'
 })
@@ -168,9 +171,10 @@ const currentRouteName = route.name;
 const isLinkActive = (routeName) => {
     return route.fullPath === routeName; // Compara el to del enlace con la fullPath del objeto route
 }
+//user store
+    const { user } = useUserStore();
 
-
-const features = shallowRef([
+const adminFeatures = shallowRef([
     {
         title: 'Propiedades',
         icon: IconBuilding,
@@ -228,6 +232,31 @@ const features = shallowRef([
 
     },
 ]);
+
+const userFeatures = shallowRef([
+    {
+        title: 'Incidencias',
+        icon: IconTool,
+        available: true,
+        color: 'amber',
+        to:'/incidences'
+    }, 
+]);
+
+const isAdmin = computed(() => {
+  if (user?.communities[0]?.role !== 'admin') {
+    return true;  
+  } 
+    return false;  
+})
+
+const setMenu = computed(() => {
+  if (isAdmin) {
+       return adminFeatures.value     
+  }
+       return userFeatures.value
+})
+
 
 </script>
 <style>

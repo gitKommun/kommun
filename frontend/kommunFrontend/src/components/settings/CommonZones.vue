@@ -5,7 +5,7 @@
                 <h3 class="text-slate-950 text-xl font-bold">Zonas comunes</h3>
                 <p class="text-slate-500">Regitra tus zonas comunes como piscinas, gimnasio, pista de padel ...</p>
             </div>
-            <div class="flex-none">
+            <div class="flex-none" v-if="zones.length">
                 <vs-button 
                     color="dark" 
                     class="inline"
@@ -39,7 +39,7 @@
                 <template #thead>
                     <vs-tr>
                         <vs-th> Nombre </vs-th>
-                        <vs-th> Reseva </vs-th>
+                        <vs-th> Uso de zona </vs-th>
                         <vs-th> tiempo </vs-th>
                         <vs-th class="max-w-12 pr-2"></vs-th>
                     </vs-tr>
@@ -50,10 +50,12 @@
                           {{ zone.name }}
                         </vs-td>
                         <vs-td>
-                          {{ zone.limited }}
+                          <Tag v-if="zone.reservable" :color="'orange'">Reserva</Tag>
+                          <Tag v-else >Libre</Tag>
+                          
                         </vs-td>
                         <vs-td>
-                          {{ zone.slotTime }} {{ zone.slotUnits }}
+                          {{ zone.reservation_duration }} {{ zone.time_unit }}
                         </vs-td>
                         <vs-td class="max-w-12 pr-2">
                             <Dropdown strategy="fixed">
@@ -95,7 +97,7 @@
             <div class="gap-y-2">
                 <vs-input v-model="zone.name" placeholder="Nombre de la zona" block />
                 <div class="flex items-center mt-6">
-                    <vs-switch v-model="zone.bookable" color="success"/>
+                    <vs-switch v-model="zone.reservable" color="success"/>
                     <span class="ml-3"> La zona que puede ser reservada por los propitarios </span>
                 </div> 
                 <transition
@@ -107,21 +109,15 @@
                     leave-to-class="opacity-0"
                     mode="out-in"
                 >
-                    <div class="mt-3 border border-slate-200 rounded-xl  p-3 md:pl-8" v-if="zone.bookable">
-                        <span class="text-slate-500">Define la franja de tiempo para el uso de la zona:</span>
-                        <div class="mt-2">
-                            <vs-radio v-model="zone.limited" value="free" color="success"><span class="text-sm">Libre</span></vs-radio>
-                        </div>
-                        <div class="mt-2 flex gap-x-2">       
-                            <vs-radio v-model="zone.limited" value="bySlot" color="success"><span class="text-sm">Tiempo limitado</span></vs-radio>
-                            <template v-if="zone.limited === 'bySlot'">
-                                <vs-input v-model="zone.slotUnits" placeholder="Tiempo" type="number" class="max-w-24"/>
-                                <vs-select v-model="zone.slotTime" placeholder="Selecciona...">
-                                    <vs-option label="Minutos" value="minutes"> Minutos </vs-option>
-                                    <vs-option label="Horas " value="hours"> Horas </vs-option>
-                                    <vs-option label="Día copleto" value="fullDay"> Día copleto </vs-option>
-                                </vs-select>
-                            </template>
+                    <div class="mt-3 rounded-xl  p-3 md:pl-14" v-if="zone.reservable">
+                        <span class="text-slate-500 text-sm">Define la franja de tiempo para el uso de la zona:</span>
+                        <div class="flex gap-x-3 py-3">
+                            <vs-input v-model="zone.reservation_duration" placeholder="Tiempo" type="number" class="max-w-24"/>
+                            <vs-select v-model="zone.time_unit" placeholder="Selecciona...">
+                                <vs-option label="Minutos" value="MIN"> Minutos </vs-option>
+                                <vs-option label="Horas " value="HOUR"> Horas </vs-option>
+                                <vs-option label="Día copleto" value="DAY"> Día copleto </vs-option>
+                            </vs-select>
                         </div>
                     </div>
                 </transition>
@@ -151,8 +147,8 @@
             <div class="gap-y-2">
                 <vs-input v-model="zone.name" placeholder="Nombre de la zona" block />
                 <div class="flex items-center mt-6">
-                    <vs-switch v-model="zone.bookable" color="success"/>
-                    <span class="ml-3"> La zona que puede ser reservada por los propitarios </span>
+                    <vs-switch v-model="zone.reservable" color="success"/>
+                    <span class="ml-3"> La zona tiene que ser reservada por los propitarios </span>
                 </div> 
                 <transition
                     enter-active-class="transition-all transition-slow ease-out overflow-hidden"
@@ -163,21 +159,15 @@
                     leave-to-class="opacity-0"
                     mode="out-in"
                 >
-                    <div class="mt-3 border border-slate-200 rounded-xl  p-3 md:pl-8" v-if="zone.bookable">
+                    <div class="mt-3 rounded-xl  p-3 md:pl-14" v-if="zone.reservable">
                         <span class="text-slate-500">Define la franja de tiempo para el uso de la zona:</span>
-                        <div class="mt-2">
-                            <vs-radio v-model="zone.limited" value="free" color="success"><span class="text-sm">Libre</span></vs-radio>
-                        </div>
-                        <div class="mt-2 flex gap-x-2">       
-                            <vs-radio v-model="zone.limited" value="bySlot" color="success"><span class="text-sm">Tiempo limitado</span></vs-radio>
-                            <template v-if="zone.limited === 'bySlot'">
-                                <vs-input v-model="zone.slotUnits" placeholder="Tiempo" type="number" class="max-w-24"/>
-                                <vs-select v-model="zone.slotTime" placeholder="Selecciona...">
-                                    <vs-option label="Minutos" value="minutes"> Minutos </vs-option>
-                                    <vs-option label="Horas " value="hours"> Horas </vs-option>
-                                    <vs-option label="Día copleto" value="fullDay"> Día copleto </vs-option>
-                                </vs-select>
-                            </template>
+                        <div class="flex gap-x-3 py-3">
+                            <vs-input v-model="zone.reservation_duration" placeholder="Tiempo" type="number" class="max-w-24"/>
+                            <vs-select v-model="zone.time_unit" placeholder="Selecciona...">
+                                <vs-option label="Minutos" value="MIN"> Minutos </vs-option>
+                                <vs-option label="Horas " value="HOUR"> Horas </vs-option>
+                                <vs-option label="Día copleto" value="DAY"> Día copleto </vs-option>
+                            </vs-select>
                         </div>
                     </div>
                 </transition>
@@ -193,7 +183,7 @@
                     </vs-button>
                     <vs-button 
                     color="dark"
-                    @click="updateZone"
+                    @click="updateZone()"
                     >
                     Actualizar
                     </vs-button>
@@ -212,6 +202,7 @@
     import Dropdown from "/src/components/Dropdown.vue"
     import Loading from '/src/components/Loading.vue';
     import { VsNotification } from 'vuesax-alpha'
+    import Tag from "/src/components/Tag.vue"
     
     defineOptions({
         name: 'CommonZones'
@@ -221,10 +212,10 @@
     const showCreateZoneModal = ref(false)
     const zone = ref({
         name: '',
-        bookable: null,
-        slotTime: '',
-        slotUnits: '',
-        limited:null,
+        reservable: null,
+        reservation_duration: '',
+        time_unit: '',
+        area_id: null,
     })
     const zones = ref([]);
     const zonesLoading = ref(true);
@@ -261,7 +252,7 @@
     const createZone = () => {
         
         try {
-            const response = http.post(`common_areas/${user?.communities[0]?.community_id}/create/`, { ...zone.value });
+            const response = http.post(`common_areas/${user?.communities[0]?.community_id}/create/`, zone.value );
             getZones();
             VsNotification({
                 position: 'top-right',
@@ -269,13 +260,7 @@
                 title: 'OK',
                 content: 'La nueva zona se ha creado con exito',
             });
-            zone.value = {
-                name: '',
-                bookable: null,
-                slotTime: '',
-                slotUnits: '',
-                limited:null,
-            }
+            
 
         } catch (error) {
 
@@ -286,28 +271,47 @@
                 content: error,
             });
         }
+        zone.value = {
+                name: '',
+                reservable: null,
+                reservation_duration: '',
+                time_unit: '',
+                area_id: null,
+            }
     showCreateZoneModal.value = false;
   
     } 
     //editZone
 const openUpdateZone = (item) => {
     showUpdateZone.value = true;
-    console.log ('item', item)
     zone.value = item 
     
 } 
-const UpdateZone = () => {
+const updateZone = () => {
     try {
-            
+        const response = http.put(`common_areas/${user?.communities[0]?.community_id}/${zone.value.area_id}/`, zone.value);
+        
+            VsNotification({
+                position: 'top-right',
+                color: 'success',
+                title: 'OK',
+                content: 'La zona se ha actualizado con exito',
+            });
     } catch (error) {
-            
-        }
+            VsNotification({
+                position: 'top-right',
+                color: 'danger',
+                title: 'Upps!! algo ha fallado',
+                content: error,
+            });
+    }
+     getZones();
 } 
         //deleteZone
 
 const deleteZone = (zone) => {
     try {
-        const response = http.delete(`common_areas/${user?.communities[0]?.community_id}/${zone.id}/`);
+        const response = http.delete(`common_areas/${user?.communities[0]?.community_id}/${zone.value.area_id}/`);
         
             VsNotification({
                 position: 'top-right',

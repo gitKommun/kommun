@@ -1,10 +1,10 @@
 <template>
     <div class="w-full">
-        <div class="w-full bg-slate-50 p-3 flex gap-x-3 rounded-xl cursor-pointer"
+        <div class="w-full bg-slate-50 p-3 flex gap-x-3 rounded-xl cursor-pointer text-sm font-normal items-center group hover:bg-lime-50 transition-all duration-150"
             @click="showCreateFolder =!showCreateFolder"
         >
-            <IconFolderAdd/>
-            <span>Nueva carpeta</span>
+            <IconFolderAdd class="group-hover:text-lime-500 transition-all duration-150"/>
+            <span class="group-hover:text-lime-500 transition-all duration-150">Nueva carpeta</span>
         </div>
         <vs-dialog v-model="showCreateFolder" overlay-blur>
             <template #header>
@@ -39,11 +39,10 @@
     
 </template>
 <script setup>
-    import { ref, shallowRef, watch } from 'vue'
+    import { ref, watch} from 'vue'
     import IconFolderAdd from "/src/components/icons/IconFolderAdd.vue"
-    import EventBus from '/src/utils/event-bus.js'
     import { useHttp } from '/src/composables/useHttp.js'; 
-import { useUserStore } from '/src/stores/useUserStore.js';
+    import { useUserStore } from '/src/stores/useUserStore.js';
     import { VsNotification } from 'vuesax-alpha'
 
     // options
@@ -61,6 +60,8 @@ import { useUserStore } from '/src/stores/useUserStore.js';
     const http = useHttp();
     //user store
     const { user } = useUserStore();
+
+    const emit = defineEmits(['update:folder']);
 
     watch(showCreateFolder, (n, o) => {
         if (!n) {
@@ -80,8 +81,7 @@ import { useUserStore } from '/src/stores/useUserStore.js';
             folderCreateLoading.value = false;
             showCreateFolder.value = false;
             folderName.value = '';
-            //getFolders()
-            EventBus.emit('updateFolders')
+            emit('update:folder', true);
         }
         catch (error) {
             VsNotification({
@@ -95,6 +95,8 @@ import { useUserStore } from '/src/stores/useUserStore.js';
         folderCreateValidated.value = true;
         folderCreateLoading.value = false;
     }
+
+  
   
 }
 </script>

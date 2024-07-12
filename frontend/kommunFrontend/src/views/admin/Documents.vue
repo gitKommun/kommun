@@ -1,12 +1,15 @@
 <template>
-  <div class="h-full w-full flex flex-col">
-    <div class="text-slate-950 text-3xl font-bold truncate pl-4 md:pl-16 py-6 flex flex-col">
-      {{title}}
-      <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
+  <div class="h-full w-full">
+    <div class="pl-4 md:pl-16 py-6 flex">
+      <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
+          {{title}}
+          <span class="text-sm text-slate-500 font-medium">{{ user.communities[0]?.community_name }}</span>
+      </div>
+      <div class="w-full p-4 flex justify-end">
+        <AddContent @update:items="updateItems" class="h-auto"/>  
+      </div>
     </div>
-    <div class="w-full flex justify-end px-4">
-      <AddContent/>      
-    </div>
+    
     <!-- old -->
     <div class=" w-full flex justify-center px-4 flex-1 min-h-0 overflow-y-scroll">
       <div class="w-full max-w-4xl  flex flex-col">
@@ -29,11 +32,14 @@
               <div v-if="folders.length" class="flex items-center justify-between py-4">
                 <span class="text-slate-950 font-semibold text-lg">Carpetas</span>
               </div>
-              <FolderItem
-                v-for="folder in folders"
-                :key="folder.id"
-                :folder="folder"
-              />
+              <div class="w-full flex flex-wrap gap-3">
+                <FolderItem
+                  v-for="folder in folders"
+                  :key="folder.id"
+                  :folder="folder"
+                  @update:items="updateItems"
+                />
+              </div>
               <div v-if="folders.length" class="flex items-center justify-between py-4">
                   <span class="text-slate-950 font-semibold text-lg">Archivos</span>
               </div>
@@ -47,7 +53,7 @@
   </div>  
 </template>
 <script setup>
-import { ref, shallowRef, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch} from 'vue'
 
 import AddContent from "/src/components/documents/AddContent.vue"
 import FolderItem from "/src/components/documents/FolderItem.vue"
@@ -58,7 +64,7 @@ import Main from '/src/layouts/Main.vue';
 
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
-import EventBus from '/src/utils/event-bus.js'
+
 
 // options
 defineOptions({
@@ -88,23 +94,22 @@ async function getFolders() {
     foldersLoading.value = false;
     
   } catch (error) {
-    console.log(error);
+    VsNotification({
+          position: 'top-right',
+          color: 'danger',
+          title: 'Upps!! algo ha fallado',
+          content: error,
+      });
   }
 }
 getFolders();
 
-function updateFolders() {
-  console.log('llega emit')
-  getFolders();
+function updateItems() {
+  setTimeout(() => {
+    getFolders();
+  }, 300);
 }
 
-onMounted(() => {
-  EventBus.on('updateFolders', getFolders());
-})
-
-onUnmounted(() => {
-  EventBus.off('updateFolders', getFolders());
-})
 
 
 
