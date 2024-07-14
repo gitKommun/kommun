@@ -6,34 +6,28 @@
             <IconFolderAdd class="group-hover:text-lime-500 transition-all duration-150"/>
             <span class="group-hover:text-lime-500 transition-all duration-150">Nueva carpeta</span>
         </div>
-        <vs-dialog v-model="showCreateFolder" overlay-blur>
-            <template #header>
-              <span>Crear nueva carpeta</span>
-            </template>
+        <Dialog v-model:visible="showCreateFolder" modal header="Crear nueva carpeta" class="w-96">
             <div class="">
-              <vs-input v-model="folderName" placeholder="Folder name" block>
-                <template v-if="folderCreateValidated" #message-danger> No puedes crear una carpeta sin nombre</template>
-              </vs-input>
+              <InputText v-model="folderName" placeholder="Folder name" :invalid="folderCreateValidated" class="w-full" />
             </div>
-            <template #footer>
-              <div class="flex justify-end gap-x-4">
-                <vs-button 
-                  color="dark"
-                  type="transparent"
+              <div class="flex justify-end gap-x-4 pt-4">
+                <Button 
                   @click="showCreateFolder =!showCreateFolder"
+                  text
+                  severity="secondary"
                   >
                   Cancelar
-                </vs-button>
-                <vs-button 
-                  color="dark"
+                </Button>
+                <Button 
                   @click="crateFolder"
                   :loading="folderCreateLoading"
+                  severity="contrast"
                   >
                   Crear
-                </vs-button>
+                </Button>
               </div>
-            </template>
-          </vs-dialog> 
+          </Dialog>
+          <Toast /> 
     </div>
     
     
@@ -43,7 +37,7 @@
     import IconFolderAdd from "/src/components/icons/IconFolderAdd.vue"
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
-    import { VsNotification } from 'vuesax-alpha'
+    import { useToast } from 'primevue/usetoast';
 
     // options
     defineOptions({
@@ -60,7 +54,9 @@
     const http = useHttp();
     //user store
     const { user } = useUserStore();
-
+    //use toast
+    const toast = useToast();
+    //emit
     const emit = defineEmits(['update:folder']);
 
     watch(showCreateFolder, (n, o) => {
@@ -81,15 +77,11 @@
             folderCreateLoading.value = false;
             showCreateFolder.value = false;
             folderName.value = '';
-            emit('update:folder', true);
+          emit('update:folder', true);
+            toast.add({ severity: 'success', summary: 'Ok', detail: 'Carpeta creada con exito', life: 3000 });
         }
         catch (error) {
-            VsNotification({
-                position: 'top-right',
-                color: 'danger',
-                title: 'Upps!! algo ha fallado',
-                content: error,
-            });
+            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
         }
     } else {
         folderCreateValidated.value = true;

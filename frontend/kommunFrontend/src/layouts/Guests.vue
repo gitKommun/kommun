@@ -7,25 +7,25 @@
                 </RouterLink>
                 <div class="hidden md:flex items-center space-x-4">
                     <RouterLink to="/">
-                        <vs-button color="dark" type="transparent" >Features</vs-button>
+                        <Button label="Features" severity="secondary" text/>
                     </RouterLink>
                     <RouterLink to="/">
-                        <vs-button color="dark" type="transparent" >About</vs-button>
+                        <Button label="About" severity="secondary" text/>
                     </RouterLink>
                     <RouterLink to="/">
-                        <vs-button color="dark" type="transparent" >Pricing</vs-button>
+                        <Button label="Pricing" severity="secondary" text/>
                     </RouterLink>
                     <RouterLink to="/">
-                        <vs-button color="dark" type="transparent" >Contact</vs-button>
+                        <Button label="Contact" severity="secondary" text/>
                     </RouterLink>
                     
                 </div>
                 <div class="hidden md:flex items-center space-x-4">
                     <router-link :to="{name:'login'}">
-                        <vs-button color="dark" type="border">Login</vs-button>
+                        <Button label="Login" severity="contrast" outlined/>
                     </router-link >
                     <router-link :to="{name:'register'}">
-                        <vs-button color="dark">Registro</vs-button>
+                        <Button label="Registro" severity="contrast" raised/>
                     </router-link>
  
                 </div>

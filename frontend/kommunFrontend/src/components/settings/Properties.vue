@@ -19,7 +19,11 @@
                 </transition>
             </div>
             <div class="columns-1 md:columns-3  mb-2">
-                <vs-checkbox v-model="form.propertyTypes" color="success" value="apartment"> Viviendas </vs-checkbox>
+                <div class="flex items-center gap-x-2">
+                    <Checkbox v-model="form.propertyTypes" inputId="apartment" value="apartment"/> 
+                    <label for="apartment">Apartamento</label> 
+                </div>
+                
                 <transition
                     enter-active-class="transition-all transition-slow ease-out overflow-hidden"
                     leave-active-class="transition-all transition-slow ease-in overflow-hidden"
@@ -29,16 +33,19 @@
                     leave-to-class="opacity-0"
                     mode="out-in"
                 >
-                    <vs-input 
+                    <InputNumber 
                         v-if="form.propertyTypes.includes('apartment')"
                         v-model="form.apartmentAccount" 
                         placeholder="Nº de viviendas"  
-                        type="number"
+                        showButtons
                         />
                 </transition>
             </div>
             <div class="columns-1 md:columns-3 mb-2">
-                <vs-checkbox v-model="form.propertyTypes" color="success" value="garage" > Plazas de aparcamiento </vs-checkbox>
+                <div class="flex items-center gap-x-2">
+                    <Checkbox v-model="form.propertyTypes" inputId="garage" value="garage"/> 
+                    <label for="garage">Plazas de aparcamiento</label> 
+                </div>
                 <transition
                     enter-active-class="transition-all transition-slow ease-out overflow-hidden"
                     leave-active-class="transition-all transition-slow ease-in overflow-hidden"
@@ -48,17 +55,19 @@
                     leave-to-class="opacity-0"
                     mode="out-in"
                 >
-                    <vs-input 
+                    <InputNumber 
                         v-if="form.propertyTypes.includes('garage')"
                         v-model="form.garageAccount" 
                         placeholder="Nº de plazas"  
-                        type="number"
-                        class="w-12"
+                        showButtons
                     />
                 </transition>
             </div>
             <div class="columns-1 md:columns-3">
-                <vs-checkbox v-model="form.propertyTypes" color="success" value="storageRoom"> Trasteros </vs-checkbox>
+                <div class="flex items-center gap-x-2">
+                    <Checkbox v-model="form.propertyTypes" inputId="storageRoom" value="storageRoom"/> 
+                    <label for="storageRoom">Trasteros</label> 
+                </div>
                 <transition
                     enter-active-class="transition-all transition-slow ease-out overflow-hidden"
                     leave-active-class="transition-all transition-slow ease-in overflow-hidden"
@@ -68,19 +77,19 @@
                     leave-to-class="opacity-0"
                     mode="out-in"
                 >
-                    <vs-input 
+                    <InputNumber 
                         v-if="form.propertyTypes.includes('storageRoom')"
                         v-model="form.storageRoomAccount" 
                         placeholder="Nº de trasteros"  
-                        type="number" 
-                        />
+                        showButtons
+                    />
                 </transition>
             </div>
         </div>
     </div>
 </template>
 <script setup>
-    import { ref, shallowRef } from 'vue'
+    import { ref } from 'vue'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
 

@@ -6,10 +6,8 @@
             <IconFileAdd class="group-hover:text-lime-500 transition-all duration-150"/>
             <span class="group-hover:text-lime-500 transition-all duration-150">Subir archivo</span>
         </div>
-        <vs-dialog v-model="showUploadFile" overlay-blur>
-            <template #header>
-              <span>Cargar archivo</span>
-            </template>
+        <Dialog v-model:visible="showUploadFile" modal header="Cargar archivo" class="w-96">
+
             <div class="">
               <inputFileDraggable @update:files="updateFiles"/>
             </div>
@@ -18,23 +16,23 @@
               </div>
             <template #footer>
               <div class="flex justify-end gap-x-4">
-                <vs-button 
-                  color="dark"
-                  type="transparent"
+                <Button 
+                  text
+                  severity="secondary"
                   @click="showUploadFile =!showUploadFile"
                   >
                   Cancelar
-                </vs-button>
-                <vs-button 
-                  color="dark"
+                </Button>
+                <Button 
+                  severity="contrast"
                   @click="crateFolder"
                   :loading="folderCreateLoading"
                   >
                   Cargar
-                </vs-button>
+                </Button>
               </div>
             </template>
-          </vs-dialog> 
+          </Dialog> 
     </div>
     
     
@@ -46,7 +44,7 @@
     import EventBus from '/src/utils/event-bus.js'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
-    import { VsNotification } from 'vuesax-alpha'
+    import { useToast } from 'primevue/usetoast';
 
     // options
     defineOptions({
@@ -63,6 +61,8 @@
     const http = useHttp();
     //user store
     const { user } = useUserStore();
+    //use toast
+    const toast = useToast();
 
    const updateFiles = (newFiles) => {
      files.value = newFiles;

@@ -14,72 +14,87 @@
                     </div>
                 </div>
                 <div class="flex flex-col gap-y-2 px-2">
-                    <div class="flex gap-x-3">
-                        <vs-input 
+                    <div class="flex gap-x-3 py-4">
+                        <InputText 
                             v-model="name" 
                             placeholder="Name" 
-                            label-float 
-                            block/>
-                        <vs-input 
+                            class="w-full"/>
+                        <InputText
                             v-model="surnames" 
                             placeholder="Surname" 
-                            label-float 
-                            block/>
+                            class="w-full"/>
                     </div>
-                    <vs-input 
-                        v-model="email" 
-                        placeholder="E-mail"
-                        type="email"
-                        label-float 
-                        block/>
-                    <div class="flex gap-x-3">
-                        <vs-input 
+                    <div class="py-4">
+                        <InputText 
+                            v-model="email" 
+                            placeholder="E-mail"
+                            type="email"
+                            class="w-full"/>
+                    </div> 
+                    <div class="flex gap-x-3 py-4">
+                        <div class="w-full">
+                            <Password
                             v-model="password_1" 
-                            placeholder="Password" 
-                            type="password"
-                            label-float 
-                            block/>
-                        <vs-input 
+                            placeholder="Contraseña" 
+                            inputClass="min-w-full"
+                            toggleMask
+                            promptLabel="Elige contraseña" weakLabel="Muy debil" mediumLabel="Debil" strongLabel="Segura"
+                            :fluid="true">
+                            <template #footer>
+                                <Divider />
+                                <ul class="text-xs mt-2 pl-2">
+                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationNumber},{'text-green-500':passValidationNumber}]" type="disc">Numbers</li>
+                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationUppercase},{'text-green-500':passValidationUppercase}]"type="disc">Capital letters</li>
+                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationLowercase},{'text-green-500':passValidationLowercase}]"type="disc">Lowercase</li>
+                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationDigits},{'text-green-500':passValidationDigits}]"type="disc">8 Digits</li>
+                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationCharacter},{'text-green-500':passValidationCharacter}]"type="disc">Special characters</li>
+                                </ul>
+                            </template>
+                        </Password>
+                        </div>
+                        <div class="w-full">
+                            <Password
                             v-model="password_2" 
-                            placeholder="Password verification"
-                            type="password"
-                            label-float
-                            block>
-                            <!-- <template v-if="!passConfirm" #message-warn >no coincide</template> -->
-                        </vs-input>
+                            placeholder="Confirmar contraseña"
+                            inputClass="w-full"
+                            :feedback="false"
+                            toggleMask
+                            fluid/>
+                        </div>
+                        
+                        
                     </div>
-                    <div class="text-[10px] text-slate-500 px-8">
-                        <span>Your password must be at least...</span>
-                        <ul>
-                            <li :class="[{'text-red-500':password_1!=''&&!passValidationNumber},{'text-green-500':passValidationNumber}]" type="disc">Numbers</li>
-                            <li :class="[{'text-red-500':password_1!=''&&!passValidationUppercase},{'text-green-500':passValidationUppercase}]"type="disc">Capital letters</li>
-                            <li :class="[{'text-red-500':password_1!=''&&!passValidationLowercase},{'text-green-500':passValidationLowercase}]"type="disc">Lowercase</li>
-                            <li :class="[{'text-red-500':password_1!=''&&!passValidationDigits},{'text-green-500':passValidationDigits}]"type="disc">8 Digits</li>
-                            <li :class="[{'text-red-500':password_1!=''&&!passValidationCharacter},{'text-green-500':passValidationCharacter}]"type="disc">Special characters</li>
-                        </ul>
-                    </div>                  
+                 
+                                   
                 </div>            
                 <div class="flex justify-between items-center mt-4">
                     <RouterLink to="/">
-                        <vs-button color="dark" type="transparent"><IconArrowBack class="mr-1 "/>Back to home</vs-button>
+                        <Button size="small" text><IconArrowBack class="mr-1 "/>Back to home</Button>
                     </RouterLink>
-                    <vs-button color="dark"  @click="registerUser" :loading="registerLoading">Submit</vs-button>
+                    <Button  @click="registerUser" :loading="registerLoading" label="crear" severity="contrast" class="min-w-32" raised/>
                 </div> 
             
         </div>
     </div>
 </template>
 <script setup>
-    import { computed, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
 import { VsNotification } from 'vuesax-alpha'
 import { useRouter } from 'vue-router';
 //Jakub: enlazando con API
 import { useHttp } from '/src/composables/useHttp.js'; 
+
+//API
 const http = useHttp();
 // router
 const router = useRouter();
+
+//use toast
+const toast = useToast();
+
 const registerLoading = ref(false);
 const registerUser = async () => {
     registerLoading.value = true
@@ -97,31 +112,16 @@ const registerUser = async () => {
                 
                 router.push({ name: 'login' });
             } else {
-                VsNotification({
-                position: 'top-right',
-                color:'danger',
-                title: 'Las contraseñas no coinciden',
-                content:'Comprueba que has introducido la misma contraseña en los dos campos',
-                })
+                toast.add({ severity: 'danger', summary: 'Las contraseñas no coinciden', detail: 'Comprueba que has introducido la misma contraseña en los dos campos', life: 3000 });
             }
         } else {
-            VsNotification({
-            position: 'top-right',
-            color:'danger',
-            title: 'Formato de contraseña no valido',
-            content:'Revisa los requisitos para tener una contraseña segura',
-            })
+             toast.add({ severity: 'danger', summary: 'Formato de contraseña no valido', detail: 'Revisa los requisitos para tener una contraseña segura', life: 3000 });
         }
         registerLoading.value = false
-  } catch (error) {
-      VsNotification({
-            position: 'top-right',
-        color:'danger',
-        title: 'Error en el registro',
-        content:error,
-    })
-    registerLoading.value = false
-  }
+    } catch (error) {
+        toast.add({ severity: 'danger', summary: 'Error en el registro', detail: error, life: 3000 });
+        registerLoading.value = false
+    }
 };
 //Jakub: fin
 
@@ -171,7 +171,7 @@ const registerUser = async () => {
         }
         return false
     })
-    const passConfirm = (() => {
+    const passConfirm = computed (() => {
         if (passFormatValid.value && password_1.value===password_2.value) {
           return true  
         }

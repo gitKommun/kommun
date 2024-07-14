@@ -11,41 +11,38 @@
                 <p>Introduce el email con el que te registraste, te mandaremos los pasos para recuperar tu contraseña</p>
             </div>
 
-            <div class="flex flex-col gap-y-2 px-2">
-                <vs-input 
+            <div class="flex flex-col gap-y-2 px-2 py-4">
+                <InputText
                     v-model="email" 
                     placeholder="User email" 
-                    label-float 
-                    block/>
+                    class="w-full"/>
             </div>
             <div class="flex justify-between items-center mt-4">
                 <RouterLink to="/">
-                    <vs-button color="dark" type="transparent"> <IconArrowBack class="mr-1 "/> Back to home</vs-button>
+                    <Button size="small" text><IconArrowBack class="mr-1 "/>Back to home</Button>
                 </RouterLink>
-                <vs-button @click="openNotification" color="dark">Send</vs-button>
+                <Button @click="openNotification" severity="contrast" label="Enviar" class="min-w-32" raised/>
             </div>       
         </div>
     </div>
 </template>
 <script setup>
 import { ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
-import { VsNotification } from 'vuesax-alpha'
 import Authentication from '/src/layouts/Authentication.vue';
 
     defineOptions({
         name: 'recovery',
         layout:Authentication
     });
+
+    //use toast
+    const toast = useToast();
+
+    //Variables
     const email = ref('');
-    const openNotification = () => {
-        VsNotification({
-            position: 'top-right',
-        color:'success',
-        title: 'Te hemos enviado un mail',
-        content:
-        'Revisa tu bandeja de correo y sigue las innstrucciones para recuperar tu acceso',
-    })
-}
+
+
     
 </script>

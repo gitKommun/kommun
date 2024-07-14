@@ -6,46 +6,46 @@
         >
             <div class="">
                 <RouterLink to="/">
-                    <vs-button color="dark" type="transparent" size="small"><IconArrowBack class="scale-75 mr-1"/> back</vs-button>
+                    <Button size="small" text severity="contrast">
+                        <IconArrowBack class="scale-75 mr-1"/> back
+                    </Button>
                 </RouterLink>
             </div>
 
-            <div class="w-full flex justify-center">
+            <div class="w-full flex justify-center mb-4">
                 <img alt="Kommun logo" class="h-24" src="@/assets/iso_kommun.svg"  />
             </div>
 
-            <div class="flex flex-col gap-y-2 px-2">
-                <vs-input 
+            <div class="flex flex-col gap-y-8 px-2">
+                <InputText 
                     v-model="email" 
                     placeholder="User email" 
-                    label-float 
-                    block
                 />
 
-                <vs-input
-                    v-model="password"
-                    type="text"
-                    placeholder="Password"
-                    label-float 
-                    block
-                />
+                <Password
+                    v-model="password" 
+                    placeholder="Contraseña"
+                    inputClass="w-full"
+                    :feedback="false"
+                    toggleMask
+                    fluid/>
             </div>
 
             <div class="flex justify-center items-center mt-2">
                 <RouterLink :to="{name:'recovery'}">
-                    <span class="text-xs text-cyan-500  hover:underline transition-all duration-300">forget password</span>
+                    <span class="text-xs text-indigo-500  hover:underline transition-all duration-300">forget password</span>
                 </RouterLink>
 
                 <span class="text-slate-500 text-xs mx-[4px]">or</span>
 
                 <RouterLink :to="{name:'register'}">
-                    <span class="text-xs text-cyan-500  hover:underline transition-all duration-300">create account</span>
+                    <span class="text-xs text-indigo-500  hover:underline transition-all duration-300">create account</span>
                 </RouterLink>
             </div>
 
             <div class="flex justify-center mt-4">
                 <div class="flex justify-center mt-4">
-                    <vs-button color="dark" @click="login" :loading="loginLoading">Sign in</vs-button>
+                    <Button  @click="login" :loading="loginLoading" severity="contrast" label="Sign in" raised class="w-full"/>
                 </div>
             </div>
         </div>
@@ -55,10 +55,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
-import { VsNotification } from 'vuesax-alpha'
 import { setCookie } from '/src/utils/cookies.js';
 import { useHttp } from '/src/composables/useHttp.js';
 
@@ -80,33 +80,29 @@ const router = useRouter();
 //instancia API
 const http = useHttp();
 
+//use toast
+const toast = useToast();
+
 // login
 const login = async () => {
     loginLoading.value = true;
 
     try {
-        console.log('Realizando solicitud POST a la API...');
         const response = await http.post(`members/login/`, {
             email: email.value,
             password: password.value,
         });
         
         const { csrftoken, sessionid } = response.data;
-        console.log('tokens--->', csrftoken, sessionid);
 
         setCookie('csrftoken', csrftoken, 30);
         setCookie('sessionid', sessionid, 30);
 
         router.push({ name: 'properties' });
     } catch (error) {
-        console.error('Error en la solicitud POST:', error);
+
         // Manejar el error de autenticación
-        VsNotification({
-            position: 'top-right',
-            color: 'danger',
-            title: 'Error de autenticación',
-            content: error,
-        });
+        toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
 
         loginLoading.value = false;
     }

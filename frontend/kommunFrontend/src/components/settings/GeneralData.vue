@@ -4,24 +4,24 @@
             <h3 class="text-slate-950 text-lg font-semibold"> Datos generales</h3>
         </div>
         <div class="gap-y-2">
-            <div class="">
-                <vs-input v-model="form.name" placeholder="Nombre de la comunidad" label-float block/>
+            <div class="py-4">
+                <InputText v-model="form.name" placeholder="Nombre de la comunidad" class="w-full"/>
             </div>
-            <div class="">
-                <vs-input v-model="form.address" placeholder="Dirección" label-float  block/>
+            <div class="py-4">
+                <InputText v-model="form.address" placeholder="Dirección" class="w-full"/>
             </div>
-            <div class="flex gap-x-3 ">
-                <vs-input v-model="form.city" placeholder="Ciudad" label-float  block/>
-                <vs-input v-model="form.postalCode" placeholder="Código postal" label-float  block/>
+            <div class="py-4 flex gap-x-3 ">
+                <InputText v-model="form.city" placeholder="Ciudad" class="w-full"/>
+                <InputText v-model="form.postalCode" placeholder="Código postal" class="w-full"/>
             </div>
-            <div class="flex gap-x-3 ">
-                <vs-input v-model="form.cif" placeholder="CIF" label-float />
+            <div class="py-4 flex gap-x-3 ">
+                <InputText v-model="form.cif" placeholder="CIF" label-float />
             </div>
         </div>
     </div>
 </template>
 <script setup>
-    import { ref, shallowRef } from 'vue'
+    import { ref } from 'vue'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
 

@@ -1,21 +1,20 @@
 <template>
     <div class="p-4 border border-slate-200 rounded-2xl ">
-        <div class="flex justify-between">
+        <div class="flex justify-between mb-3">
             <div class="flex flex-col w-full">
                 <h3 class="text-slate-950 text-xl font-bold">Zonas comunes</h3>
                 <p class="text-slate-500">Regitra tus zonas comunes como piscinas, gimnasio, pista de padel ...</p>
             </div>
             <div class="flex-none" v-if="zones.length">
-                <vs-button 
-                    color="dark" 
-                    class="inline"
-                    type="border"
+                <Button 
+                    severity="contrast"
                     size="small"
                     @click="showCreateZoneModal= true"
+                    outlined
                     >
                     <IconPlus class="scale-75"/>
                     Nuevo
-                </vs-button>
+                </Button>
             </div>      
         </div>    
         <template v-if="!zones.length">
@@ -25,79 +24,67 @@
                     Actualmente no hay áreas comunes
                 </span>
                 <span class="text-sm text-slate-500 max-w-80 text-center mb-3">Aun no hay registrado ningún elemento como zona comun</span>
-                <vs-button 
-                    color="dark" 
-                    class="inline"
+                <Button 
+                    severity="contrast"
                     @click="showCreateZoneModal= true"
                     >
                     Crear primer elemento
-                </vs-button>
+                </Button>
             </div>
         </template>
         <template v-else>
-            <vs-table class="mt-4">
-                <template #thead>
-                    <vs-tr>
-                        <vs-th> Nombre </vs-th>
-                        <vs-th> Uso de zona </vs-th>
-                        <vs-th> tiempo </vs-th>
-                        <vs-th class="max-w-12 pr-2"></vs-th>
-                    </vs-tr>
-                </template>
-                <template #tbody>
-                    <vs-tr v-for="zone in zones" :key="zone.id" :data="zone">
-                        <vs-td>
-                          {{ zone.name }}
-                        </vs-td>
-                        <vs-td>
-                          <Tag v-if="zone.reservable" :color="'orange'">Reserva</Tag>
-                          <Tag v-else >Libre</Tag>
-                          
-                        </vs-td>
-                        <vs-td>
-                          {{ zone.reservation_duration }} {{ zone.time_unit }}
-                        </vs-td>
-                        <vs-td class="max-w-12 pr-2">
-                            <Dropdown strategy="fixed">
-                                <template #reference="{ open }">
-                                    <div 
-                                        class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer "
-                                        @click="open"
+            <DataTable :value="zones" tableStyle="min-width: 50rem">
+                <Column field="name" header="Nombre"></Column>
+                <Column  header="Uso">
+                    <template #body="slotProps">
+                        <Tag :severity="slotProps.data.reservable?'info':'success'"  :value="slotProps.data.reservable?'Reserva':'Libre'"/>     
+                    </template>
+                </Column>
+                <Column header="Tiempo">
+                    <template #body="slotProps">
+                        {{ slotProps.data.reservation_duration }} {{ slotProps.data.time_unit }}
+                    </template>
+                </Column>
+                <Column  header="Opciones" class="flex justify-end">
+                    <template #body="slotProps">
+                        <Dropdown strategy="fixed">
+                            <template #reference="{ open }">
+                                <div 
+                                    class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer "
+                                    @click="open"
+                                >
+                                    <IconDotsHorizontal class="text-slate-500"/>
+                                </div>
+                            </template>
+                            <template #content="{ close }">
+                                <div class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
+                                    <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
+                                        @click="openUpdateZone(zone)"
                                     >
-                                        <IconDotsHorizontal class="text-slate-500"/>
+                                        <IconPencil class="scale-75"/>
+                                        <span>Editar</span>
                                     </div>
-                                </template>
-                                <template #content="{ close }">
-                                    <div class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
-                                        <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
-                                            @click="openUpdateZone(zone)"
+                                    <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
+                                        @click="deleteZone(zone)"
                                         >
-                                            <IconPencil class="scale-75"/>
-                                            <span>Editar</span>
-                                        </div>
-                                        <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
-                                            @click="deleteZone(zone)"
-                                            >
-                                            <IconTrash class="scale-75"/>
-                                            <span>Eliminar</span>
-                                        </div>
+                                        <IconTrash class="scale-75"/>
+                                        <span>Eliminar</span>
                                     </div>
-                                </template>
-                            </Dropdown>
-                        </vs-td>
-
-                    </vs-tr>
-                </template>
-            </vs-table>
+                                </div>
+                            </template>
+                        </Dropdown>
+                    </template>    
+                </Column>
+            </DataTable>
         </template>
-        <vs-dialog v-model="showCreateZoneModal" overlay-blur>
-            <template #header>
-                <span>Crear nueva zona</span>
-            </template>
+        <Dialog v-model:visible="showCreateZoneModal" modal header="Crear nueva zona" class="w-96">
+ 
             <div class="gap-y-2">
-                <vs-input v-model="zone.name" placeholder="Nombre de la zona" block />
+                <InputText v-model="zone.name" placeholder="Nombre de la zona" class="w-full" />
                 <div class="flex items-center mt-6">
-                    <vs-switch v-model="zone.reservable" color="success"/>
+                    <span class="min-w-10">
+                        <ToggleSwitch v-model="zone.reservable" />
+                    </span>
                     <span class="ml-3"> La zona que puede ser reservada por los propitarios </span>
                 </div> 
                 <transition
@@ -109,45 +96,40 @@
                     leave-to-class="opacity-0"
                     mode="out-in"
                 >
-                    <div class="mt-3 rounded-xl  p-3 md:pl-14" v-if="zone.reservable">
+                    <div class="mt-3 rounded-xl p-3 " v-if="zone.reservable">
                         <span class="text-slate-500 text-sm">Define la franja de tiempo para el uso de la zona:</span>
                         <div class="flex gap-x-3 py-3">
-                            <vs-input v-model="zone.reservation_duration" placeholder="Tiempo" type="number" class="max-w-24"/>
-                            <vs-select v-model="zone.time_unit" placeholder="Selecciona...">
-                                <vs-option label="Minutos" value="MIN"> Minutos </vs-option>
-                                <vs-option label="Horas " value="HOUR"> Horas </vs-option>
-                                <vs-option label="Día copleto" value="DAY"> Día copleto </vs-option>
-                            </vs-select>
+                            <InputNumber v-model="zone.reservation_duration" placeholder="Tiempo" inputClass="w-12 mr-1"/>
+                            <Select v-model="zone.time_unit" :options="timePeriods" optionLabel="label" optionValue="value" placeholder="Selecciona..."/>
                         </div>
                     </div>
                 </transition>
             </div>
-            <template #footer>
-                <div class="flex justify-end gap-x-4">
-                    <vs-button 
-                    color="dark"
-                    type="transparent"
-                    @click="showCreateZoneModal =! showCreateZoneModal"
+
+                <div class="flex justify-end gap-x-4 pt-4">
+                    <Button 
+                        text
+                        severity="secondary"
+                        @click="showCreateZoneModal =! showCreateZoneModal"
                     >
-                    Cancelar
-                    </vs-button>
-                    <vs-button 
-                    color="dark"
+                        Cancelar
+                    </Button>
+                    <Button 
+                        severity="contrast"
                     @click="createZone"
                     >
                     Crear
-                    </vs-button>
+                    </Button>
                 </div>
-            </template>
-        </vs-dialog>
-        <vs-dialog v-model="showUpdateZone" overlay-blur>
-            <template #header>
-                <span>Editar zona</span>
-            </template>
+
+        </Dialog>
+        <Dialog v-model:visible="showUpdateZone" modal header="Editar zona" class="w-96">
             <div class="gap-y-2">
-                <vs-input v-model="zone.name" placeholder="Nombre de la zona" block />
+                <InputText v-model="zone.name" placeholder="Nombre de la zona" class="w-full" />
                 <div class="flex items-center mt-6">
-                    <vs-switch v-model="zone.reservable" color="success"/>
+                    <span class="min-w-10">
+                        <ToggleSwitch v-model="zone.reservable" />
+                    </span>
                     <span class="ml-3"> La zona tiene que ser reservada por los propitarios </span>
                 </div> 
                 <transition
@@ -159,50 +141,48 @@
                     leave-to-class="opacity-0"
                     mode="out-in"
                 >
-                    <div class="mt-3 rounded-xl  p-3 md:pl-14" v-if="zone.reservable">
-                        <span class="text-slate-500">Define la franja de tiempo para el uso de la zona:</span>
+                    <div class="mt-3 rounded-xl p-3 " v-if="zone.reservable">
+                        <span class="text-slate-500 text-sm">Define la franja de tiempo para el uso de la zona:</span>
                         <div class="flex gap-x-3 py-3">
-                            <vs-input v-model="zone.reservation_duration" placeholder="Tiempo" type="number" class="max-w-24"/>
-                            <vs-select v-model="zone.time_unit" placeholder="Selecciona...">
-                                <vs-option label="Minutos" value="MIN"> Minutos </vs-option>
-                                <vs-option label="Horas " value="HOUR"> Horas </vs-option>
-                                <vs-option label="Día copleto" value="DAY"> Día copleto </vs-option>
-                            </vs-select>
+                            <InputNumber v-model="zone.reservation_duration" placeholder="Tiempo" inputClass="w-12 mr-1"/>
+                            <Select v-model="zone.time_unit" :options="timePeriods" optionLabel="label" optionValue="value" placeholder="Selecciona..."/>
                         </div>
                     </div>
                 </transition>
             </div>
-            <template #footer>
-                <div class="flex justify-end gap-x-4">
-                    <vs-button 
-                    color="dark"
-                    type="transparent"
+
+                <div class="flex justify-end gap-x-4 pt-4">
+                    <Button 
+                    text
+                    severity="secondary"
                     @click="!showUpdateZone"
                     >
-                    Cancelar
-                    </vs-button>
-                    <vs-button 
-                    color="dark"
+                        Cancelar
+                    </Button>
+                    <Button 
+                    severity="contrast"
                     @click="updateZone()"
                     >
-                    Actualizar
-                    </vs-button>
+                        Actualizar
+                    </Button>
                 </div>
-            </template>
-        </vs-dialog>
+
+        </Dialog>
     </div>
 </template>
 <script setup>
-    import { ref, shallowRef, watch } from 'vue'
+    import { ref, computed } from 'vue'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
     import EmptyTask from "/src/components/emptys/EmptyTask.vue";
-    import IconPlus from "/src/components/icons/IconPlus.vue";
+import IconPlus from "/src/components/icons/IconPlus.vue";
+    import IconTrash from "/src/components/icons/IconTrash.vue";
+    import IconPencil from "/src/components/icons/IconPencil.vue";
     import IconDotsHorizontal from "/src/components/icons/IconDotsHorizontal.vue";
     import Dropdown from "/src/components/Dropdown.vue"
     import Loading from '/src/components/Loading.vue';
-    import { VsNotification } from 'vuesax-alpha'
-    import Tag from "/src/components/Tag.vue"
+    import { useToast } from 'primevue/usetoast';
+    //import Tag from "/src/components/Tag.vue"
     
     defineOptions({
         name: 'CommonZones'
@@ -217,13 +197,20 @@
         time_unit: '',
         area_id: null,
     })
+    const timePeriods = ref([
+        { label: 'Minutos', value: 'MIN' },
+        { label: 'Horas', value: 'HOUR' },
+        {label:'Día Completo',value:'DAY'}
+    ])
     const zones = ref([]);
     const zonesLoading = ref(true);
-
+    const zonesNameValidation = ref(true);
     //instancia API
     const http = useHttp();
     //user store
     const { user } = useUserStore();
+      //use toast
+    const toast = useToast();
 
     const showUpdateZone = ref(false);
 
@@ -234,51 +221,41 @@
 
             const response = await http.get(`common_areas/${user?.communities[0]?.community_id}/`);
             zones.value = response.data
-
             zonesLoading.value = false;
 
         } catch (error) {
-        VsNotification({
-            position: 'top-right',
-            color: 'danger',
-            title: 'Upps!! algo ha fallado',
-            content: error,
-        });
+            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
         }
     }
     getZones();
 
-    //createZone
+//createZone
+
+
     const createZone = () => {
-        
-        try {
+        if (zone.name != '') {
+            zonesNameValidation.value = true;
+            try {
             const response = http.post(`common_areas/${user?.communities[0]?.community_id}/create/`, zone.value );
             getZones();
-            VsNotification({
-                position: 'top-right',
-                color: 'success',
-                title: 'OK',
-                content: 'La nueva zona se ha creado con exito',
-            });
+            toast.add({ severity: 'success', summary: 'Ok', detail: 'Zona creada con exito', life: 3000 });
             
+            } catch (error) {
 
-        } catch (error) {
-
-            VsNotification({
-                position: 'top-right',
-                color: 'danger',
-                title: 'Upps!! algo ha fallado',
-                content: error,
-            });
-        }
-        zone.value = {
-                name: '',
-                reservable: null,
-                reservation_duration: '',
-                time_unit: '',
-                area_id: null,
+               toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
             }
-    showCreateZoneModal.value = false;
+            zone.value = {
+                    name: '',
+                    reservable: null,
+                    reservation_duration: '',
+                    time_unit: '',
+                    area_id: null,
+                }
+            showCreateZoneModal.value = false;
+        } else {
+            zonesNameValidation.value=false
+        }
+        
   
     } 
     //editZone
@@ -290,43 +267,42 @@ const openUpdateZone = (item) => {
 const updateZone = () => {
     try {
         const response = http.put(`common_areas/${user?.communities[0]?.community_id}/${zone.value.area_id}/`, zone.value);
-        
-            VsNotification({
-                position: 'top-right',
-                color: 'success',
-                title: 'OK',
-                content: 'La zona se ha actualizado con exito',
-            });
+        toast.add({ severity: 'success', summary: 'Ok', detail: 'La zona se ha actualizado con exito', life: 3000 });
+
+        showUpdateZone.value = false;
+        zone.value = {
+            name: '',
+            reservable: null,
+            reservation_duration: '',
+            time_unit: '',
+            area_id: null,
+        }
+
     } catch (error) {
-            VsNotification({
-                position: 'top-right',
-                color: 'danger',
-                title: 'Upps!! algo ha fallado',
-                content: error,
-            });
+        toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
     }
-     getZones();
+     updateItems()
 } 
         //deleteZone
 
 const deleteZone = (zone) => {
+
+    console.log('deleteeeee')
     try {
         const response = http.delete(`common_areas/${user?.communities[0]?.community_id}/${zone.value.area_id}/`);
-        
-            VsNotification({
-                position: 'top-right',
-                color: 'success',
-                title: 'OK',
-                content: 'La zona se ha eliminado con exito',
-            });
+        toast.add({ severity: 'success', summary: 'Ok', detail: 'La zona se ha eliminado con exito', life: 3000 });
+
     } catch (error) {
-            VsNotification({
-                position: 'top-right',
-                color: 'danger',
-                title: 'Upps!! algo ha fallado',
-                content: error,
-            });
+         toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
     }
-        getZones();
-    } 
+        updateItems()
+} 
+function updateItems() {
+  setTimeout(() => {
+    getZones();
+  }, 300);
+}
+
+
+
 </script>

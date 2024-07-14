@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen w-screen">
+  <div class="h-screen w-screen text-slate-950">
     <RouterView v-slot="{ Component }">
       <transition
         enter-active-class="transition-all transition-slow ease-out overflow-hidden"

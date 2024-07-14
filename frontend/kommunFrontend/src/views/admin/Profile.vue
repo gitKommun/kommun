@@ -6,44 +6,19 @@
           <span class="text-sm text-slate-500 font-medium">{{ user.communities[0]?.community_name }}</span>
       </div>
       <div class=" p-4 flex justify-end">
-        <vs-button color="dark" class="inline flex-none">Guardar</vs-button>
-        <vs-button 
-          color="danger" 
+        <Button 
+          severity="danger"
           class="inline flex-none"
-          @click="logout">Cerrar sesión</vs-button>
+          @click="logout"
+          raised>
+            Cerrar sesión
+          </Button>
       </div>
     </div>
     <div class="flex justify-center px-3 pb-6">
       <div class="w-full max-w-4xl ">
         <!-- DATOS PERSONALES -->
-          <div class="p-4 border border-slate-200 rounded-2xl mb-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-slate-950 text-lg font-semibold"> Datos generales </h3>
-            </div>
-            <div class="gap-y-2">
-                <div class="">
-                    <vs-input v-model="form.name" placeholder="Nombre" label-float block/>
-                    <vs-input v-model="form.surname" placeholder="Apellidos" label-float  block/>
-                </div>
-                <div class="flex gap-x-3 mb-6">
-                    <vs-input v-model="form.email" placeholder="E-mail" label-float  block/>
-                    <vs-input v-model="form.phone" placeholder="Teléfono" label-float  block/>
-                    
-                </div>
-                <div class="flex items-center gap-x-2">
-                  <vs-select v-model="form.identificationType" placeholder="Selecciona...">
-                      <vs-option label="DNI" value="DNI"> DNI </vs-option>
-                      <vs-option label="NIE " value="NIE"> NIE </vs-option>
-                      <vs-option label="Pasaporte" value="passport"> Pasaporte </vs-option>
-                  </vs-select>
-                  <vs-input v-model="form.identificationNumber" placeholder="Número de identificación" class="max-w-48"/>
-                </div>
-                <div class="flex items-center mt-6">
-                    <vs-switch v-model="form.allowSharing" color="success"/>
-                    <span class="ml-3"> Permitir que los otros propietarios tengan acesso a tus datos de contacto </span>
-                </div>
-            </div>
-          </div>
+          <PersonalData/>
           <!-- DATOS GENERALES -->
           <!-- PROPIEDADES -->
           <!-- ZONAS COMUNES -->
@@ -124,6 +99,7 @@ import IconWarehouse from "/src/components/icons/IconWarehouse.vue"
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useRouter } from 'vue-router';
 import { VsNotification } from 'vuesax-alpha'
+import PersonalData from '/src/components/profile/PersonalData.vue'
 
 const { user } = useUserStore();
 

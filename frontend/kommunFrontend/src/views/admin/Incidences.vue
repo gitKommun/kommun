@@ -34,10 +34,10 @@
               placeholder="Buscar" 
               label-float 
               />
-              <vs-button color="dark" @click="openDetail =! openDetail">
-              toggle
-              </vs-button>
+              
+              
           </div>
+          <Button @click="openDetail =! openDetail" rised> <IconClose class="group-hover:rotate-90 transition-all duration-300"/> yrryry</Button>
           <!-- lista incidencias -->
       </div>
     </div>
@@ -75,6 +75,7 @@ import { useUserStore } from '/src/stores/useUserStore.js';
 
 import Main from '/src/layouts/Main.vue';
 import IconClose from "/src/components/icons/IconClose.vue";
+
 defineOptions({
   name: 'incidences',
   layout: Main

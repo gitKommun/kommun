@@ -4,11 +4,16 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import Vuesax from 'vuesax-alpha';
+import PrimeVue from 'primevue/config';
+import Aura from '@primevue/themes/aura';
+import ToastService from 'primevue/toastservice';
 import { createPinia } from 'pinia';
+import kommunTheme from './kommunTheme';
 
 
 
 import './index.css';
+import 'primeicons/primeicons.css'
 import 'vuesax-alpha/dist/index.css';
 
 
@@ -18,6 +23,96 @@ const app = createApp(App);
 app.use(pinia);
 app.use(router);
 app.use(Vuesax);
+
+app.use(PrimeVue, {
+    theme: {
+        preset: {
+            ...Aura,
+            semantic: {
+                ...Aura.semantic,
+                ...kommunTheme
+            }
+        },
+        options: {
+            prefix: 'p',
+            darkModeSelector: '',
+            cssLayer: false
+        }
+    }, 
+});
+app.use(ToastService);
+//PRIME COMPONENTS
+import Button from "primevue/button"
+app.component('Button', Button);
+
+import Dialog from 'primevue/dialog';
+app.component('Dialog', Dialog);
+
+import InputText from 'primevue/inputtext';
+app.component('InputText', InputText);
+
+import Toast from 'primevue/toast';
+app.component('Toast', Toast);
+
+import Checkbox from 'primevue/checkbox';
+app.component('Checkbox', Checkbox)
+
+import InputNumber from 'primevue/inputnumber';
+app.component('InputNumber', InputNumber)
+
+import ToggleSwitch from 'primevue/toggleswitch';
+app.component('ToggleSwitch',ToggleSwitch)
+
+import Select from 'primevue/select';
+app.component('Select', Select)
+
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import ColumnGroup from 'primevue/columngroup';   // optional
+import Row from 'primevue/row';  
+app.component('DataTable', DataTable)
+app.component('Column', Column)
+app.component('ColumnGroup', ColumnGroup)
+app.component('Row', Row)
+
+import Tag from 'primevue/tag';
+app.component('Tag', Tag)
+
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
+app.component('InputGroup', InputGroup)
+app.component('InputGroupAddon', InputGroupAddon)
+
+import Password from 'primevue/password';
+app.component('Password', Password)
+
+import Avatar from 'primevue/avatar';
+import AvatarGroup from 'primevue/avatargroup';
+app.component('Avatar', Avatar)
+app.component('AvatarGroup', AvatarGroup)
+
+
+import Textarea from 'primevue/textarea';
+app.component('Textarea', Textarea)
+
+import Stepper from 'primevue/stepper';
+import StepList from 'primevue/steplist';
+import StepPanels from 'primevue/steppanels';
+import StepItem from 'primevue/stepitem';
+import Step from 'primevue/step';
+import StepPanel from 'primevue/steppanel';
+app.component('Stepper', Stepper)
+app.component('StepList', StepList)
+app.component('StepPanels', StepPanels)
+app.component('StepItem', StepItem)
+app.component('Step', Step)
+app.component('StepPanel', StepPanel)
+
+import DatePicker from 'primevue/datepicker';
+app.component('DatePicker', DatePicker)
+
+import Popover from 'primevue/popover';
+app.component('Popover', Popover)
 
 
 app.mount('#app');

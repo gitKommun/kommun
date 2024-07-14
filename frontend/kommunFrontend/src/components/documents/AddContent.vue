@@ -1,28 +1,16 @@
 <template>
     <Dropdown strategy="fixed">
         <template #reference="{ open , isOpen }">
-            <vs-button color="dark" @click="open">
+            <Button  @click="open" severity="contrast" raised>
                 <IconPlus class="mr-2"/>
               Nuevo
-            </vs-button>
+            </Button>
         </template>
         <template #content>
-          <!-- <transition
-            enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-            leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-            enter-class="opacity-0 mt-6"
-            enter-to-class="opacity-100 mt-0"
-            leave-class="opacity-100 mt-0"
-            leave-to-class="opacity-0 mt-6"
-            mode="out-in"
-          > -->
           <div class="bg-white w-56 rounded-xl p-3 shadow-2xl gap-y-2 flex flex-col">
             <AddNewFolder @update:folder="updateItems"/>
             <AddNewFile/>
           </div>
-
-          <!-- </transition> -->
-
         </template>
       </Dropdown>
 </template>

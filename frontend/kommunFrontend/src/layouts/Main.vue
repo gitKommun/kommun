@@ -40,9 +40,8 @@
               :class="isAsideOpen?'w-full pl-2 gap-4':'w-10 justify-center'"
             >
             <router-link to="/profile">
-                <vs-avatar size="40">
-                  <img src="@/assets/avatar_2.png" alt="" /> 
-                </vs-avatar>
+              <Avatar label="P" size="large" shape="circle" class="bg-indigo-500"/>
+                
               </router-link>
               
               <span v-if="isAsideOpen" class="text-sm font-semibold">Jane Smith</span>    
@@ -244,7 +243,7 @@ const userFeatures = shallowRef([
 ]);
 
 const isAdmin = computed(() => {
-  if (user?.communities[0]?.role !== 'admin') {
+  if (user?.communities[0]?.role === 'admin') {
     return true;  
   } 
     return false;  
