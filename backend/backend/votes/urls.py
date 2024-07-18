@@ -16,6 +16,8 @@ urlpatterns = [
     # Vote URLs
     path('<str:IDcommunity>/', VoteListAPIView.as_view(), name='vote-list'),
     path('<str:IDcommunity>/create/', VoteCreateAPIView.as_view(), name='vote-create'),
+    #Modificar para que permita pasar un listado de usuarios que pueden votar. Si no recibe ninguno es toda la comunidad. 
+
     path('<str:IDcommunity>/<int:vote_id>/', VoteDetailAPIView.as_view(), name='vote-detail'),
     path('<str:IDcommunity>/<int:vote_id>/update-delete/', VoteUpdateDeleteAPIView.as_view(), name='vote-update-delete'),
     

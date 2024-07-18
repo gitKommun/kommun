@@ -50,18 +50,6 @@ class Community(models.Model):
         president = self.presidentcommunity_set.filter(startDate__gt=now).order_by('startDate').first()
         return president.president if president else None
 
-#class Property(models.Model):
-#    community = models.ForeignKey(Community, on_delete=models.CASCADE, verbose_name=_('community'))
-#    numberProperty = models.CharField(_('property number'), max_length=50)
-#    typeProperty = models.CharField(_('property type'), max_length=50, choices=[('HOUSE', _('House')), ('PARKING', _('Parking')), ('OTHER', _('Other'))])
-#    communityPropertyPercentage = models.FloatField(verbose_name=_('community property percentage'), null=True, blank=True)
-
-#    class Meta:
-#        verbose_name = _("Property")
-#        verbose_name_plural = _("Properties")
-
-#    def __str__(self):
-#        return f"{self.numberProperty} - {self.community.address} ({self.typeProperty})"
     
 class Property(models.Model):
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='properties')
@@ -79,7 +67,24 @@ class Property(models.Model):
 
     def __str__(self):
         return f"Property {self.property_id} in {self.community.name}"
-    
+
+class PersonCommunity(models.Model):
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='people')
+    person_id = models.PositiveIntegerField() # Número secuencial dentro de la comunidad
+    name = models.CharField(_('first name'), max_length=30)
+    surnames = models.CharField(_('last name'), max_length=150)
+    email = models.EmailField(_('email address'), null=True, blank=True) #TO DO: ver si se deja unique o se utiliza para linkar a usuarios existentes
+    phone_number = models.CharField(_('phone number'), max_length=20, null=True, blank=True)
+    user = models.ForeignKey('members.User', on_delete=models.CASCADE, null=True, blank=True, related_name='person_user')
+
+    class Meta:
+        # Clave primaria compuesta
+        unique_together = (('community', 'person_id'),)
+        ordering = ['community', 'person_id']
+
+    def __str__(self):
+        return f"{self.name} {self.surnames}"
+
 class PresidentCommunity(models.Model):
     presidentCommunity = models.ForeignKey('members.User', on_delete=models.CASCADE, null=True, verbose_name=_('presidentCommunity'))
     presidencyCommunity = models.ForeignKey(Community, on_delete=models.CASCADE, verbose_name=_('community'), related_name='presidents')
@@ -108,8 +113,10 @@ class PropertyRelationship(models.Model):
         TENANT = 'tenant', _('Tenant')
 
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='relationships')
-    user = models.ForeignKey('members.User', on_delete=models.CASCADE, related_name='property_relationships')
+    #user = models.ForeignKey('members.User', on_delete=models.CASCADE, related_name='property_relationships')
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.OWNER)
+    person = models.ForeignKey(PersonCommunity, on_delete=models.CASCADE, related_name='property_relationships')
+
 
     def __str__(self):
         return f"{self.user.name} - {self.role} of {self.property.number}"
@@ -134,3 +141,5 @@ class UserCommunityRole(models.Model):
 
     class Meta:
         unique_together = ('user', 'community', 'role')
+
+

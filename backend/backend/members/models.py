@@ -48,6 +48,8 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.name} {self.surnames}"
 
+
+
 #class Owner which is an extenion of User
 class Owner(User):
     properties = models.ManyToManyField(Property, verbose_name="Properties", related_name="owners", blank=True) #privado

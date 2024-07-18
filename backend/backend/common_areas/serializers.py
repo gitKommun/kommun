@@ -5,9 +5,9 @@ class CommonAreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommonArea
         fields = '__all__'
-        #extra_kwargs = {'area_id': {'write_only': True}}
-
+        
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = '__all__'
+#eliminar campos olbigatorios reservas
