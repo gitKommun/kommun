@@ -6,11 +6,13 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Community, Property, UserCommunityRole
-from .serializers import CommunitySerializer, PropertySerializer, UserCommunityRoleSerializer
+from .models import Community, PersonCommunity, Property, UserCommunityRole
+from .serializers import CommunitySerializer, PersonCommunitySerializer, PropertySerializer, UserCommunityRoleSerializer
 
 from members.serializers import UserRegistrationSerializer
 from members.decorators import community_admin_required
+
+### Comunity management views ###
 
 class CommunityListAPIView(generics.ListAPIView):
     queryset = Community.objects.all()
@@ -45,6 +47,9 @@ def community_update(request, IDcommunity):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+
+### Property managemente views ###
 
 @api_view(['GET'])
 def list_properties(request, IDcommunity):
@@ -116,7 +121,7 @@ def delete_property(request, IDcommunity, property_id):
     property_instance.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+### User managemente views ###
 
 class AddUserToCommunityAPIView(APIView):
     def post(self, request, IDcommunity):
@@ -183,3 +188,69 @@ class ManageUserCommunityRoleAPIView(APIView):
         role = get_object_or_404(UserCommunityRole, pk=role_id, community_id=IDcommunity)
         role.delete()
         return Response({'message': 'Rol eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)
+    
+
+### Person management views ###
+
+
+class PersonCommunityListAPIView(generics.ListCreateAPIView):
+    serializer_class = PersonCommunitySerializer
+
+    def get_queryset(self):
+        IDcommunity = self.kwargs['IDcommunity']
+        return PersonCommunity.objects.filter(community_id=IDcommunity)
+
+
+class PersonCommunityCreateAPIView(APIView):
+    def post(self, request, IDcommunity):
+        data = request.data.copy()
+        data['community'] = IDcommunity
+        serializer = PersonCommunitySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+    
+
+class PersonCommunityCreateAPIView(APIView):
+    def post(self, request, IDcommunity):
+        data = request.data.copy()
+        community = get_object_or_404(Community, IDcommunity=IDcommunity)
+        data['community'] = IDcommunity
+        
+        # Calcular el siguiente person_id secuencial para la comunidad
+        last_person = PersonCommunity.objects.filter(community=community).order_by('person_id').last()
+        if last_person:
+            data['person_id'] = last_person.person_id + 1
+        else:
+            data['person_id'] = 1
+
+        serializer = PersonCommunitySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+#Detail, update, delete PersonCommunity
+class PersonCommunityDetailAPIView(APIView):
+    def get_object(self, IDcommunity, person_id):
+        community = get_object_or_404(Community, IDcommunity=IDcommunity)
+        return get_object_or_404(PersonCommunity, community=community, person_id=person_id)
+    
+    def get(self, request, IDcommunity, person_id):
+        person = self.get_object(IDcommunity, person_id)
+        serializer = PersonCommunitySerializer(person)
+        return Response(serializer.data)
+    
+    def put(self, request, IDcommunity, person_id):
+        person = self.get_object(IDcommunity, person_id)
+        serializer = PersonCommunitySerializer(person, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, IDcommunity, person_id):
+        person = self.get_object(IDcommunity, person_id)
+        person.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

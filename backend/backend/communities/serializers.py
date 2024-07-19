@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Community, Property, UserCommunityRole
+from .models import Community, PersonCommunity, Property, UserCommunityRole
 
 class CommunitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,3 +17,10 @@ class UserCommunityRoleSerializer(serializers.ModelSerializer):
         model = UserCommunityRole
         fields = '__all__'
         #fields = ['community','user', 'role']
+
+class PersonCommunitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PersonCommunity
+        fields = '__all__'
+
+    

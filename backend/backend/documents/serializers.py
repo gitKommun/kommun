@@ -7,23 +7,26 @@ class DocumentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class FolderSerializer(serializers.ModelSerializer):
+    folder_id = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Folder
         fields = '__all__'
+
 
 class FolderListCompleteSerializer(serializers.ModelSerializer):
     document_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Folder
-        fields = ['id', 'name', 'community', 'document_count']
+        fields = ['folder_id', 'name', 'document_count']
 
 
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ['name', 'file', 'community', 'folder']
+        fields = ['name', 'file', 'community', 'folder_id']
 
 
 class DocumentSerializer(serializers.ModelSerializer):

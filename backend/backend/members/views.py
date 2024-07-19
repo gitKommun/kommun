@@ -159,21 +159,21 @@ def get_user_data(request):
 
         for user_community in user_communities:
             community = user_community.community
-            properties = PropertyRelationship.objects.filter(user=user, property__community=community).select_related('property')
-            properties_data = [
-                {
-                    'property_id': property.property.id,
-                    'property_number': property.property.numberProperty,
-                    'type': property.property.typeProperty,
-                    'role': property.role
-                } for property in properties
-            ]
+            #properties = PropertyRelationship.objects.filter(user=user, property__community=community).select_related('property')
+            #properties_data = [
+            #    {
+            #        'property_id': property.property.id,
+            #        'property_number': property.property.numberProperty,
+            #        'type': property.property.typeProperty,
+            #        'role': property.role
+            #    } for property in properties
+            #]
 
             user_community_data = {
                 'community_id': community.IDcommunity,
                 'community_name': community.nameCommunity,
                 'role': user_community.role,
-                'properties': properties_data
+            #    'properties': properties_data
             }
             user_communities_data.append(user_community_data)
 

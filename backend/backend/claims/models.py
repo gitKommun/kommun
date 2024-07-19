@@ -39,6 +39,7 @@ class Claim(models.Model):
     problem_persists = models.BooleanField(default=True)
     #image = models.ImageField(upload_to='claims_images/', null=True, blank=True)
     #assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_claims')
+    #assignet_toName = models.CharField(max_length=255, null=True, blank=True) 
 
     def __str__(self):
         return f"{self.title} - {self.status}"

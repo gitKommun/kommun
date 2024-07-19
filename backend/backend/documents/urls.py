@@ -1,8 +1,10 @@
 from django.urls import path
 from .views import FolderListAPIView, FolderCreateAPIView, FolderDetailAPIView, FolderOpenAPIView
-from .views import DocumentUploadAPIView, DocumentDetailAPIView, DocumentDeleteAPIView, DocumentDownloadAPIView
+from .views import DocumentUploadAPIView, DocumentDetailAPIView, DocumentDeleteAPIView, DocumentDownloadAPIView, RootFolderAndDocumentsAPIView
 
 urlpatterns = [
+    path('<str:IDcommunity>/', RootFolderAndDocumentsAPIView.as_view(), name='root_folders_and_documents_api'),#GET/listar carpetas con numero de elementos + documentos en ROOT
+
     path('<str:IDcommunity>/folders/', FolderListAPIView.as_view(), name='folder_list_api'), #GET/listar carpetas con numero de elementos
     path('<str:IDcommunity>/folders/create/', FolderCreateAPIView.as_view(), name='folder_create_api'),#POST/crear carpeta
 
@@ -12,7 +14,7 @@ urlpatterns = [
 
     path('<str:IDcommunity>/f/<int:IDfolder>/upload/', DocumentUploadAPIView.as_view(), name='document-upload'), #POST/subir documento
     path('<str:IDcommunity>/d/<int:IDdocument>/', DocumentDetailAPIView.as_view(), name='document-detail'), #GET/ver documento
-    path('<str:IDcommunity>/d/<int:IDdocument>/download/', DocumentDownloadAPIView.as_view(), name='document-download'),
+    path('<str:IDcommunity>/d/<int:IDdocument>/download/', DocumentDownloadAPIView.as_view(), name='document-download'), #GET/descargar documento
     path('<str:IDcommunity>/d/<int:IDdocument>/delete/', DocumentDeleteAPIView.as_view(), name='document-delete'), #DELETE/borrar documento
 
 ]
