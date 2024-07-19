@@ -35,5 +35,5 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'name', 'surnames', 'birthdate', 'addressLetters',
             'phoneNumber', 'bankAccount', 'languageConf', 
-            'documentID', 'documentType', 'contactIsPublic'
+            'documentID', 'documentType', 'contactIsPublic', 'current_community'
         ]

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import FolderListAPIView, FolderCreateAPIView, FolderDetailAPIView, FolderOpenAPIView
+from .views import FolderListAPIView, FolderCreateAPIView, FolderDetailAPIView, FolderOpenAPIView, FolderOpenDetailView
 from .views import DocumentUploadAPIView, DocumentDetailAPIView, DocumentDeleteAPIView, DocumentDownloadAPIView, RootFolderAndDocumentsAPIView
 
 urlpatterns = [
@@ -8,7 +8,8 @@ urlpatterns = [
     path('<str:IDcommunity>/folders/', FolderListAPIView.as_view(), name='folder_list_api'), #GET/listar carpetas con numero de elementos
     path('<str:IDcommunity>/folders/create/', FolderCreateAPIView.as_view(), name='folder_create_api'),#POST/crear carpeta
 
-    path('<str:IDcommunity>/folders/<str:IDfolder>/', FolderOpenAPIView.as_view(), name='folder_detail_api'),#GET/ver carpeta
+    #path('<str:IDcommunity>/folders/<str:IDfolder>/', FolderOpenAPIView.as_view(), name='folder_detail_api'),#GET/ver carpeta
+    path('<str:IDcommunity>/folders/<str:IDfolder>/', FolderOpenDetailView.as_view(), name='folder_detail_api'),#GET/ver carpeta
     path('<str:IDcommunity>/folders/<str:IDfolder>/delete/', FolderDetailAPIView.as_view(), name='folder_delete_api'),#DELETE/borrar carpeta
     path('<str:IDcommunity>/folders/<str:IDfolder>/update/', FolderDetailAPIView.as_view(), name='folder_update_api'),#PUT/actualizar
 

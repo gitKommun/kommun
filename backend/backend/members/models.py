@@ -40,6 +40,8 @@ class User(AbstractUser):
     documentType = models.CharField(_('document type'), null=True, blank=True, max_length=20, choices=[('DNI', 'DNI'), ('NIE', 'NIE'), ('PASSPORT', 'Passport')])
     contactIsPublic = models.BooleanField(_('public contact'), default=False, null=True, blank=True)
 
+    current_community = models.ForeignKey(Community, on_delete=models.SET_NULL, null=True, blank=True)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 

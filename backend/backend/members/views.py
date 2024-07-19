@@ -151,11 +151,25 @@ def get_user_data(request):
             'documentID': user.documentID,
             'documentType': user.documentType,
             'date_joined': user.date_joined,
-            'contactIsPublic': user.contactIsPublic
+            'contactIsPublic': user.contactIsPublic,
 
         }
         user_communities = UserCommunityRole.objects.filter(user=user).select_related('community')
         user_communities_data = []
+        user_current_community = UserCommunityRole.objects.filter(user=user, community=user.current_community)
+
+        user_current_community_data = {}
+        if user.current_community:
+            user_current_community_data = {
+                'community_id': user.current_community.IDcommunity,
+                'community_name': user.current_community.nameCommunity,
+                'community_role': user_current_community.first().role,
+                'community_user_status': user_current_community.first().user_status
+            
+            }
+        user_data['current_community'] = user_current_community_data
+
+
 
         for user_community in user_communities:
             community = user_community.community
@@ -172,12 +186,12 @@ def get_user_data(request):
             user_community_data = {
                 'community_id': community.IDcommunity,
                 'community_name': community.nameCommunity,
-                'role': user_community.role,
+                #'role': user_community.role,
             #    'properties': properties_data
             }
             user_communities_data.append(user_community_data)
 
-        user_data['communities'] = user_communities_data
+        user_data['available_communities'] = user_communities_data
 
         return Response(user_data)
     else:
