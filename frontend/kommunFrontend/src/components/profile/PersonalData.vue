@@ -1,21 +1,44 @@
 <template>
-    <div class="p-4 border border-slate-200 rounded-2xl mb-3">
-        <div class="flex items-center justify-between">
-            <h3 class="text-slate-950 text-lg font-semibold"> Datos generales </h3>
-        </div>
-        <div class="gap-y-2">
-            <div class="flex gap-x-3 py-4">
-                <InputText v-model="form.name" placeholder="Nombre" class="w-full"/>
-                <InputText v-model="form.surname" placeholder="Apellidos" class="w-full"/>
+    <Fieldset legend="Datos personales">
+        <div class="flex gap-x-3 py-4">
+                <InputText 
+                    v-model="form.name" 
+                    placeholder="Nombre" 
+                    class="w-full" 
+                    variant="filled"/>
+                <InputText 
+                    v-model="form.surname" 
+                    placeholder="Apellidos" 
+                    class="w-full" 
+                    variant="filled"/>
             </div>
             <div class="flex gap-x-3 py-4">
-                <InputText v-model="form.email" placeholder="E-mail" class="w-full"/>
-                <InputText v-model="form.phone" placeholder="Teléfono" class="w-full"/>
+                <InputText 
+                    v-model="form.email" 
+                    placeholder="E-mail" 
+                    class="w-full" 
+                    variant="filled"/>
+                <InputText 
+                    v-model="form.phone" 
+                    placeholder="Teléfono" 
+                    class="w-full" 
+                    variant="filled"/>
             </div>
             <div class="flex items-center py-4">
                 <InputGroup>
-                    <Select v-model="form.identificationType" :options="documentType" optionLabel="label" class="max-w-40" optionValue="value" placeholder="Selecciona..."/>
-                    <InputText v-model="form.identificationNumber" placeholder="Número de identificación" class="max-w-64"/>
+                    <Select 
+                        v-model="form.identificationType" 
+                        :options="documentType" 
+                        optionLabel="label" 
+                        class="max-w-40" 
+                        optionValue="value" 
+                        placeholder="Selecciona..." 
+                        variant="filled"/>
+                    <InputText 
+                        v-model="form.identificationNumber" 
+                        placeholder="Número de identificación" 
+                        class="max-w-64" 
+                        variant="filled"/>
                 </InputGroup>   
             </div>
             <div class="flex items-center py-4">
@@ -24,8 +47,8 @@
                 </span>
                 <span class="ml-3"> Permitir que los otros propietarios tengan acesso a tus datos de contacto </span>
             </div>
-        </div>
-    </div>
+    </Fieldset>
+ 
 </template>
 <script setup>
 import { ref } from 'vue'

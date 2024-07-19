@@ -1,24 +1,38 @@
 <template>
-    <div class="p-4 border border-slate-200 rounded-2xl mb-3">
-        <div class="flex items-center justify-between">
-            <h3 class="text-slate-950 text-lg font-semibold"> Datos generales</h3>
-        </div>
-        <div class="gap-y-2">
+    <Fieldset legend="Datos generales">
             <div class="py-4">
-                <InputText v-model="form.name" placeholder="Nombre de la comunidad" class="w-full"/>
+                <InputText 
+                    v-model="form.name" 
+                    placeholder="Nombre de la comunidad" 
+                    class="w-full"
+                    variant="filled"/>
             </div>
             <div class="py-4">
-                <InputText v-model="form.address" placeholder="Dirección" class="w-full"/>
+                <InputText 
+                    v-model="form.address" 
+                    placeholder="Dirección" 
+                    class="w-full"
+                    variant="filled"/>
             </div>
             <div class="py-4 flex gap-x-3 ">
-                <InputText v-model="form.city" placeholder="Ciudad" class="w-full"/>
-                <InputText v-model="form.postalCode" placeholder="Código postal" class="w-full"/>
+                <InputText 
+                    v-model="form.city" 
+                    placeholder="Ciudad" 
+                    class="w-full"
+                    variant="filled"/>
+                <InputText 
+                    v-model="form.postalCode" 
+                    placeholder="Código postal" 
+                    class="w-full"
+                    variant="filled"/>
             </div>
             <div class="py-4 flex gap-x-3 ">
-                <InputText v-model="form.cif" placeholder="CIF" label-float />
+                <InputText 
+                    v-model="form.cif" 
+                    placeholder="CIF" variant="filled" />
             </div>
-        </div>
-    </div>
+    </Fieldset>
+
 </template>
 <script setup>
     import { ref } from 'vue'

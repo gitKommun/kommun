@@ -11,7 +11,23 @@
     </div>
     <div class="w-full flex justify-center px-4 flex-1 min-h-0 overflow-y-scroll">
       <div class="w-full max-w-4xl  flex flex-col">
-        content
+        <div class="">
+          <h2 class="font-bold text-slate-950">Votaciones activas</h2>
+          <div class="flex py-3">
+            <div class="border border-slate-200 rounded-2xl p-3 min-w-80">
+                <p class="font-bold">Titulos de la votacion</p>
+                <span class="text-sm text-slate-500">Periodo</span>
+                <div class="flex items-center">
+                  <div class="w-full">
+                    <ProgressBar :value="(35*100)/68" style="height: 6px" :showValue="false"/>
+                  </div>
+                  <div class="flex justify-end min-w-12  text-xs text-slate-500">
+                    35/68
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>  

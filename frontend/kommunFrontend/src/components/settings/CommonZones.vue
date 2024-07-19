@@ -1,10 +1,7 @@
 <template>
-    <div class="p-4 border border-slate-200 rounded-2xl ">
-        <div class="flex justify-between mb-3">
-            <div class="flex flex-col w-full">
-                <h3 class="text-slate-950 text-xl font-bold">Zonas comunes</h3>
-                <p class="text-slate-500">Regitra tus zonas comunes como piscinas, gimnasio, pista de padel ...</p>
-            </div>
+    <Fieldset legend="Zonas comunes">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-slate-500 text-xs">Regitra tus zonas comunes como piscinas, gimnasio, pista de padel ...</p>
             <div class="flex-none" v-if="zones.length">
                 <Button 
                     severity="contrast"
@@ -16,7 +13,8 @@
                     Nuevo
                 </Button>
             </div>      
-        </div>    
+        </div> 
+
         <template v-if="!zones.length">
             <div  class="w-full flex flex-col items-center justify-center py-16">
                 <EmptyTask class="scale-75"/>
@@ -45,7 +43,7 @@
                         {{ slotProps.data.reservation_duration }} {{ slotProps.data.time_unit }}
                     </template>
                 </Column>
-                <Column  header="Opciones" class="flex justify-end">
+                <Column  header="..." class="flex justify-end">
                     <template #body="slotProps">
                         <Dropdown strategy="fixed">
                             <template #reference="{ open }">
@@ -80,7 +78,11 @@
         <Dialog v-model:visible="showCreateZoneModal" modal header="Crear nueva zona" class="w-96">
  
             <div class="gap-y-2">
-                <InputText v-model="zone.name" placeholder="Nombre de la zona" class="w-full" />
+                <InputText 
+                    v-model="zone.name" 
+                    placeholder="Nombre de la zona" 
+                    class="w-full" 
+                    variant="filled"/>
                 <div class="flex items-center mt-6">
                     <span class="min-w-10">
                         <ToggleSwitch v-model="zone.reservable" />
@@ -94,13 +96,24 @@
                     enter-to-class="opacity-100"
                     leave-class="opacity-100"
                     leave-to-class="opacity-0"
-                    mode="out-in"
                 >
                     <div class="mt-3 rounded-xl p-3 " v-if="zone.reservable">
                         <span class="text-slate-500 text-sm">Define la franja de tiempo para el uso de la zona:</span>
                         <div class="flex gap-x-3 py-3">
-                            <InputNumber v-model="zone.reservation_duration" placeholder="Tiempo" inputClass="w-12 mr-1"/>
-                            <Select v-model="zone.time_unit" :options="timePeriods" optionLabel="label" optionValue="value" placeholder="Selecciona..."/>
+                            <InputGroup>
+                                <InputNumber 
+                                    v-model="zone.reservation_duration" 
+                                    placeholder="Tiempo"
+                                    variant="filled"
+                                    inputClass="w-12 mr-1"/>
+                                <Select 
+                                    v-model="zone.time_unit" 
+                                    :options="timePeriods" 
+                                    optionLabel="label" 
+                                    optionValue="value"
+                                    variant="filled"
+                                    placeholder="Selecciona..."/>
+                            </InputGroup>
                         </div>
                     </div>
                 </transition>
@@ -125,7 +138,11 @@
         </Dialog>
         <Dialog v-model:visible="showUpdateZone" modal header="Editar zona" class="w-96">
             <div class="gap-y-2">
-                <InputText v-model="zone.name" placeholder="Nombre de la zona" class="w-full" />
+                <InputText 
+                    v-model="zone.name" 
+                    placeholder="Nombre de la zona" 
+                    class="w-full" 
+                    variant="filled"/>
                 <div class="flex items-center mt-6">
                     <span class="min-w-10">
                         <ToggleSwitch v-model="zone.reservable" />
@@ -144,8 +161,21 @@
                     <div class="mt-3 rounded-xl p-3 " v-if="zone.reservable">
                         <span class="text-slate-500 text-sm">Define la franja de tiempo para el uso de la zona:</span>
                         <div class="flex gap-x-3 py-3">
-                            <InputNumber v-model="zone.reservation_duration" placeholder="Tiempo" inputClass="w-12 mr-1"/>
-                            <Select v-model="zone.time_unit" :options="timePeriods" optionLabel="label" optionValue="value" placeholder="Selecciona..."/>
+                            <InputGroup>
+                                <InputNumber 
+                                    v-model="zone.reservation_duration" 
+                                    placeholder="Tiempo" 
+                                    inputClass="w-12 mr-1"
+                                    variant="filled"/>
+                                <Select 
+                                    v-model="zone.time_unit" 
+                                    :options="timePeriods" 
+                                    optionLabel="label" 
+                                    optionValue="value" 
+                                    placeholder="Selecciona..."
+                                    variant="filled"/>
+                            </InputGroup>
+                            
                         </div>
                     </div>
                 </transition>
@@ -168,7 +198,8 @@
                 </div>
 
         </Dialog>
-    </div>
+    </Fieldset>
+
 </template>
 <script setup>
     import { ref, computed } from 'vue'

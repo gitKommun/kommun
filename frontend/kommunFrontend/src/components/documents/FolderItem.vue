@@ -36,34 +36,28 @@
                 </div>
             </template>
         </Dropdown>
-        <vs-dialog v-model="showUpdateFolder" overlay-blur>
-            <template #header>
-              <span>Actualizar carpeta</span>
-            </template>
+        <Dialog v-model:visible="showUpdateFolder" modal header="Actualizar carpeta" class="w-96">
+
             <div class="">
-              <vs-input v-model="folderName" placeholder="Folder name" block>
-                <template v-if="folderUpdateValidated" #message-danger> No puedes crear una carpeta sin nombre</template>
-              </vs-input>
+              <InputText v-model="folderName" placeholder="Folder name" :invalid="folderUpdateValidated" variant="filled"/>
             </div>
             <template #footer>
               <div class="flex justify-end gap-x-4">
-                <vs-button 
-                  color="dark"
-                  type="transparent"
+                <Button 
+                  text
+                  severity="secondary"
+                  label="Cancelar"
                   @click="showUpdateFolder =!showUpdateFolder"
-                  >
-                  Cancelar
-                </vs-button>
-                <vs-button 
-                  color="dark"
+                  />
+                <Button 
+                  severity="contrast"
+                  label="Actualizar"
                   @click="updateFolder()"
                   :loading="folderUpdateLoading"
-                  >
-                  Actualizar
-                </vs-button>
+                  />
               </div>
             </template>
-          </vs-dialog> 
+          </Dialog> 
                 
     </div>
 </template>
@@ -78,7 +72,7 @@
     import IconPencil from "/src/components/icons/IconPencil.vue"
     import IconTrash from "/src/components/icons/IconTrash.vue"
     import Dropdown from "/src/components/Dropdown.vue"
-    import { VsNotification } from 'vuesax-alpha'
+    import { useToast } from 'primevue/usetoast';
 
     // options
     defineOptions({
@@ -100,7 +94,10 @@
     //instancia API
     const http = useHttp();
     //user store
-    const { user } = useUserStore();
+const { user } = useUserStore();
+
+ //use toast
+    const toast = useToast();
 
     const emit = defineEmits(['update:items']);
     
@@ -108,21 +105,10 @@
     function deleteFolder() {
         try {
             const response =  http.delete(`documents/${user?.communities[0]?.community_id}/folders/${props.folder.id}/delete`);
-            VsNotification({
-                position: 'top-right',
-                color: 'success',
-                title: 'OK',
-                content: 'La carpeta se ha eliminado con exito',
-                
-            });
+            toast.add({ severity: 'success', summary: 'Ok', detail: 'La carpeta se ha eliminado con exito', life: 3000 });
              
         } catch (error) {
-            VsNotification({
-                position: 'top-right',
-                color: 'danger',
-                title: 'Upps!! algo ha fallado',
-                content: error,
-            });
+            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
         }
         emit('update:items', true);
     }
@@ -140,21 +126,10 @@
                 );
                 folderUpdateLoading.value = false;
                 showUpdateFolder.value = false;
-                VsNotification({
-                    position: 'top-right',
-                    color: 'success',
-                    title: 'OK',
-                    content: 'La carpeta se ha actualizado con exito',
-                });
-                 
+                toast.add({ severity: 'success', summary: 'Ok', detail: 'La carpeta se ha actualizado con exito', life: 3000 });
                
             } catch (error) {
-                VsNotification({
-                    position: 'top-right',
-                    color: 'danger',
-                    title: 'Upps!! algo ha fallado',
-                    content: error,
-                });
+                toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
                 folderUpdateLoading.value = false;
             }
             emit('update:items', true);

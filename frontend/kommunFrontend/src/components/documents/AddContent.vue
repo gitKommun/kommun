@@ -1,8 +1,8 @@
 <template>
     <Dropdown strategy="fixed">
         <template #reference="{ open , isOpen }">
-            <Button  @click="open" severity="contrast" raised>
-                <IconPlus class="mr-2"/>
+            <Button @click="open" severity="contrast" raised>
+                <IconPlus/>
               Nuevo
             </Button>
         </template>
@@ -15,6 +15,7 @@
       </Dropdown>
 </template>
 <script setup>
+    import { ref, shallowRef, computed } from 'vue'
     import Dropdown from "/src/components/Dropdown.vue"
     import AddNewFolder from "/src/components/documents/AddNewFolder.vue";
     import AddNewFile from "/src/components/documents/AddNewFile.vue";

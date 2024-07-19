@@ -19,7 +19,8 @@
             <div class="flex flex-col gap-y-8 px-2">
                 <InputText 
                     v-model="email" 
-                    placeholder="User email" 
+                    placeholder="User email"
+                    variant="filled" 
                 />
 
                 <Password
@@ -28,6 +29,7 @@
                     inputClass="w-full"
                     :feedback="false"
                     toggleMask
+                    variant="filled"
                     fluid/>
             </div>
 

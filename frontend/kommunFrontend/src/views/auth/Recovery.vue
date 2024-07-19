@@ -15,7 +15,8 @@
                 <InputText
                     v-model="email" 
                     placeholder="User email" 
-                    class="w-full"/>
+                    class="w-full"
+                    variant="filled"/>
             </div>
             <div class="flex justify-between items-center mt-4">
                 <RouterLink to="/">

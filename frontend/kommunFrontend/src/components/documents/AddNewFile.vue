@@ -79,12 +79,7 @@
             
         }
         catch (error) {
-            VsNotification({
-                position: 'top-right',
-                color: 'danger',
-                title: 'Upps!! algo ha fallado',
-                content: error,
-            });
+            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
         }
     
     uploadLoading.value = false;

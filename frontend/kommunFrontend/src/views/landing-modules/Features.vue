@@ -34,7 +34,7 @@
 <script setup >
     import { ref, shallowRef } from 'vue'
     import Guests from '/src/layouts/Guests.vue';
-    import Tag from "/src/components/Tag.vue"
+    import CustomTag from "/src/components/CustomTag.vue"
     import IconArrowRight from "/src/components/icons/IconArrowRight.vue"
     import IconUsers from "/src/components/icons/IconUsers.vue"
     import IconFinance from "/src/components/icons/IconFinance.vue"

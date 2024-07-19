@@ -3,7 +3,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
-import Vuesax from 'vuesax-alpha';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ToastService from 'primevue/toastservice';
@@ -14,7 +13,6 @@ import kommunTheme from './kommunTheme';
 
 import './index.css';
 import 'primeicons/primeicons.css'
-import 'vuesax-alpha/dist/index.css';
 
 
 const pinia = createPinia();
@@ -22,9 +20,14 @@ const app = createApp(App);
 
 app.use(pinia);
 app.use(router);
-app.use(Vuesax);
+
+
+//DIRECTIVAS
+import Ripple from 'primevue/ripple';
+app.directive('ripple', Ripple);
 
 app.use(PrimeVue, {
+    ripple:true,
     theme: {
         preset: {
             ...Aura,
@@ -39,8 +42,13 @@ app.use(PrimeVue, {
             cssLayer: false
         }
     }, 
+    
 });
 app.use(ToastService);
+
+
+
+
 //PRIME COMPONENTS
 import Button from "primevue/button"
 app.component('Button', Button);
@@ -113,6 +121,25 @@ app.component('DatePicker', DatePicker)
 
 import Popover from 'primevue/popover';
 app.component('Popover', Popover)
+
+
+import MultiSelect from 'primevue/multiselect';
+app.component('MultiSelect', MultiSelect)
+
+import Card from 'primevue/Card';
+app.component('Card', Card)
+
+import Fieldset from 'primevue/Fieldset';
+app.component('Fieldset', Fieldset)
+
+import ProgressBar from 'primevue/ProgressBar';
+app.component('ProgressBar', ProgressBar)
+
+
+
+
+
+
 
 
 app.mount('#app');

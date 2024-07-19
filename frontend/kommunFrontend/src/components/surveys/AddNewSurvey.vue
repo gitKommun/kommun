@@ -2,8 +2,8 @@
     <div class="">
 
         <Button  @click="showCreateSurvey =!showCreateSurvey" severity="contrast" raised>
-                <IconPlus class="mr-2"/>
-              Nuevo
+                <IconPlus/>
+              Nueva
         </Button>
         <Dialog v-model:visible="showCreateSurvey" modal header="Crear nueva consulta" class="w-128">
 
@@ -16,16 +16,22 @@
                     <StepPanel v-slot="{ activateCallback }" value="1">
                         <InputText
                           v-model="form.title" 
-                          placeholder="Pregunta" 
+                          placeholder="Pregunta"
+                          variant="filled"
                           class="w-full mb-4"/>
                         <Textarea
                           v-model="form.description" 
-                          placeholder="Descripción" 
+                          placeholder="Descripción"
+                          variant="filled"  
                           class="w-full"/>
                         <div class="flex justify-between border-t border-slate-200 mt-3 flex-col">
                             <div class="text-xs text-slate-500 uppercase py-3">Opciones de respuesta</div>
                             <div v-for="(option, index) in form.options" :key="index" class="flex items-center w-full gap-x-2 py-1 mb-2">
-                              <InputText v-model="form.options[index]"  :placeholder="'Opción ' + (index + 1)" class="w-full"/>
+                              <InputText 
+                                v-model="form.options[index]"  
+                                :placeholder="'Opción ' + (index + 1)" 
+                                variant="filled"
+                                class="w-full"/>
                               <Button 
                                 severity="danger"
                                 text 
@@ -63,14 +69,58 @@
                     </StepPanel>
                     <StepPanel v-slot="{ activateCallback }" value="2">
                       <div class="w-full flex-col gap-y-2">
-                        <Select v-model="form.type" :options="answerTypes" optionLabel="label" optionValue="value" placeholder="Respuesta..." class="w-full"/>
-                        <DatePicker v-model="form.dates" selectionMode="range" :manualInput="false" placeholder="Habilitar desde... hasta " class="w-full"/>
+                        <Select 
+                            v-model="form.vote_type" 
+                            :options="answerTypes" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            placeholder="Respuesta..." 
+                            class="w-full mb-4"
+                            variant="filled"/>
+                        <div class="flex gap-x-3">
+                            <DatePicker 
+                            v-model="form.start_date" 
+                            dateFormat="dd/mm/yy"  
+                            :manualInput="false" 
+                            variant="filled"
+                            placeholder="Fecha de inicio" 
+                            class="w-full"/>
+                            <DatePicker 
+                            v-model="form.end_date" 
+                            dateFormat="dd/mm/yy" 
+                            :manualInput="false" 
+                            variant="filled"
+                            placeholder="Fecha de fin" 
+                            class="w-full"/>
+                        </div>    
+                        
                         <div class="flex items-center mt-6">
                                 <span class="min-w-10">
                                     <ToggleSwitch v-model="enableAllAudience" />
                                 </span>
                             <span class="ml-3"> Enviar a todos los miembros de la comunidad </span>
-                        </div> 
+                        </div>
+                        <transition
+                            enter-active-class="transition-all transition-slow ease-out overflow-hidden"
+                            leave-active-class="transition-all transition-slow ease-in overflow-hidden"
+                            enter-class="opacity-0"
+                            enter-to-class="opacity-100"
+                            leave-class="opacity-100"
+                            leave-to-class="opacity-0"
+                        >  
+                          <div v-if="!enableAllAudience" class="mt-4">
+                              <MultiSelect 
+                                v-model="form.eligible_voters" 
+                                :options="owners" 
+                                optionLabel="label" 
+                                optionValue="value"
+                                filter 
+                                variant="filled"
+                                placeholder="Selecciona propietarios"  
+                                :maxSelectedLabels="3" 
+                                class="w-full" />
+                          </div>
+                        </transition>
                       </div>
                         
                         <div class="flex justify-end gap-x-4 pt-4">
@@ -101,6 +151,7 @@
 import { ref, watch} from 'vue'
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
+ import { useToast } from 'primevue/usetoast';
 
 import IconPlus from "/src/components/icons/IconPlus.vue";
 import IconTrash from "/src/components/icons/IconTrash.vue";
@@ -115,11 +166,19 @@ const showCreateSurvey = ref(false);
 const form = ref({
     title: '',
     description: '',
-    type: null,
-    options: [],
-    dates: null,
+    vote_type: null,
+    options: [''],
+  end_date: null,
+    start_date: null,
     eligible_voters:[]
 })
+
+  //instancia API
+    const http = useHttp();
+    //user store
+const { user } = useUserStore();
+          //use toast
+    const toast = useToast();
 
 const  enableAllAudience = ref(true)
 
@@ -128,6 +187,14 @@ const answerTypes = ref([
     { label: 'Multiple', value: 'multiple_choice' },
     {label:'Ranking',value:'ranking'}
 ])
+
+const owners = ref([
+    { label: 'Dani Carvajal', value: 'NY' },
+    { label: 'Luka Modric', value: 'RM' },
+    { label: 'Jude Bellimhan', value: 'LDN' },
+    { label: 'Nacho Fernandez', value: 'IST' },
+    { label: 'Tonni Kross', value: 'PRS' }
+]);
 
 const addOption = () => {
   form.value.options.push('')
@@ -140,7 +207,24 @@ const removeOption = (index) => {
 };
 
 const createSurvey = () => {
-  console.log('survey',form)
+  console.log('survey', form)
+  try {
+    const response = http.post(`votes/${user?.communities[0]?.community_id}/create/`, form.value );
+    toast.add({ severity: 'success', summary: 'Ok', detail: 'Votacion creada con exito', life: 3000 });
+    
+    } catch (error) {
+
+        toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+  }
+    form.value={
+    title: '',
+    description: '',
+    vote_type: null,
+    options: [''],
+    end_date: null,
+    start_date: null,
+    eligible_voters:[]
+}
 }
 
 </script>

@@ -8,7 +8,12 @@
         </div>
         <Dialog v-model:visible="showCreateFolder" modal header="Crear nueva carpeta" class="w-96">
             <div class="">
-              <InputText v-model="folderName" placeholder="Folder name" :invalid="folderCreateValidated" class="w-full" />
+              <InputText 
+                v-model="folderName" 
+                placeholder="Folder name" 
+                variant="filled"
+                :invalid="folderCreateValidated" 
+                class="w-full" />
             </div>
               <div class="flex justify-end gap-x-4 pt-4">
                 <Button 

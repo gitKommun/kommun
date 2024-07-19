@@ -39,12 +39,41 @@
             <div class="h-10 flex  items-center rounded-xl cursor pointer"
               :class="isAsideOpen?'w-full pl-2 gap-4':'w-10 justify-center'"
             >
-            <router-link to="/profile">
-              <Avatar label="P" size="large" shape="circle" class="bg-indigo-500"/>
-                
-              </router-link>
-              
-              <span v-if="isAsideOpen" class="text-sm font-semibold">Jane Smith</span>    
+              <Dropdown strategy="fixed">
+                <template #reference="{ open }">
+                    <div 
+                        class="rounded-xl hover:bg-slate-100 items-center flex flex-none transition-all duration-300 cursor-pointer "
+                        @click="open"
+                    >
+                        <Avatar :label="getInitials()" size="large" shape="circle"/>
+                        <span v-if="isAsideOpen" class="text-sm font-semibold ml-3">Jane Smith</span>  
+                    </div>
+                </template>
+
+                <template #content="{ close }">
+                    <div class="w-48 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
+                        <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
+                          >
+                            <IconBell class="scale-75"/>
+                            <span>Notificaciones</span>
+                        </div>
+                        <router-link to="/profile">
+                          <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
+                        >
+                            <IconUserAccount class="scale-75"/>
+                            <span>Mi perfil</span>
+                        </div>
+                        </router-link>
+                        
+                        <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
+                            @click="logout"
+                            >
+                            <IconLogout class="scale-75"/>
+                            <span>Cerrar Sesión</span>
+                        </div>
+                    </div>
+                </template>
+            </Dropdown>   
             </div>
       
         </div>
@@ -55,11 +84,40 @@
     <div class="flex md:hidden w-full flex-col ">
       <div class="w-full flex justify-between items-center px-3">
           <img alt="Kommun logo" key="logo" class="h-16" src="@/assets/logo_kommun.svg"  />
-          <router-link to="/profile">
-            <vs-avatar size="40">
-              <img src="@/assets/avatar_2.png" alt="" /> 
-            </vs-avatar>
-          </router-link>
+          <Dropdown strategy="fixed">
+                <template #reference="{ open }">
+                    <div 
+                        class="rounded-xl hover:bg-slate-100 items-center flex flex-none transition-all duration-300 cursor-pointer "
+                        @click="open"
+                    >
+                        <Avatar :label="getInitials()" size="large" shape="circle"/>
+                    </div>
+                </template>
+
+                <template #content="{ close }">
+                    <div class="w-48 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
+                        <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
+                          >
+                            <IconBell class="scale-75"/>
+                            <span>Notificaciones</span>
+                        </div>
+                        <router-link to="/profile">
+                          <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
+                        >
+                            <IconUserAccount class="scale-75"/>
+                            <span>Mi perfil</span>
+                        </div>
+                        </router-link>
+                        
+                        <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
+                            @click="logout"
+                            >
+                            <IconLogout class="scale-75"/>
+                            <span>Cerrar Sesión</span>
+                        </div>
+                    </div>
+                </template>
+            </Dropdown>   
       </div>
       <div class="flex w-full h-10 px-3 gap-x-3">
         <div class="flex justify-center items-center h-10 w-10 rounded-2xl hover:bg-slate-200 transition-all duration-300"
@@ -122,6 +180,7 @@
 <script setup>
 import { ref, shallowRef, computed } from 'vue'
 import { useRoute } from 'vue-router';
+import { useHttp } from '/src/composables/useHttp.js'; 
 import IconAsideCollapsed from "/src/components/icons/IconAsideCollapsed.vue"
 import IconAsideExpand from "/src/components/icons/IconAsideExpand.vue"
   import IconUsers from "/src/components/icons/IconUsers.vue"
@@ -136,11 +195,54 @@ import IconSettings from "/src/components/icons/IconSettings.vue"
 import IconChevronRight from "/src/components/icons/IconChevronRight.vue"
 import IconChevronLeft from "/src/components/icons/IconChevronLeft.vue"
 import IconBuilding from "/src/components/icons/IconBuilding.vue"
+import IconLogout from "/src/components/icons/IconLogout.vue"
+import IconBell from "/src/components/icons/IconBell.vue"
+import IconUserAccount from "/src/components/icons/IconUserAccount.vue"
 import Dropdown from "/src/components/Dropdown.vue"
 import { useUserStore } from '/src/stores/useUserStore.js';
+import { useToast } from 'primevue/usetoast';
 defineOptions({
   name:'home'
 })
+
+// uses
+        //use toast
+const toast = useToast();
+    
+//instancia API
+const http = useHttp();
+//user store
+const { user } = useUserStore();
+
+//logout
+const logoutLoading = ref(false);
+
+const logout = async () => {
+  logoutLoading.value = true
+  try {
+    await http.post(`members/logout/`)
+    logoutLoading.value = false;
+    window.location.reload();
+  } catch (error) {
+    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+    loginLoading.value = false
+  }
+}
+
+
+//iniciales avatar
+const getInitials = () => {
+  const fullName = user?.name+' '+user?.surnames
+  const namesArray = fullName.split(' ').slice(0, 2); // Tomar solo las primeras dos palabras
+  const initials = namesArray.map(name => name.charAt(0).toUpperCase()).join('');
+  console.log('initials', user?.name+' '+user?.surname)
+  return initials;
+ 
+}
+
+
+
+
 //collapse expand vertical menu
 const isAsideOpen = ref(false)
 
@@ -170,8 +272,7 @@ const currentRouteName = route.name;
 const isLinkActive = (routeName) => {
     return route.fullPath === routeName; // Compara el to del enlace con la fullPath del objeto route
 }
-//user store
-    const { user } = useUserStore();
+
 
 const adminFeatures = shallowRef([
     {
@@ -186,13 +287,15 @@ const adminFeatures = shallowRef([
         available: true,
         color: 'blue',
         to:'/owners'
-    }, {
-        title: 'Finanzas',
-        icon: IconFinance,
-        available: true,
-        color: 'pink',
-        to:'/finance'
-    }, {
+  },
+  // {
+  //       title: 'Finanzas',
+  //       icon: IconFinance,
+  //       available: true,
+  //       color: 'pink',
+  //       to:'/finance'
+  // },
+  {
         title: 'Incidencias',
         icon: IconTool,
         available: true,
@@ -222,14 +325,15 @@ const adminFeatures = shallowRef([
         available: false,
         color: 'fuchsia',
          to:'/bookings'
-    },{
-        title: 'Proveedores',
-        icon: IconWorker,
-        available: false,
-        color:'orange',
-         to:'/providers'
+  },
+  // {
+  //       title: 'Proveedores',
+  //       icon: IconWorker,
+  //       available: false,
+  //       color:'orange',
+  //        to:'/providers'
 
-    },
+  //   },
 ]);
 
 const userFeatures = shallowRef([
@@ -255,6 +359,9 @@ const setMenu = computed(() => {
   }
        return userFeatures.value
 })
+
+
+
 
 
 </script>

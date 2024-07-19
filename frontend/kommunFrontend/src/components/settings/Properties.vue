@@ -1,9 +1,7 @@
 <template>
-    <div class="p-4 border border-slate-200 rounded-2xl mb-3">
-        <div class="flex items-center justify-between">
-            <h3 class="text-slate-950 text-lg font-semibold">Propiedades</h3>
-        </div>
-        <div class="gap-y-2 pt-3">
+
+    <Fieldset legend="Propiedades">
+        
             <div class="md:columns-3 text-xs uppercase text-slate-500 mb-2">
                 <div>Tipo</div>
                 <transition
@@ -20,7 +18,11 @@
             </div>
             <div class="columns-1 md:columns-3  mb-2">
                 <div class="flex items-center gap-x-2">
-                    <Checkbox v-model="form.propertyTypes" inputId="apartment" value="apartment"/> 
+                    <Checkbox 
+                        v-model="form.propertyTypes" 
+                        inputId="apartment" 
+                        value="apartment"
+                        variant="filled"/> 
                     <label for="apartment">Apartamento</label> 
                 </div>
                 
@@ -38,12 +40,17 @@
                         v-model="form.apartmentAccount" 
                         placeholder="Nº de viviendas"  
                         showButtons
+                        variant="filled"
                         />
                 </transition>
             </div>
             <div class="columns-1 md:columns-3 mb-2">
                 <div class="flex items-center gap-x-2">
-                    <Checkbox v-model="form.propertyTypes" inputId="garage" value="garage"/> 
+                    <Checkbox 
+                        v-model="form.propertyTypes" 
+                        inputId="garage" 
+                        value="garage"
+                        variant="filled"/> 
                     <label for="garage">Plazas de aparcamiento</label> 
                 </div>
                 <transition
@@ -58,14 +65,19 @@
                     <InputNumber 
                         v-if="form.propertyTypes.includes('garage')"
                         v-model="form.garageAccount" 
-                        placeholder="Nº de plazas"  
+                        placeholder="Nº de plazas"
+                        variant="filled"  
                         showButtons
                     />
                 </transition>
             </div>
             <div class="columns-1 md:columns-3">
                 <div class="flex items-center gap-x-2">
-                    <Checkbox v-model="form.propertyTypes" inputId="storageRoom" value="storageRoom"/> 
+                    <Checkbox 
+                        v-model="form.propertyTypes"
+                        inputId="storageRoom"
+                        value="storageRoom"
+                        variant="filled"/> 
                     <label for="storageRoom">Trasteros</label> 
                 </div>
                 <transition
@@ -80,13 +92,15 @@
                     <InputNumber 
                         v-if="form.propertyTypes.includes('storageRoom')"
                         v-model="form.storageRoomAccount" 
-                        placeholder="Nº de trasteros"  
+                        placeholder="Nº de trasteros" 
+                        variant="filled" 
                         showButtons
                     />
                 </transition>
             </div>
-        </div>
-    </div>
+        
+    </Fieldset>
+
 </template>
 <script setup>
     import { ref } from 'vue'

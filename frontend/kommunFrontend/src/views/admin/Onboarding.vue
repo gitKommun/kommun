@@ -9,18 +9,18 @@
                 <div class="w-full text-center font-bold text-2xl text-slate-950 mb-4">¡Vamos a contruir una comunidad!</div>
                 <div class="py-4 gap-y-2">
                     <div class="">
-                        <vs-input v-model="form.name" placeholder="Nombre de la comunidad" label-float block/>
+                        <InputText  v-model="form.name" placeholder="Nombre de la comunidad" class="w-full" variant="filled"/>
                     </div>
                     <div class="">
-                        <vs-input v-model="form.address" placeholder="Dirección" label-float  block/>
+                        <InputText  v-model="form.address" placeholder="Dirección" class="w-full" variant="filled"/>
                     </div>
                     <div class="flex gap-x-3 ">
-                        <vs-input v-model="form.city" placeholder="Ciudad" label-float  block/>
-                        <vs-input v-model="form.postalCode" placeholder="Código postal" label-float  block/>
+                        <InputText  v-model="form.city" placeholder="Ciudad" class="w-full" variant="filled"/>
+                        <InputText  v-model="form.postalCode" placeholder="Código postal" class="w-full" variant="filled"/>
                     </div>
                 </div>
                 <div class="w-full flex flex-end">
-                    <vs-button color="dark">Crear mi comunidad</vs-button>
+                    <Button severity="contrast" label="Crear mi comunidad"/>
                 </div>
             </div>
         </div>

@@ -1,62 +1,56 @@
 <template>
     <div class="">
-        <vs-button color="dark" @click="showCreateOwner =!showCreateOwner">
-                <IconPlus class="mr-2"/>
+        <Button severity="contrast" @click="showCreateOwner =!showCreateOwner" raised>
+            <IconPlus/>
               Nuevo propietario
-        </vs-button>
-        <vs-dialog v-model="showCreateOwner" overlay-blur>
-            <template #header>
-              <span>Crear nuevo propietario</span>
-            </template>
+        </Button>
+        <Dialog v-model:visible="showCreateOwner" modal header="Crear nuevo propietario" class="w-96">
             <div class="">
-              <div class="flex gap-x-3">
-                    <vs-input 
+              <div class="flex gap-x-3 mb-4">
+                    <InputText 
                         v-model="form.name" 
                         placeholder="Name" 
-                        label-float 
-                        block/>
-                    <vs-input 
+                        class="w-full"
+                        variant="filled"/>
+                    <InputText  
                         v-model="form.surnames" 
                         placeholder="Surname" 
-                        label-float 
-                        block/>
+                        class="w-full"
+                        variant="filled"/>
                 </div>
-                <vs-input 
+                <InputText  
                     v-model="form.email" 
                     placeholder="E-mail"
-                    type="email"
-                    label-float 
-                    block/>
-                <div class="mt-6">
-                    <vs-select v-model="form.role" placeholder="Rol...">
-                        <vs-option label="Administrador" value="admin"> Administrador</vs-option>
-                        <vs-option label="Propietario" value="owner"> Propietario </vs-option>
-                        <vs-option label="Inquilino" value="tenant"> Inquilino</vs-option>
-                        <vs-option label="Temporal" value="temp"> Temporal </vs-option>
-                    </vs-select>
+                    class="w-full"
+                    variant="filled"/>
+                <div class="mt-4">
+                    <Select 
+                        v-model="form.role" 
+                        :options="userTypes" 
+                        optionLabel="label" 
+                        optionValue="value" 
+                        placeholder="Rol..." 
+                        class="w-full mb-4"
+                        variant="filled"/>
                 </div>
                     
                    
             </div>
-            <template #footer>
               <div class="flex justify-end gap-x-4">
-                <vs-button 
-                  color="dark"
-                  type="transparent"
+                <Button 
+                  text
+                  severity="secondary"
                   @click="showCreateOwner =!showCreateOwner"
-                  >
-                  Cancelar
-                </vs-button>
-                <vs-button 
-                  color="dark"
+                  label="Cancelar"
+                  />
+                <Button 
+                  severity="contrast"
                   @click="createOwner"
                   :loading="ownerCreateLoading"
-                  >
-                  Crear
-                </vs-button>
+                  label="Crear"
+                  />
               </div>
-            </template>
-          </vs-dialog> 
+          </Dialog> 
     </div>
 </template>
 <script setup>
@@ -64,7 +58,7 @@ import { ref, watch, computed} from 'vue'
 import IconPlus from "/src/components/icons/IconPlus.vue";
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
-import { VsNotification } from 'vuesax-alpha'
+
 defineOptions({
     name: 'AddNewOwner',
 })
@@ -72,13 +66,19 @@ defineOptions({
 //variables
 const showCreateOwner = ref(false);
 const ownerCreateLoading = ref(false);
-    const form = ref({
-        name: '',
-        surname: '',
-        email: '',
-        password: '1234',
-        role:''
-    })
+const form = ref({
+    name: '',
+    surname: '',
+    email: '',
+    password: '1234',
+    role:''
+})
+const userTypes = ref([
+{ label: 'Administrador', value: 'admin' },
+{ label: 'Propietario', value: 'owner' },
+{ label: 'Inquilino', value: 'tenant' },
+{label:'Temporal',value:'temp'},
+])
 
     //instancia API
     const http = useHttp();
@@ -92,20 +92,10 @@ const createOwner = async () => {
     if (validatedForm) {
         try {
             const respone = await http.post(`communities/${user?.communities[0]?.community_id}/add-user/`, form.value);
-            VsNotification({
-                position: 'top-right',
-                color: 'success',
-                title: 'Ok',
-                content: 'Has creado un nuevo propietario',
-            });
+            toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
             
         } catch (error) {
-            VsNotification({
-                position: 'top-right',
-                color: 'danger',
-                title: 'Upps!! algo ha fallado',
-                content: error,
-            });
+            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
         }
         showCreateOwner.value = false;
         ownerCreateLoading.value = false 

@@ -36,7 +36,7 @@
                     <h3 class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-yellow-400">Free</h3>
                     <p class="text-slate-500 text-sm text-center">Ideal para pequeñas comunidades</p>
                     <h1 class="text-6xl font-bold text-center py-4">0€ <span class="text-sm text-slate-500 font-regular">/mes</span></h1>
-                    <vs-button color="dark" block size="large">Get started</vs-button>
+                    <Button severity="contrast" size="large">Get started</Button>
                     <div class="border-t border-slate-200 mt-3 py-3">
                         <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Foro para miembros</div>
                         <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Votaciones</div>
@@ -49,7 +49,7 @@
                     <h3 class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-cyan-400">Basic</h3>
                     <p class="text-slate-500 text-sm text-center">Ideal para pequeñas comunidades</p>
                     <h1 class="text-6xl font-bold text-center py-4">15€ <span class="text-sm text-slate-500 font-regular">/mes</span></h1>
-                    <vs-button color="dark" block size="large">Get started</vs-button>
+                    <Button severity="contrast" size="large">Get started</Button>
                     <div class="border-t border-slate-200 mt-3 py-3">
                         <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Foro para miembros</div>
                         <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Votaciones</div>
@@ -64,7 +64,7 @@
                     <h3 class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-pink-400">Advanced</h3>
                     <p class="text-slate-500 text-sm text-center">Todo lo que tu comunidad necesita</p>
                     <h1 class="text-6xl font-bold text-center py-4">25€ <span class="text-sm text-slate-500 font-regular">/mes</span></h1>
-                    <vs-button color="dark" block size="large">Get started</vs-button>
+                    <Button severity="contrast" size="large">Get started</Button>
                     <div class="border-t border-slate-200 mt-3 py-3">
                         <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Foro para miembros</div>
                         <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Votaciones</div>

@@ -18,18 +18,21 @@
                         <InputText 
                             v-model="name" 
                             placeholder="Name" 
-                            class="w-full"/>
+                            class="w-full"
+                            variant="filled"/>
                         <InputText
                             v-model="surnames" 
                             placeholder="Surname" 
-                            class="w-full"/>
+                            class="w-full"
+                            variant="filled"/>
                     </div>
                     <div class="py-4">
                         <InputText 
                             v-model="email" 
                             placeholder="E-mail"
                             type="email"
-                            class="w-full"/>
+                            class="w-full"
+                            variant="filled"/>
                     </div> 
                     <div class="flex gap-x-3 py-4">
                         <div class="w-full">
@@ -38,6 +41,7 @@
                             placeholder="Contraseña" 
                             inputClass="min-w-full"
                             toggleMask
+                            variant="filled"
                             promptLabel="Elige contraseña" weakLabel="Muy debil" mediumLabel="Debil" strongLabel="Segura"
                             :fluid="true">
                             <template #footer>
@@ -59,6 +63,7 @@
                             inputClass="w-full"
                             :feedback="false"
                             toggleMask
+                            variant="filled"
                             fluid/>
                         </div>
                         
@@ -82,7 +87,6 @@ import { computed, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import IconArrowBack from "/src/components/icons/IconArrowBack.vue"
 import Authentication from '/src/layouts/Authentication.vue';
-import { VsNotification } from 'vuesax-alpha'
 import { useRouter } from 'vue-router';
 //Jakub: enlazando con API
 import { useHttp } from '/src/composables/useHttp.js'; 

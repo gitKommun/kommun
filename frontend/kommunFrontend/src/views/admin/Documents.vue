@@ -59,7 +59,6 @@ import AddContent from "/src/components/documents/AddContent.vue"
 import FolderItem from "/src/components/documents/FolderItem.vue"
 import EmptyFolder from "/src/components/emptys/EmptyFolder.vue"
 import Loading from '/src/components/Loading.vue'
-import { VsNotification } from 'vuesax-alpha'
 import Main from '/src/layouts/Main.vue';
 
 import { useHttp } from '/src/composables/useHttp.js'; 
@@ -94,12 +93,7 @@ async function getFolders() {
     foldersLoading.value = false;
     
   } catch (error) {
-    VsNotification({
-          position: 'top-right',
-          color: 'danger',
-          title: 'Upps!! algo ha fallado',
-          content: error,
-      });
+    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
   }
 }
 getFolders();

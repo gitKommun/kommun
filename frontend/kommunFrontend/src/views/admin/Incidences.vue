@@ -6,7 +6,7 @@
           <span class="text-sm text-slate-500 font-medium">{{ user.communities[0]?.community_name }}</span>
       </div>
       <div class="w-full p-4 flex justify-end">
-        <!-- <AddContent @update:items="updateItems" class="h-auto"/>   -->
+        <AddNewIncidence @update:items="updateItems" class="h-auto"/>  
       </div>
     </div>
     <div class="w-full flex justify-center px-4 flex-1 min-h-0 overflow-y-scroll">
@@ -28,15 +28,9 @@
         </div>
         <!-- resumen -->
          <!-- lista incidencias -->
-          <div class="w-full">
-            <vs-input 
-              v-model="search" 
-              placeholder="Buscar" 
-              label-float 
-              />
-              
-              
-          </div>
+
+         <div class=""></div>
+  
           <Button @click="openDetail =! openDetail" rised> <IconClose class="group-hover:rotate-90 transition-all duration-300"/> yrryry</Button>
           <!-- lista incidencias -->
       </div>
@@ -75,6 +69,7 @@ import { useUserStore } from '/src/stores/useUserStore.js';
 
 import Main from '/src/layouts/Main.vue';
 import IconClose from "/src/components/icons/IconClose.vue";
+import AddNewIncidence from "/src/components/incidences/AddNewIncidence.vue"
 
 defineOptions({
   name: 'incidences',
@@ -82,10 +77,28 @@ defineOptions({
 })
 const title = ref('Incidencias')
 const search = ref('');
+const incidences = ref([]);
+
 const openDetail = ref(false);
 //instancia API
 const http = useHttp();
 //user store
 const { user } = useUserStore();
+
+
+const getIncidences = async ()=>{
+  try {
+    const respone = await http.get(`claims/${user?.communities[0]?.community_id}/`);
+            incidences.value = response.data
+            toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
+            
+        } catch (error) {
+            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+        }
+        showCreateIncidence.value = false;
+        incidenceCreateLoading.value = false      
+}
+getIncidences()
+
 </script>
 

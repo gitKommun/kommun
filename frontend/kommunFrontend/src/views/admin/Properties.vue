@@ -6,7 +6,10 @@
           <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
       </div>
       <div class=" p-4 flex justify-end">
-        <vs-button color="dark" class="inline flex-none">Añadir propiedad</vs-button>
+        <Button severity="contrast" raised  class="inline flex-none">
+          <IconPlus/>
+          Añadir propiedad
+        </Button>
       </div>
     </div>
   </div>  
@@ -14,6 +17,7 @@
 <script setup>
 import { ref , shallowRef} from 'vue'
 import Main from '/src/layouts/Main.vue';
+import IconPlus from "/src/components/icons/IconPlus.vue";
 defineOptions({
   name: 'properties',
   layout: Main
