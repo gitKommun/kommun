@@ -122,24 +122,25 @@ class PropertyRelationship(models.Model):
         return f"{self.user.name} - {self.role} of {self.property.number}"
 
 
-class CommunityRole(models.Model):
-    user = models.ForeignKey('members.User', on_delete=models.CASCADE)
-    community = models.ForeignKey(Community, on_delete=models.CASCADE)
-    is_admin = models.BooleanField(default=False)
-
-
 class UserCommunityRole(models.Model):
     USER_ROLES = (
         ('owner', 'Propietario'),
         ('tenant', 'Inquilino'),
         ('admin', 'Administrador'),
+    )
+
+    USER_STATUS = (
+        ('active', 'Activo'),
+        ('disabled', 'Deshabilitado'),
         ('temp', 'Temporal'),
     )
+    
     user = models.ForeignKey('members.User', on_delete=models.CASCADE, related_name='roles')
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='user_roles')
     role = models.CharField(max_length=10, choices=USER_ROLES)
+    user_status = models.CharField(max_length=10, choices=USER_STATUS, default='active')
 
     class Meta:
-        unique_together = ('user', 'community', 'role')
+        unique_together = ('user', 'community', 'role', 'user_status')
 
 

@@ -7,14 +7,14 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Folder, Document
-from .serializers import FolderSerializer, FolderListCompleteSerializer, DocumentUploadSerializer, DocumentSerializer, FolderDetailSerializer
+from .serializers import FolderSerializer, FolderListCompleteSerializer, DocumentUploadSerializer, DocumentSerializer, FolderDetailSerializer, FolderOpenSerializer
 
 
 
 class RootFolderAndDocumentsAPIView(APIView):
     def get(self, request, IDcommunity):
         # Obtener todas las carpetas con el conteo de documentos
-        folders = Folder.objects.filter(community=IDcommunity)
+        folders = Folder.objects.filter(community=IDcommunity, parent_folder_id=0)
         folder_data = []
 
         for folder in folders:
@@ -88,6 +88,18 @@ class FolderOpenAPIView(APIView):
         serializer = FolderDetailSerializer(folder)
         return Response(serializer.data)
     
+class FolderOpenDetailView(APIView):
+    def get(self, request, IDcommunity, IDfolder):
+        folder = get_object_or_404(Folder, community_id=IDcommunity, folder_id=IDfolder)
+        subfolders = Folder.objects.filter(community_id=IDcommunity, parent_folder_id=IDfolder)
+        documents = Document.objects.filter(community_id=IDcommunity, folder_id=IDfolder)
+        
+        folder_data = FolderOpenSerializer(folder).data
+        folder_data['subfolders'] = FolderListCompleteSerializer(subfolders, many=True).data
+        folder_data['documents'] = DocumentSerializer(documents, many=True).data
+
+        return Response(folder_data)
+
 ### Document views ###  
 class DocumentUploadAPIView(APIView):
     def post(self, request, IDcommunity, IDfolder):

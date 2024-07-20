@@ -20,9 +20,9 @@ class Claim(models.Model):
     ]
     
     PRIORITY_CHOICES = [
-        ('information', 'Information'),
-        ('complaint', 'Complaint'),
-        ('important', 'Important'),
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
         ('urgent', 'Urgent'),
     ]
 

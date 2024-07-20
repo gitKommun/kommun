@@ -13,6 +13,7 @@ class Folder(models.Model):
     #userCreator = models.ForeignKey('members.User', on_delete=models.CASCADE, null=True, blank=True)
     #created_at = models.DateTimeField(auto_now_add=True)
     folder_id = models.PositiveIntegerField()  # ID relativo autoincremental
+    parent_folder_id = models.PositiveIntegerField(null=True, blank=True, default=0)  # ID del folder padre
 
     class Meta:
         unique_together = ('community', 'folder_id')
