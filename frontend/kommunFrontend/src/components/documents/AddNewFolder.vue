@@ -48,6 +48,12 @@
     defineOptions({
     name: 'addNewFolder',
     })
+    const props = defineProps({
+        selected: {
+            type: Object,
+            
+        },
+    });
 
     //variables
     const showCreateFolder = ref(false);

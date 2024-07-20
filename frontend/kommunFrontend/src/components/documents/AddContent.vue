@@ -8,7 +8,7 @@
         </template>
         <template #content>
           <div class="bg-white w-56 rounded-xl p-3 shadow-2xl gap-y-2 flex flex-col">
-            <AddNewFolder @update:folder="updateItems"/>
+            <AddNewFolder @update:folder="updateItems" :selected="selected"/>
             <AddNewFile/>
           </div>
         </template>
@@ -24,6 +24,13 @@
     defineOptions({
     name: 'addContent',
     })
+
+const props = defineProps({
+        selected: {
+            type: Object,
+            
+        },
+    });
 
     const emit = defineEmits(['update:items']);
     const updateItems = () => {
