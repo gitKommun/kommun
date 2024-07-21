@@ -55,6 +55,10 @@ class UserMainContactCommunityRegistrationAPIView(APIView):
                 role='admin'  
             )
 
+            # Asignar current community al usuario
+            user.current_community = community
+            user.save()
+
             community_serializer = CommunitySerializer(community)
             return Response({
                 'user': serializer.data,
