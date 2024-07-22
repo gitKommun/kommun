@@ -3,7 +3,7 @@
     <div class="pl-4 md:pl-16 py-6 flex">
       <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
           {{title}}
-          <span class="text-sm text-slate-500 font-medium">{{ user.available_communities[0]?.community_name }}</span>
+          <span class="text-sm text-slate-500 font-medium">{{ user.current_community?.community_name }}</span>
       </div>
       <div class="w-full p-4 flex justify-end">
         <AddContent 
@@ -14,18 +14,22 @@
       </div>
     </div>
     <!-- breadcrum -->
-    <div v-if="selectedFolder" class="flex overflow-x-scroll px-14 -mt-4">
-        <div @click="resetPath()" class="flex items-center px-2 text-xs rounded-lg hover:bg-slate-100 transition-all duration-300 cursor-pointer">
-            <IconFolders class="scale-75 text-slate-500"/>
-            <span class="ml-2 text-slate-500">Documentos</span>
-        </div>
-        <div v-for="(folder ,index) in selectedFolder?.path" :key="folder.folder_id">
-          {{ folder }}
-          <IconChevronRight class="scale-75 mx-1 text-slate-500"/>
-          <div class="flex items-center px-2 text-xs rounded-lg hover:bg-slate-100 transition-all duration-300 cursor-pointer">
-            <IconFolder class="scale-75 " :class="index== selectedFolder?.path.length-1?'text-lime-500':'text-slate-500'"/>
-            <span class="ml-2"  :class="index== selectedFolder?.path.length-1?'text-lime-500':'text-slate-500'">{{folder.name}}</span>
-          </div>
+    <div v-if="selectedFolder" class="flex overflow-x-scroll px-14 -mt-4">       
+        <div v-for="(folder ,index) in path" :key="folder.folder_id" class="flex items-certer">
+          <template v-if="index == 0">
+            <div @click="resetPath()" class="flex items-center px-2 text-xs rounded-lg hover:bg-slate-100 transition-all duration-300 cursor-pointer">
+                <IconFolders class="scale-75 text-slate-500"/>
+                <span class="ml-2 text-slate-500">Documentos</span>
+            </div>
+          </template>
+          <template v-if="index > 0">
+            <IconChevronRight class="scale-75 mx-1 text-slate-500"/>
+            <div @click="selectFolder(folder) " class="flex items-center px-2 text-xs rounded-lg hover:bg-slate-100 transition-all duration-300 cursor-pointer">
+              <IconFolder class="scale-75 " :class="index== path.length-1?'text-lime-500':'text-slate-500'"/>
+              <span class="ml-2"  :class="index== path.length-1?'text-lime-500':'text-slate-500'">{{folder.name}}</span>
+            </div>
+          </template>
+          
         </div>
     </div>
     <!-- breadcrum -->
@@ -38,7 +42,6 @@
           <Loading/>
         </div>  
         <div v-else class="flex flex-wrap gap-x-4">
-          {{ folders }}
           <template v-if="!folders.length">
             <div  class="w-full flex flex-col items-center justify-center py-24">
               <EmptyFolder class="scale-75"/>
@@ -51,7 +54,7 @@
           <template v-else>
             <div class="w-full flex flex-col">
               <div v-if="folders.length" class="flex items-center justify-between py-4">
-                <span class="text-slate-950 font-semibold text-lg">Carpetas</span>
+                <span class="text-slate-950 font-semibold text-lg">Carpetas s</span>
               </div>
               <div class="w-full flex flex-wrap gap-3">
                 <FolderItem
@@ -105,7 +108,8 @@ const title = ref('Documentos')
 const folders = ref([]);
 const foldersLoading = ref(true);
 const selectedFolder = ref(null);
-const documents = ref([])
+const documents = ref([]);
+const path = ref([])
 
 
 //instancia API
@@ -129,11 +133,14 @@ onMounted(() => {
 
 // folders
 async function getFolders() { 
+  //folders.value = [];
   if (selectedFolder?.value) {
     try {
-    const response = await http.get(`documents/${user?.available_communities[0]?.community_id}/folders/${selectedFolder?.value.folder_id}`);
+    const response = await http.get(`documents/${user?.current_community?.community_id}/folders/${selectedFolder?.value.folder_id}`);
     
-    folders.value = response.data
+      folders.value = response.data.folders;
+      path.value = response.data.path;
+      documents.value = response.data.documents;
 
     foldersLoading.value = false;
     
@@ -142,10 +149,11 @@ async function getFolders() {
   }
   } else {
     try {
-      const response = await http.get(`documents/${user?.available_communities[0]?.community_id}`);
+      const response = await http.get(`documents/${user?.current_community?.community_id}/folders/0/`);
       
       folders.value = response.data.folders;
-      documents.value = response.data.documents
+      documents.value = response.data.documents;
+      path.value = response.data.path
 
       foldersLoading.value = false;
       

@@ -347,7 +347,7 @@ const userFeatures = shallowRef([
 ]);
 
 const isAdmin = computed(() => {
-  if (user?.available_communities[0]?.role === 'admin') {
+  if (user?.current_community?.community_role === 'admin') {
     return true;  
   } 
     return false;  

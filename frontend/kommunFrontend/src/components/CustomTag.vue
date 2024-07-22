@@ -1,5 +1,5 @@
 <template>
-  <span :class="computedClasses" class="flex items-center">
+  <span :class="computedClasses" class="inline-flex items-center ">
     <slot></slot>
   </span>
 </template>

@@ -12,7 +12,7 @@
               <inputFileDraggable @update:files="updateFiles"/>
             </div>
               <div v-for="(f,i) in files" :key="'k'+i">
-                {{ f }}
+                {{ f.name }}
               </div>
             <template #footer>
               <div class="flex justify-end gap-x-4">
@@ -25,8 +25,8 @@
                 </Button>
                 <Button 
                   severity="contrast"
-                  @click="crateFolder"
-                  :loading="folderCreateLoading"
+                  @click="uploadDocument"
+                  :loading="uploadLoading"
                   >
                   Cargar
                 </Button>
@@ -38,7 +38,7 @@
     
 </template>
 <script setup>
-    import { ref, shallowRef, watch } from 'vue'
+    import { ref, shallowRef, watch, toRaw } from 'vue'
     import IconFileAdd from "/src/components/icons/IconFileAdd.vue"
     import inputFileDraggable from '/src/components/inputFileDraggable.vue';
     import EventBus from '/src/utils/event-bus.js'
@@ -50,6 +50,12 @@
     defineOptions({
     name: 'addNewFolder',
     })
+    const props = defineProps({
+        selected: {
+            type: Object,
+            
+        },
+    });
 
     //variables
     const showUploadFile = ref(false);
@@ -62,28 +68,57 @@
     //user store
     const { user } = useUserStore();
     //use toast
-    const toast = useToast();
+const toast = useToast();
+
+//emit
+    const emit = defineEmits(['update:document']);
 
    const updateFiles = (newFiles) => {
      files.value = newFiles;
-      console.log('file', newFiles)
+     console.log('file',files.value)
     };
 
     // uploadDocument
     const uploadDocument = async () => {
       uploadLoading.value = true;
-      try {
-            // const response = await http.post(`documents/${user?.available_communities[0]?.community_id}/folders/create/`, {
-            // name: folderName.value
-            // })
-            
-        }
-        catch (error) {
-            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
-        }
-    
-    uploadLoading.value = false;
-    showUploadFile.value = false;
+
+      if (files.value.length) {
+        if (props.selected?.folder_id) {
+                    try {
+                    const response = await http.post(`documents/${user?.current_community?.community_id}/f/${props.selected.folder_id}/upload/`, {
+                      file: files.value,
+                        //name:
+
+                    })
+                    uploadLoading.value = false;
+                    showUploadFile.value = false;
+                    files.value = [];
+                emit('update:document', true);
+                    toast.add({ severity: 'success', summary: 'Ok', detail: 'Documentos cargados con exito', life: 3000 });
+                }
+                catch (error) {
+                    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+                }
+             } else {
+                try {
+                    const response = await http.post(`documents/${user?.current_community?.community_id}/f/0/upload/`, {
+                    files: files.value,
+                    })
+                    uploadLoading.value = false;
+                    showUploadFile.value = false;
+                    files.value = [];
+                emit('update:document', true);
+                    toast.add({ severity: 'success', summary: 'Ok', detail: 'Documentos cargados con exito', life: 3000 });
+                }
+                catch (error) {
+                    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+                }
+            }
+      } else {
+        toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: 'No has añadido ningun archivo', life: 3000 });
+      }    
+      uploadLoading.value = false;
+      showUploadFile.value = false;
 
   
   

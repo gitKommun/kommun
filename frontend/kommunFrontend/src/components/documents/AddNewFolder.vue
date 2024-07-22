@@ -84,7 +84,7 @@ const crateFolder = async () => {
         if (folderName.value != '') {
              if (props.selected?.folder_id) {
                     try {
-                    const response = await http.post(`documents/${user?.available_communities[0]?.community_id}/folders/create/`, {
+                    const response = await http.post(`documents/${user?.current_community?.community_id}/folders/create/`, {
                         name: folderName.value,
                         parent_folder_id:props.selected.folder_id
                     })
@@ -99,7 +99,7 @@ const crateFolder = async () => {
                 }
              } else {
                 try {
-                    const response = await http.post(`documents/${user?.available_communities[0]?.community_id}/folders/create/`, {
+                    const response = await http.post(`documents/${user?.current_community?.community_id}/folders/create/`, {
                     name: folderName.value
                     })
                     folderCreateLoading.value = false;

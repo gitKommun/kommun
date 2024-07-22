@@ -9,7 +9,7 @@
         <template #content>
           <div class="bg-white w-56 rounded-xl p-3 shadow-2xl gap-y-2 flex flex-col">
             <AddNewFolder @update:folder="updateItems" :selected="selected"/>
-            <AddNewFile/>
+            <AddNewFile @update:document="updateItems" :selected="selected"/>
           </div>
         </template>
       </Dropdown>

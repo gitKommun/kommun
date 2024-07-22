@@ -168,7 +168,7 @@ const createIncidence = async () => {
     incidenceCreateLoading.value =true 
     if (validatedForm) {
         try {
-            const respone = await http.post(`claims/${user?.available_communities[0]?.community_id}/create/`, form.value);
+            const respone = await http.post(`claims/${user?.current_community?.community_id}/create/`, form.value);
             toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
             
         } catch (error) {

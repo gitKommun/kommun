@@ -45,7 +45,6 @@
                             promptLabel="Elige contraseña" weakLabel="Muy debil" mediumLabel="Debil" strongLabel="Segura"
                             :fluid="true">
                             <template #footer>
-                                <Divider />
                                 <ul class="text-xs mt-2 pl-2">
                                     <li :class="[{'text-red-500':password_1!=''&&!passValidationNumber},{'text-green-500':passValidationNumber}]" type="disc">Numbers</li>
                                     <li :class="[{'text-red-500':password_1!=''&&!passValidationUppercase},{'text-green-500':passValidationUppercase}]"type="disc">Capital letters</li>

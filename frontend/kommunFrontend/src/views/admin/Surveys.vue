@@ -3,7 +3,7 @@
     <div class="pl-4 md:pl-16 py-6 flex">
       <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
           {{title}}
-          <span class="text-sm text-slate-500 font-medium">{{ user.available_communities[0]?.community_name }}</span>
+          <span class="text-sm text-slate-500 font-medium">{{ user.current_community?.community_name }}</span>
       </div>
       <div class="w-full p-4 flex justify-end">
           <AddNewSurvey  @update:items="updateItems" class="h-auto"/>

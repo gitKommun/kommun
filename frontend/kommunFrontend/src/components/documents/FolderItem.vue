@@ -5,8 +5,8 @@
         </div>
         <div class="flex flex-col w-full truncate">
             <span class="mb-1 truncate font-semibold text-sm">{{folder.name}}</span>
-            <span v-if="folder.document_count === 0" class="text-xs text-slate-500">Carpeta vacia</span>
-            <span v-else class="text-xs text-slate-500">{{ folder.document_count }} Elementos</span>
+            <span v-if="folder.document_count+folder.subfolder_count === 0" class="text-xs text-slate-500">Carpeta vacia</span>
+            <span v-else class="text-xs text-slate-500">{{ folder.document_count+folder.subfolder_count }} Elementos</span>
         </div>
 
         <Dropdown strategy="fixed">
@@ -104,7 +104,7 @@ const { user } = useUserStore();
     // Delete Item
     function deleteFolder() {
         try {
-            const response =  http.delete(`documents/${user?.available_communities[0]?.community_id}/folders/${props.folder.folder_id}/delete`);
+            const response =  http.delete(`documents/${user?.current_community?.community_id}/folders/${props.folder.folder_id}/delete`);
             toast.add({ severity: 'success', summary: 'Ok', detail: 'La carpeta se ha eliminado con exito', life: 3000 });
              
         } catch (error) {
@@ -119,7 +119,7 @@ const { user } = useUserStore();
         folderUpdateLoading.value = true;
         if (folderName.value != '') {
             try {
-                const response = http.put(`documents/${user?.available_communities[0]?.community_id}/folders/${props.folder.folder_id}/update/`,
+                const response = http.put(`documents/${user?.current_community?.community_id}/folders/${props.folder.folder_id}/update/`,
                     {
                         name:folderName.value
                     }

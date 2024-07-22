@@ -49,7 +49,7 @@
 
     //variables
     const form = ref({
-        name: user?.available_communities[0]?.community_name,
+        name: user?.current_community?.community_name,
         address: '',
         city:'',
         postalCode: '',

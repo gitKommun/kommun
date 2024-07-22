@@ -3,7 +3,7 @@
     <div class="pl-4 md:pl-16 py-6 flex sticky top-0  backdrop-blur z-10">
       <div class="w-full flex flex-col">
           <span class="text-slate-950 text-3xl font-bold truncate flex items-center">{{title}}</span>
-          <span class="text-sm text-slate-500 font-medium">{{ user.available_communities[0]?.community_name }}</span>
+          <span class="text-sm text-slate-500 font-medium">{{ user.current_community?.community_name }}</span>
       </div>
     </div>
     <div class="flex justify-center px-3 pb-6">
