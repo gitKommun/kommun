@@ -2,7 +2,7 @@
     <div class="">
         <Button severity="contrast" @click="showCreateIncidence =!showCreateIncidence" raised>
             <IconPlus/>
-              Nueva incidencia
+             <span class="hidden md:flex">Nueva incidencia</span> 
         </Button>
         <Dialog v-model:visible="showCreateIncidence" modal header="Crear nuevo propietario" class="w-120">
             <div class="">
@@ -29,7 +29,7 @@
                         variant="filled"/>
                         <Select 
                         v-model="form.priority" 
-                        :options="prioritiesOld" 
+                        :options="priorities" 
                         optionLabel="label" 
                         optionValue="value" 
                         placeholder="Prioridad" 
@@ -120,23 +120,16 @@ const priorities = ref([
 { label: 'Urgente', value: 'urgent' },
 ])
 
-const prioritiesOld = ref([
-{ label: 'Informacion', value: 'information' },
-{ label: 'Queja', value: 'complaint' },
-{ label: 'Importante', value: 'important' },
-{ label: 'Urgente', value: 'urgent' },
-])
-
 const priorityColor = {
-    information: 'blue',
-    complaint: 'yellow',
-    important: 'orange',
+    low: 'blue',
+    medium: 'yellow',
+    high: 'orange',
     urgent:'red'
 }
 const priorityLabel = {
-    information: 'Informacion',
-    complaint: 'Queja',
-    important: 'Importante',
+    low: 'Baja',
+    medium: 'Media',
+    high: 'Alta',
     urgent:'Urgente'
 }
 
@@ -175,7 +168,7 @@ const createIncidence = async () => {
     incidenceCreateLoading.value =true 
     if (validatedForm) {
         try {
-            const respone = await http.post(`claims/${user?.communities[0]?.community_id}/create/`, form.value);
+            const respone = await http.post(`claims/${user?.available_communities[0]?.community_id}/create/`, form.value);
             toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
             
         } catch (error) {

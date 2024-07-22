@@ -2,7 +2,7 @@
     <div class="">
         <Button severity="contrast" @click="showCreateOwner =!showCreateOwner" raised>
             <IconPlus/>
-              Nuevo propietario
+            <span class="hidden md:flex">Nueva usuario</span> 
         </Button>
         <Dialog v-model:visible="showCreateOwner" modal header="Crear nuevo propietario" class="w-96">
             <div class="">
@@ -91,7 +91,7 @@ const createOwner = async () => {
     ownerCreateLoading.value =true 
     if (validatedForm) {
         try {
-            const respone = await http.post(`communities/${user?.communities[0]?.community_id}/add-user/`, form.value);
+            const respone = await http.post(`communities/${user?.available_communities[0]?.community_id}/add-user/`, form.value);
             toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
             
         } catch (error) {

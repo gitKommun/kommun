@@ -3,7 +3,7 @@
     <div class="pl-4 md:pl-16 py-6 flex">
       <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
           {{title}}
-          <span class="text-sm text-slate-500 font-medium">{{ user.communities[0]?.community_name }}"</span>
+          <span class="text-sm text-slate-500 font-medium">{{ user.available_communities[0]?.community_name }}"</span>
       </div>
       <div class="w-full p-4 flex justify-end">
         <AddNewOwner @update:owner="updateOwners"/>
@@ -174,7 +174,7 @@ const showUpdateOwner = ref(false);
   const getOwners = async () => {
     try {
 
-      const response = await http.get(`communities/${user?.communities[0]?.community_id}/users/`);
+      const response = await http.get(`communities/${user?.available_communities[0]?.community_id}/users/`);
       owners.value = response.data
       
     } catch (error) {
@@ -188,7 +188,7 @@ const showUpdateOwner = ref(false);
   const deleteOwner = async () => {
     try {
 
-      const response = await http.get(`communities/${user?.communities[0]?.community_id}/users/`);
+      const response = await http.get(`communities/${user?.available_communities[0]?.community_id}/users/`);
       
     } catch (error) {
       toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
@@ -207,7 +207,7 @@ const openUpdateOwner = (item) => {
   const updateOwner = async () => {
     try {
 
-      //const response = await http.put(`communities/${user?.communities[0]?.community_id}/users/`);
+      //const response = await http.put(`communities/${user?.available_communities[0]?.community_id}/users/`);
       
       
     } catch (error) {

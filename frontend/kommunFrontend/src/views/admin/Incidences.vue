@@ -3,7 +3,7 @@
     <div class="pl-4 md:pl-16 py-6 flex ">
       <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
           {{title}}
-          <span class="text-sm text-slate-500 font-medium">{{ user.communities[0]?.community_name }}</span>
+          <span class="text-sm text-slate-500 font-medium">{{ user.available_communities[0]?.community_name }}</span>
       </div>
       <div class="w-full p-4 flex justify-end">
         <AddNewIncidence @update:items="updateItems" class="h-auto"/>  
@@ -66,6 +66,7 @@
 import { ref } from 'vue'
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
+import { useToast } from 'primevue/usetoast';
 
 import Main from '/src/layouts/Main.vue';
 import IconClose from "/src/components/icons/IconClose.vue";
@@ -84,11 +85,13 @@ const openDetail = ref(false);
 const http = useHttp();
 //user store
 const { user } = useUserStore();
+ //use toast
+    const toast = useToast();
 
 
 const getIncidences = async ()=>{
   try {
-    const respone = await http.get(`claims/${user?.communities[0]?.community_id}/`);
+    const respone = await http.get(`claims/${user?.available_communities[0]?.community_id}/`);
             incidences.value = response.data
             toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
             

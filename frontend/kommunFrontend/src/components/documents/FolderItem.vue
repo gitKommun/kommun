@@ -13,7 +13,7 @@
             <template #reference="{ open }">
                 <div 
                     class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer "
-                    @click="open"
+                    @click.capture="open"
                 >
                     <IconDots class="text-slate-500"/>
                 </div>
@@ -104,7 +104,7 @@ const { user } = useUserStore();
     // Delete Item
     function deleteFolder() {
         try {
-            const response =  http.delete(`documents/${user?.communities[0]?.community_id}/folders/${props.folder.id}/delete`);
+            const response =  http.delete(`documents/${user?.available_communities[0]?.community_id}/folders/${props.folder.folder_id}/delete`);
             toast.add({ severity: 'success', summary: 'Ok', detail: 'La carpeta se ha eliminado con exito', life: 3000 });
              
         } catch (error) {
@@ -119,7 +119,7 @@ const { user } = useUserStore();
         folderUpdateLoading.value = true;
         if (folderName.value != '') {
             try {
-                const response = http.put(`documents/${user?.communities[0]?.community_id}/folders/${props.folder.id}/update/`,
+                const response = http.put(`documents/${user?.available_communities[0]?.community_id}/folders/${props.folder.folder_id}/update/`,
                     {
                         name:folderName.value
                     }

@@ -244,7 +244,7 @@ const getInitials = () => {
 
 
 //collapse expand vertical menu
-const isAsideOpen = ref(false)
+const isAsideOpen = ref(true)
 
 const asideToogle = () => {
   isAsideOpen.value = !isAsideOpen.value
@@ -347,7 +347,7 @@ const userFeatures = shallowRef([
 ]);
 
 const isAdmin = computed(() => {
-  if (user?.communities[0]?.role === 'admin') {
+  if (user?.available_communities[0]?.role === 'admin') {
     return true;  
   } 
     return false;  

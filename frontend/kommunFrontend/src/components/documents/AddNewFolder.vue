@@ -77,23 +77,42 @@
     })
 
     // createFolders
-    const crateFolder = async () => {
+const crateFolder = async () => {
+        console.log('cick ddesdw')
     folderCreateLoading.value = true;
-    
-    if (folderName.value != '') {
-        try {
-            const response = await http.post(`documents/${user?.communities[0]?.community_id}/folders/create/`, {
-            name: folderName.value
-            })
-            folderCreateLoading.value = false;
-            showCreateFolder.value = false;
-            folderName.value = '';
-          emit('update:folder', true);
-            toast.add({ severity: 'success', summary: 'Ok', detail: 'Carpeta creada con exito', life: 3000 });
-        }
-        catch (error) {
-            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
-        }
+   
+        if (folderName.value != '') {
+             if (props.selected?.folder_id) {
+                    try {
+                    const response = await http.post(`documents/${user?.available_communities[0]?.community_id}/folders/create/`, {
+                        name: folderName.value,
+                        parent_folder_id:props.selected.folder_id
+                    })
+                    folderCreateLoading.value = false;
+                    showCreateFolder.value = false;
+                    folderName.value = '';
+                emit('update:folder', true);
+                    toast.add({ severity: 'success', summary: 'Ok', detail: 'Carpeta creada con exito', life: 3000 });
+                }
+                catch (error) {
+                    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+                }
+             } else {
+                try {
+                    const response = await http.post(`documents/${user?.available_communities[0]?.community_id}/folders/create/`, {
+                    name: folderName.value
+                    })
+                    folderCreateLoading.value = false;
+                    showCreateFolder.value = false;
+                    folderName.value = '';
+                emit('update:folder', true);
+                    toast.add({ severity: 'success', summary: 'Ok', detail: 'Carpeta creada con exito', life: 3000 });
+                }
+                catch (error) {
+                    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+                }
+            }
+        
     } else {
         folderCreateValidated.value = true;
         folderCreateLoading.value = false;

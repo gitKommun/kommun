@@ -73,7 +73,7 @@
     const uploadDocument = async () => {
       uploadLoading.value = true;
       try {
-            // const response = await http.post(`documents/${user?.communities[0]?.community_id}/folders/create/`, {
+            // const response = await http.post(`documents/${user?.available_communities[0]?.community_id}/folders/create/`, {
             // name: folderName.value
             // })
             

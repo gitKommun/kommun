@@ -3,7 +3,7 @@
 
         <Button  @click="showCreateSurvey =!showCreateSurvey" severity="contrast" raised>
                 <IconPlus/>
-              Nueva
+                <span class="hidden md:flex">Nueva votación</span> 
         </Button>
         <Dialog v-model:visible="showCreateSurvey" modal header="Crear nueva consulta" class="w-128">
 
@@ -209,7 +209,7 @@ const removeOption = (index) => {
 const createSurvey = () => {
   console.log('survey', form)
   try {
-    const response = http.post(`votes/${user?.communities[0]?.community_id}/create/`, form.value );
+    const response = http.post(`votes/${user?.available_communities[0]?.community_id}/create/`, form.value );
     toast.add({ severity: 'success', summary: 'Ok', detail: 'Votacion creada con exito', life: 3000 });
     
     } catch (error) {
