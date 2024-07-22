@@ -20,9 +20,9 @@ class Folder(models.Model):
         ordering = ['community', 'folder_id']
 
     def save(self, *args, **kwargs):
-        if not self.folder_id:
-            last_folder = Folder.objects.filter(community=self.community).order_by('folder_id').last()
-            self.folder_id = last_folder.folder_id + 1 if last_folder else 1
+        if self.folder_id is None:
+                last_folder = Folder.objects.filter(community=self.community).order_by('folder_id').last()
+                self.folder_id = last_folder.folder_id + 1 if last_folder else 1
         super().save(*args, **kwargs)
 
 valid_formats = [
@@ -45,7 +45,7 @@ class Document(models.Model):
     name = models.CharField(max_length=255)
     file = models.FileField(upload_to=document_path, validators=[FileExtensionValidator(allowed_extensions=valid_formats)])
     community = models.ForeignKey('communities.Community', on_delete=models.CASCADE)
-    folder_id = models.PositiveIntegerField(null=True, blank=True)  # ID relativo de la carpeta
+    folder_id = models.PositiveIntegerField(null=True, blank=True, default=0)  # ID relativo de la carpeta
     #folder = models.ForeignKey(Folder, related_name='documents', on_delete=models.CASCADE, null=True, blank=True)
     #userCreator = models.ForeignKey('members.User', on_delete=models.SET_NULL, null=True, blank=True) #TO DO añadir logica para mantener el nombre del usuario creador en caso de eliminar el usuario
     #created_at = models.DateTimeField(auto_now_add=True)

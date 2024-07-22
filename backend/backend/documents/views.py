@@ -31,7 +31,7 @@ class RootFolderAndDocumentsAPIView(APIView):
         document_serializer = DocumentSerializer(documents, many=True)
 
         response_data = {
-            'folders': folder_data,
+            'subfolders': folder_data,
             'documents': document_serializer.data
         }
 
@@ -89,16 +89,60 @@ class FolderOpenAPIView(APIView):
         return Response(serializer.data)
     
 class FolderOpenDetailView(APIView):
+ def get(self, request, IDcommunity, IDfolder):
+        folder = get_object_or_404(Folder, community_id=IDcommunity, folder_id=IDfolder)
+        folders = Folder.objects.filter(community_id=IDcommunity, parent_folder_id=IDfolder)
+        documents = Document.objects.filter(community_id=IDcommunity, folder_id=IDfolder)
+        
+        # Construir el path
+        path = []
+        current_folder = folder
+        while current_folder.parent_folder_id is not None:
+            parent_folder = Folder.objects.filter(community=current_folder.community, folder_id=current_folder.parent_folder_id).first()
+            if not parent_folder:
+                break
+            path.append({
+                'folder_id': parent_folder.folder_id,
+                'name': parent_folder.name
+            })
+            current_folder = parent_folder
+        path.reverse()  # Path en orden desde el root hasta la carpeta actual
+
+        # Añadir el folder actual al path
+        path.append({
+            'folder_id': folder.folder_id,
+            'name': folder.name
+        })
+
+        documents_data = DocumentSerializer(documents, many=True).data
+
+        result = {
+            'folders': FolderListCompleteSerializer(folders, many=True).data,
+            'documents': documents_data,
+            'path': path
+        }
+
+        return Response(result)
+
+class OLDFolderOpenDetailView(APIView):
     def get(self, request, IDcommunity, IDfolder):
         folder = get_object_or_404(Folder, community_id=IDcommunity, folder_id=IDfolder)
         subfolders = Folder.objects.filter(community_id=IDcommunity, parent_folder_id=IDfolder)
         documents = Document.objects.filter(community_id=IDcommunity, folder_id=IDfolder)
         
-        folder_data = FolderOpenSerializer(folder).data
+        folder_data = {}
+        documents_data = {}
+        folder_data['folders'] = FolderOpenSerializer(folder).data.folder_id
         folder_data['subfolders'] = FolderListCompleteSerializer(subfolders, many=True).data
-        folder_data['documents'] = DocumentSerializer(documents, many=True).data
+        documents_data['documents'] = DocumentSerializer(documents, many=True).data
 
-        return Response(folder_data)
+        result = {
+            'folders': [folder_data],
+            'documents': [documents_data],
+            'path': ""
+        }
+
+        return Response(result)
 
 ### Document views ###  
 class DocumentUploadAPIView(APIView):
