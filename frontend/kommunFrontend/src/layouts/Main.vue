@@ -16,11 +16,13 @@
                 :class="[isAsideOpen?'w-full pl-4 gap-4':'w-10 justify-center',{'bg-white':isLinkActive(section.to),'hover:bg-slate-200':!isLinkActive(section.to)}]"
                 >
                     <component 
-                        :is="section.icon"
-                        
-                        :class="[isLinkActive(section.to)?`text-${section.color}-500`:'text-slate-400']"
+                        :is="section.icon" 
+                        :class="[isLinkActive(section.to)?'text-slate-950':'text-slate-400']"
                         />
-                    <span v-if="isAsideOpen" class="text-sm" >{{section.title}}</span>
+                    <span v-if="isAsideOpen" class="text-sm"
+                          :class="isLinkActive(section.to)?'font-semibold':'font-regular'">
+                          {{section.title}}
+                    </span>
 
             </router-link>
         
@@ -33,7 +35,7 @@
               to="/settings"
             >
               <IconSettings class="text-slate-400"/>
-              <span v-if="isAsideOpen" class="text-sm">Settings</span>
+              <span v-if="isAsideOpen" class="text-sm">Configuración</span>
             
             </router-link>
             <div class="h-10 flex  items-center rounded-xl cursor pointer"
@@ -178,18 +180,18 @@
   
 </template>
 <script setup>
-import { ref, shallowRef, computed } from 'vue'
+import { ref, shallowRef, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
 import { useHttp } from '/src/composables/useHttp.js'; 
 import IconAsideCollapsed from "/src/components/icons/IconAsideCollapsed.vue"
 import IconAsideExpand from "/src/components/icons/IconAsideExpand.vue"
-  import IconUsers from "/src/components/icons/IconUsers.vue"
-    import IconFinance from "/src/components/icons/IconFinance.vue"
-    import IconSpeakerphone from "/src/components/icons/IconSpeakerphone.vue"
-    import IconFolders from "/src/components/icons/IconFolders.vue"
-    import IconTool from "/src/components/icons/IconTool.vue"
+import IconUsers from "/src/components/icons/IconUsers.vue"
+import IconFinance from "/src/components/icons/IconFinance.vue"
+import IconSpeakerphone from "/src/components/icons/IconSpeakerphone.vue"
+import IconFolders from "/src/components/icons/IconFolders.vue"
+import IconTool from "/src/components/icons/IconTool.vue"
 import IconSurvey from "/src/components/icons/IconSurvey.vue"
-    import IconPin from "/src/components/icons/IconPin.vue"
+import IconPin from "/src/components/icons/IconPin.vue"
 import IconWorker from "/src/components/icons/IconWorker.vue"
 import IconSettings from "/src/components/icons/IconSettings.vue"
 import IconChevronRight from "/src/components/icons/IconChevronRight.vue"
@@ -198,6 +200,7 @@ import IconBuilding from "/src/components/icons/IconBuilding.vue"
 import IconLogout from "/src/components/icons/IconLogout.vue"
 import IconBell from "/src/components/icons/IconBell.vue"
 import IconUserAccount from "/src/components/icons/IconUserAccount.vue"
+import IconSpaces from "/src/components/icons/IconSpaces.vue"
 import Dropdown from "/src/components/Dropdown.vue"
 import { useUserStore } from '/src/stores/useUserStore.js';
 import { useToast } from 'primevue/usetoast';
@@ -235,7 +238,6 @@ const getInitials = () => {
   const fullName = user?.name+' '+user?.surnames
   const namesArray = fullName.split(' ').slice(0, 2); // Tomar solo las primeras dos palabras
   const initials = namesArray.map(name => name.charAt(0).toUpperCase()).join('');
-  console.log('initials', user?.name+' '+user?.surname)
   return initials;
  
 }
@@ -244,7 +246,16 @@ const getInitials = () => {
 
 
 //collapse expand vertical menu
-const isAsideOpen = ref(true)
+const isAsideOpen = ref(false)
+
+//guardar carpeta en localStorage
+watch(isAsideOpen, (newValue) => {
+  localStorage.setItem('asideStatus', newValue);
+});
+
+onMounted(() => {
+  isAsideOpen.value = localStorage.getItem('asideStatus')
+});
 
 const asideToogle = () => {
   isAsideOpen.value = !isAsideOpen.value
@@ -276,16 +287,19 @@ const isLinkActive = (routeName) => {
 
 const adminFeatures = shallowRef([
     {
+        title: 'Espacios',
+        icon: IconSpaces,
+        available: true,
+        to:'/spaces'
+    },{
         title: 'Propiedades',
         icon: IconBuilding,
         available: true,
-        color: 'indigo',
         to:'/properties'
     }, {
         title: 'Propietarios',
         icon: IconUsers,
         available: true,
-        color: 'blue',
         to:'/owners'
   },
   // {
@@ -299,30 +313,25 @@ const adminFeatures = shallowRef([
         title: 'Incidencias',
         icon: IconTool,
         available: true,
-        color: 'amber',
         to:'/incidences'
     }, {
         title: 'Documentación',
         icon: IconFolders,
         available: true,
-        color: 'lime',
         to:'/documents'
     }, {
         title: 'Votaciones',
         icon: IconSurvey,
         available: true,
-        color: 'violet',
         to:'/surveys'
     }, {
         title: 'Comunicación',
         icon: IconSpeakerphone,
         available: true,
-        color: 'teal',
          to:'/communication'
     }, {
         title: 'Reservas',
         icon: IconPin,
-        available: false,
         color: 'fuchsia',
          to:'/bookings'
   },
@@ -341,7 +350,6 @@ const userFeatures = shallowRef([
         title: 'Incidencias',
         icon: IconTool,
         available: true,
-        color: 'amber',
         to:'/incidences'
     }, 
 ]);

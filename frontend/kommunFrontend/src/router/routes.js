@@ -32,6 +32,11 @@ export default function routes({ authGuard, guestGuard }) {
                 path: '/properties',
                 name: 'properties',
                 component: () => import('../views/admin/Properties.vue')
+            },
+            {
+                path: '/spaces',
+                name: 'spaces',
+                component: () => import('../views/admin/Spaces.vue')
             }, 
             {
                 path: '/owners',

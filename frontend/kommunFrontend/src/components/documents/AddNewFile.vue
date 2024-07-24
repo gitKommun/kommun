@@ -11,9 +11,9 @@
             <div class="">
               <inputFileDraggable @update:files="updateFiles"/>
             </div>
-              <div v-for="(f,i) in files" :key="'k'+i">
+              <!-- <div v-for="(f,i) in files" :key="'k'+i">
                 {{ f.name }}
-              </div>
+              </div> -->
             <template #footer>
               <div class="flex justify-end gap-x-4">
                 <Button 
