@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse, Http404
 from django.db.models import Count
@@ -5,6 +7,8 @@ from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
+
 
 from .models import Folder, Document
 from .serializers import FolderSerializer, FolderListCompleteSerializer, DocumentUploadSerializer, DocumentSerializer, FolderDetailSerializer, FolderOpenSerializer
@@ -145,6 +149,53 @@ class OLDFolderOpenDetailView(APIView):
         return Response(result)
 
 ### Document views ###  
+
+
+class DocumentMultiUploadAPIView(APIView):
+    parser_classes = [MultiPartParser]
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+    MAX_TOTAL_SIZE = 50 * 1024 * 1024  # 50 MB
+    MAX_FILES = 10  # Maximum number of files per upload
+
+    def post(self, request, IDcommunity, IDfolder):
+        documents_data = request.FILES.getlist('file')
+        #print(request.FILES)
+        #print(documents_data)
+
+        # Check number of files
+        if len(documents_data) > self.MAX_FILES:
+            return Response({'error': f'Cannot upload more than {self.MAX_FILES} files at a time.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        total_size = sum([doc.size for doc in documents_data])
+
+        # Check total size
+        if total_size > self.MAX_TOTAL_SIZE:
+            return Response({'error': f'Total upload size cannot exceed {self.MAX_TOTAL_SIZE / (1024 * 1024)} MB.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        response_data = []
+
+        for document_data in documents_data:
+            print(document_data.name)
+            # Check individual file size
+            if document_data.size > self.MAX_FILE_SIZE:
+                return Response({'error': f'File "{document_data.name}" exceeds the maximum file size of {self.MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            data = {
+                'name': document_data.name,
+                'file': document_data,
+                'community': IDcommunity,
+                'folder_id': IDfolder if IDfolder != '0' else None,
+            }
+            
+            serializer = DocumentUploadSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                response_data.append(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+    
 class DocumentUploadAPIView(APIView):
     def post(self, request, IDcommunity, IDfolder):
         data = request.data.copy()
@@ -176,6 +227,7 @@ class DocumentDownloadAPIView(APIView):
     def get(self, request, IDcommunity, IDdocument):
         document = get_object_or_404(Document, document_id=IDdocument, community_id=IDcommunity)
         file_handle = document.file.open()
+        filename = os.path.basename(document.file.name)
         response = FileResponse(file_handle, content_type='application/octet-stream')
-        response['Content-Disposition'] = f'attachment; filename="{document.file.name}"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
