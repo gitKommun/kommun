@@ -29,7 +29,7 @@ class User(AbstractUser):
     username = None  # Eliminar el campo de nombre de usuario
     email = models.EmailField(_('email address'), unique=True)
     name = models.CharField(_('name'), max_length=30)
-    surnames = models.CharField(_('surnames'), max_length=150)
+    surnames = models.CharField(_('surnames'), max_length=120)
     birthdate = models.DateField(verbose_name=_("Birthdate"), null=True, blank=True)
     addressLetters = models.CharField(_('postal address'), max_length=255)
     phoneNumber = models.CharField(_('phone number'), max_length=20, null=True, blank=True)

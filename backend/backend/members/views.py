@@ -41,12 +41,7 @@ class UserMainContactCommunityRegistrationAPIView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            community = Community.objects.create()
-            
-            # Asignar al usuario como el contacto principal de la comunidad utilizando clave foránea genérica
-            community.main_contact_type = ContentType.objects.get_for_model(User)
-            community.main_contact_id = user.id
-            community.save()
+            community = Community.objects.create(mainUser=user)
             
             # Asignar el rol de administrador al usuario en la comunidad recién creada
             UserCommunityRole.objects.create(
@@ -147,7 +142,7 @@ def get_user_data(request):
             'email': user.email,
             'name': user.name,
             'surnames': user.surnames,
-            'birthdate': user.birthdate,
+            'birthdate': user.birthdate, 
             'addressLetters': user.addressLetters,
             'phoneNumber': user.phoneNumber,
             'bankAccount': user.bankAccount,

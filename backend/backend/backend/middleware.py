@@ -63,6 +63,9 @@ class RoleBasedAccessMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         self.excluded_paths = [
+            '/admin/',
+            '/admin/.*',
+            '/admin/login/',
             '/members/',
             '/members/register_user_community/',
             '/members/register/',

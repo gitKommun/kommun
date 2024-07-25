@@ -21,10 +21,8 @@ class Community(models.Model):
     city = models.CharField(_('city'), max_length=100, null=True, blank=True)
     postal_code = models.CharField(_('postal code'), max_length=12, null=True, blank=True)
 
-    #contacto principal de la comunidad
-    main_contact_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
-    main_contact_id = models.PositiveIntegerField(null=True, blank=True)
-    mainContact = GenericForeignKey('main_contact_type', 'main_contact_id')
+    # contacto principal de la comunidad
+    mainUser = models.ForeignKey('members.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='communities_main')
 
     #onboarding -> meter userDAta
     configurationCompleted = models.BooleanField(null=True, blank=True)
@@ -66,7 +64,7 @@ class Property(models.Model):
         verbose_name_plural = _("Properties")
 
     def __str__(self):
-        return f"Property {self.property_id} in {self.community.name}"
+        return f"Property {self.property_id} in {self.community.nameCommunity}"
 
 class PersonCommunity(models.Model):
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='people')

@@ -1,13 +1,15 @@
 from django.urls import path
-from .views import CommunityListAPIView, AddUserToCommunityAPIView, CommunityUsersAPIView, ManageUserCommunityRoleAPIView
+from .views import CommunityListAPIView, AddUserToCommunityAPIView, CommunityUsersAPIView, ManageUserCommunityRoleAPIView, CommunityCreateAPIView, CommunityDeleteAPIView
 from .views import PersonCommunityListAPIView, PersonCommunityDetailAPIView, PersonCommunityCreateAPIView
 from .views import community_detail, community_update, list_properties, add_property_to_community, edit_property, delete_property, add_property_to_community2
 urlpatterns = [
     path('', CommunityListAPIView.as_view(), name='community_list'), #GET/listar comunidades
 
     #Community URLS
+    path('create/', CommunityCreateAPIView.as_view(), name='community-create'), #POST/crear comunidad
     path('<str:IDcommunity>/', community_detail, name='community-detail'), #GET/ver datos comunidad
     path('<str:IDcommunity>/update/', community_update, name='community-update'), #POST/editar comunidad
+    path('<str:IDcommunity>/delete/', CommunityDeleteAPIView.as_view(), name='community-delete'), #DELETE/borrar comunidad
     
     #Property URLS
     path('<str:IDcommunity>/properties/', list_properties, name='list-properties'), #GET/listar propiedades

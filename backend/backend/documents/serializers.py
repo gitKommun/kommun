@@ -2,10 +2,30 @@ from rest_framework import serializers
 from .models import Document, Folder
 
 class DocumentSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    upload_user = serializers.SerializerMethodField()
+    upload_date = serializers.SerializerMethodField()
+
     class Meta:
         model = Document
         #fields = '__all__'
         exclude = ['community', 'folder_id']
+
+    def get_type(self, obj):
+        # Extraer la extensión del archivo y convertirla a mayúsculas
+        file_extension = obj.file.name.split('.')[-1].upper()
+        return file_extension
+
+    def get_upload_user(self, obj):
+        if obj.upload_user:
+            return {
+                'Fullname': f"{obj.upload_user.name} {obj.upload_user.surnames}",
+                'id': obj.upload_user.id
+            }
+        
+    def get_upload_date(self, obj):
+        # Formatear la fecha al formato 'dd/mm/yyyy hh:ss'
+        return obj.upload_date.strftime('%d/%m/%Y %H:%M')
 
 class FolderSerializer(serializers.ModelSerializer):
     folder_id = serializers.IntegerField(read_only=True)
@@ -35,7 +55,7 @@ class FolderListCompleteSerializer(serializers.ModelSerializer):
 class DocumentUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ['name', 'file', 'community', 'folder_id']
+        fields = ['name', 'file', 'community', 'folder_id', 'upload_user']
 
 
 
