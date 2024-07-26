@@ -46,9 +46,8 @@ class Document(models.Model):
     file = models.FileField(upload_to=document_path, validators=[FileExtensionValidator(allowed_extensions=valid_formats)])
     community = models.ForeignKey('communities.Community', on_delete=models.CASCADE)
     folder_id = models.PositiveIntegerField(null=True, blank=True, default=0)  # ID relativo de la carpeta
-    #folder = models.ForeignKey(Folder, related_name='documents', on_delete=models.CASCADE, null=True, blank=True)
-    #userCreator = models.ForeignKey('members.User', on_delete=models.SET_NULL, null=True, blank=True) #TO DO añadir logica para mantener el nombre del usuario creador en caso de eliminar el usuario
-    #created_at = models.DateTimeField(auto_now_add=True)
+    upload_user = models.ForeignKey('members.User', on_delete=models.SET_NULL, null=True, blank=True) #TO DO añadir logica para mantener el nombre del usuario creador en caso de eliminar el usuario
+    upload_date = models.DateTimeField(auto_now_add=True)
     #log = models.JSONField(null=True, blank=True)
     document_id = models.PositiveIntegerField()  # ID relativo autoincremental
 

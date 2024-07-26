@@ -19,6 +19,25 @@ class CommunityListAPIView(generics.ListAPIView):
     serializer_class = CommunitySerializer
 
 
+class CommunityCreateAPIView(APIView):
+    def post(self, request):
+        user = request.user
+        serializer = CommunitySerializer(data=request.data)
+        if serializer.is_valid():
+            community = serializer.save(mainUser=user)
+
+            # Asignar el rol de administrador al usuario en la comunidad recien creada
+            UserCommunityRole.objects.create(
+                user=user,
+                community=community,
+                role='admin'
+            )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['GET'])
 def community_detail(request, IDcommunity):
     if request.method == 'GET':
@@ -47,7 +66,11 @@ def community_update(request, IDcommunity):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
+class CommunityDeleteAPIView(APIView):
+    def delete(self, request, IDcommunity):
+        community = get_object_or_404(Community, IDcommunity=IDcommunity)
+        community.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 ### Property managemente views ###
 

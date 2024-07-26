@@ -184,7 +184,8 @@ class DocumentMultiUploadAPIView(APIView):
                 'name': document_data.name,
                 'file': document_data,
                 'community': IDcommunity,
-                'folder_id': IDfolder if IDfolder != '0' else None,
+                'folder_id': IDfolder if IDfolder != '0' else 0,
+                'upload_user': request.user.id
             }
             
             serializer = DocumentUploadSerializer(data=data)
