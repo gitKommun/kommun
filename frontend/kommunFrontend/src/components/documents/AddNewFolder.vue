@@ -34,8 +34,6 @@
           </Dialog>
           <Toast /> 
     </div>
-    
-    
 </template>
 <script setup>
     import { ref, watch} from 'vue'
@@ -61,11 +59,9 @@
     const folderCreateValidated = ref(false);
     const folderCreateLoading = ref(false);
 
-    //instancia API
+    //utils
     const http = useHttp();
-    //user store
     const { user } = useUserStore();
-    //use toast
     const toast = useToast();
     //emit
     const emit = defineEmits(['update:folder']);

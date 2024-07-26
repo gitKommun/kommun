@@ -75,7 +75,7 @@ const toast = useToast();
 
    const updateFiles = (newFiles) => {
      files.value = newFiles;
-     console.log('file',files.value)
+     console.log('file',toRaw(files.value))
     };
 
     // uploadDocument
@@ -86,9 +86,13 @@ const toast = useToast();
         if (props.selected?.folder_id) {
                     try {
                     const response = await http.post(`documents/${user?.current_community?.community_id}/f/${props.selected.folder_id}/upload/`, {
-                      file: files.value,
+                      files: toRaw(files.value),
                         //name:
 
+                    }, {
+                      headers: {
+                          'Content-Type': 'application/json'  // Asegúrate de que este encabezado esté presente
+                      }
                     })
                     uploadLoading.value = false;
                     showUploadFile.value = false;
@@ -102,7 +106,11 @@ const toast = useToast();
              } else {
                 try {
                     const response = await http.post(`documents/${user?.current_community?.community_id}/f/0/upload/`, {
-                    files: files.value,
+                    files: toRaw(files.value),
+                    }, {
+                      headers: {
+                          'Content-Type': 'application/json'  // Asegúrate de que este encabezado esté presente
+                      }
                     })
                     uploadLoading.value = false;
                     showUploadFile.value = false;

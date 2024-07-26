@@ -136,6 +136,8 @@ import ProgressBar from 'primevue/ProgressBar';
 app.component('ProgressBar', ProgressBar)
 
 
+import SelectButton from 'primevue/selectbutton';
+app.component('SelectButton', SelectButton)
 
 
 

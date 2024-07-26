@@ -48,7 +48,7 @@
                         @click="open"
                     >
                         <Avatar :label="getInitials()" size="large" shape="circle"/>
-                        <span v-if="isAsideOpen" class="text-sm font-semibold ml-3">Jane Smith</span>  
+                        <span v-if="isAsideOpen" class="text-sm font-semibold ml-3">{{ user?.name+' '+user?.surnames }}</span>  
                     </div>
                 </template>
 
@@ -196,7 +196,7 @@ import IconWorker from "/src/components/icons/IconWorker.vue"
 import IconSettings from "/src/components/icons/IconSettings.vue"
 import IconChevronRight from "/src/components/icons/IconChevronRight.vue"
 import IconChevronLeft from "/src/components/icons/IconChevronLeft.vue"
-import IconBuilding from "/src/components/icons/IconBuilding.vue"
+import IconKey from "/src/components/icons/IconKey.vue"
 import IconLogout from "/src/components/icons/IconLogout.vue"
 import IconBell from "/src/components/icons/IconBell.vue"
 import IconUserAccount from "/src/components/icons/IconUserAccount.vue"
@@ -287,13 +287,13 @@ const isLinkActive = (routeName) => {
 
 const adminFeatures = shallowRef([
     {
-        title: 'Espacios',
+        title: 'Comunidades',
         icon: IconSpaces,
         available: true,
-        to:'/spaces'
+        to:'/communities'
     },{
         title: 'Propiedades',
-        icon: IconBuilding,
+        icon: IconKey,
         available: true,
         to:'/properties'
     }, {

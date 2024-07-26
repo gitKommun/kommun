@@ -54,12 +54,12 @@
           <template v-else>
             <div class="w-full flex flex-col">
               <div v-if="folders.length" class="flex items-center justify-between py-4">
-                <span class="text-slate-950 font-semibold text-lg">Carpetas s</span>
+                <span class="text-slate-950 font-semibold text-lg">Carpetas <span class="text-slate-400 text-sm font-medium">({{ folders.length }})</span></span>
               </div>
               <div class="w-full flex flex-wrap gap-3">
                 <FolderItem
                   v-for="folder in folders"
-                  :key="folder.id"
+                  :key="folder.folder_id"
                   :folder="folder"
                   @update:items="updateItems"
                   @click="selectFolder(folder)" 
@@ -67,9 +67,48 @@
                 />
                 <!-- -->
               </div>
-              <div v-if="folders.length" class="flex items-center justify-between py-4">
-                  <span class="text-slate-950 font-semibold text-lg">Archivos</span>
+              <div v-if="documents.length" class="flex items-center justify-between py-4">
+                  <span class="text-slate-950 font-semibold text-lg">Archivos <span class="text-slate-400 text-sm font-medium">({{ documents.length }})</span></span>
+                  <SelectButton v-model="toggleView" :options="toggleViewOptions" optionLabel="value" >
+                      <template #option="slotProps">
+                          <IconGrid v-if="slotProps.option === 'card'"/>
+                          <IconTable v-else/>
+                      </template>
+                  </SelectButton>
               </div>
+              <transition
+                enter-active-class="transition-all transition-slow ease-out overflow-hidden"
+                leave-active-class="transition-all transition-slow ease-in overflow-hidden"
+                enter-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-class="opacity-100 "
+                leave-to-class="opacity-0"
+                mode="out-in"
+              >
+              <!-- cards view -->
+              <div
+                v-if="toggleView === 'card'"
+                class="w-full flex flex-wrap gap-3"
+                key="cards"
+                >
+                <DocumentItem
+                 v-for="document in documents"
+                  :document="document"
+                  :key="document.document_id"
+                  @update:items="updateItems"
+                />
+              </div>
+              <!-- cards view -->
+              <!-- table view -->
+               <div 
+                  v-else
+                  class="w-full"
+                  key="table"
+                  >
+                tabla
+               </div>
+              <!-- table view -->
+               </transition>
             </div>    
           </template>
           
@@ -80,16 +119,19 @@
   </div>  
 </template>
 <script setup>
-import { ref, watch, onMounted, toRaw} from 'vue'
+import { ref, watch, onMounted, shallowRef} from 'vue'
 
 import AddContent from "/src/components/documents/AddContent.vue"
 import FolderItem from "/src/components/documents/FolderItem.vue"
+import DocumentItem from "/src/components/documents/DocumentItem.vue"
 import EmptyFolder from "/src/components/emptys/EmptyFolder.vue"
 import Loading from '/src/components/Loading.vue'
 import Main from '/src/layouts/Main.vue';
 import IconChevronRight from '@/components/icons/IconChevronRight.vue'
 import IconFolder from '@/components/icons/IconFolder.vue'
 import IconFolders from '@/components/icons/IconFolders.vue'
+import IconTable from '@/components/icons/IconTable.vue'
+import IconGrid from '@/components/icons/IconGrid.vue'
 
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
@@ -109,7 +151,10 @@ const folders = ref([]);
 const foldersLoading = ref(true);
 const selectedFolder = ref(null);
 const documents = ref([]);
-const path = ref([])
+const path = ref([]);
+const toggleView = ref('card');
+const toggleViewOptions = ref(['card','table'])
+
 
 
 //instancia API
@@ -124,7 +169,13 @@ watch(selectedFolder, (newValue) => {
   //localStorage.setItem('currentFolder', toRaw(newValue));
 });
 
+
+// watch(toggleView, (newValue) => {
+//   console.log('toggle', newValue)
+// })
+
 onMounted(() => {
+
   //selectedFolder.value = localStorage.getItem('currentFolder')
   updateItems()
 });

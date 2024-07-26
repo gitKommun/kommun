@@ -13,7 +13,7 @@
             <template #reference="{ open }">
                 <div 
                     class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer "
-                    @click.capture="open"
+                    @click.stop="open"
                 >
                     <IconDots class="text-slate-500"/>
                 </div>
@@ -65,7 +65,7 @@
     import { ref, shallowRef, watch } from 'vue'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
-    import EventBus from '/src/utils/event-bus.js'
+
 
     import IconFolder from "/src/components/icons/IconFolder.vue";
     import IconDots from "/src/components/icons/IconDots.vue"
