@@ -9,6 +9,60 @@
         <AddNewCommunity @update:communities="updateItems" class="h-auto"/>  
       </div>
     </div>
+    <!-- search and view -->
+    <div v-if="communities.length" class="flex items-center justify-between py-4">
+    
+      <SelectButton v-model="toggleView" :options="toggleViewOptions" optionLabel="value" >
+          <template #option="slotProps">
+              <IconGrid v-if="slotProps.option === 'card'"/>
+              <IconTable v-else/>
+          </template>
+      </SelectButton>
+    </div>
+    <!-- search and view -->
+    
+     <div class=" w-full flex justify-center px-4 flex-1 min-h-0 overflow-y-scroll">
+       <div class="w-full max-w-4xl  flex flex-col">
+          <!-- cards -->
+          <div 
+           v-if="toggleView === 'card'"
+          class="w-full flex flex-wrap gap-3 pb-4"
+          key="cards">
+            <CommunityItem
+              v-for ="community in communities"
+              :key="community.community_id"
+              :community="community"
+              @update:community="updateItems"
+            />
+          </div>
+          <!-- cards-->
+          <!-- table -->
+           <div 
+            v-else
+            class="w-full"
+            key="table">
+            <DataTable :value="communities" class="text-sm">
+              <column header="Comunidad" >
+                <template #body="slotProps">
+                  <CustomTag
+                    v-if="isCurrent(slotProps.data.IDcommunity)"
+                    :solid="true"
+                    :color="'green'"
+                    >
+                    Actual
+                    </CustomTag>
+                  <span :class="isCurrent(slotProps.data.IDcommunity)?'ml-2':''">{{slotProps.data.nameCommunity}}</span>
+                </template>
+              </column>
+              <column header="Dirección" field="address"></column>
+
+            </DataTable>
+           </div>
+          <!-- table -->
+       </div>
+     </div>
+
+
   </div>  
 </template>
 <script setup>
@@ -19,6 +73,10 @@ import { useToast } from 'primevue/usetoast';
 
 import Main from '/src/layouts/Main.vue';
 import AddNewCommunity from '/src/components/communities/AddNewCommunity.vue'
+import CommunityItem from '/src/components/communities/CommunityItem.vue'
+import IconTable from '@/components/icons/IconTable.vue'
+import IconGrid from '@/components/icons/IconGrid.vue'
+import CustomTag from '/src/components/CustomTag.vue'
 defineOptions({
   name: 'Communities',
   layout: Main
@@ -29,5 +87,42 @@ const title = ref('Comunidades')
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
+
+const communities = ref([]);
+const toggleView = ref('card');
+const toggleViewOptions = ref(['card','table'])
+
+//listar comunidades
+
+const getCommunities = async () => {
+
+  try {
+    const response = await http.get(`communities/`);
+    communities.value = response.data;
+
+  } catch (error) {
+    toast.add({
+        severity: 'danger',
+        summary: 'Upps!! algo ha fallado',
+        detail: error,
+        life: 3000
+    });
+  }
+}
+
+getCommunities()
+
+function updateItems() {
+  setTimeout(() => {
+    getCommunities()
+  }, 300);
+}
+
+//currentCommunity
+const isCurrent = (id)=> {
+    return user?.current_community?.community_id === id
+}
+
+
 </script>
 

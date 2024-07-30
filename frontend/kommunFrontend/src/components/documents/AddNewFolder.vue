@@ -88,10 +88,20 @@ const crateFolder = async () => {
                     showCreateFolder.value = false;
                     folderName.value = '';
                 emit('update:folder', true);
-                    toast.add({ severity: 'success', summary: 'Ok', detail: 'Carpeta creada con exito', life: 3000 });
+                        toast.add({
+                            severity: 'success',
+                            summary: 'Ok',
+                            detail: 'Carpeta creada con exito',
+                            life: 3000
+                        });
                 }
                 catch (error) {
-                    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+                        toast.add({
+                            severity: 'danger',
+                            summary: 'Upps!! algo ha fallado',
+                            detail: error,
+                            life: 3000
+                        });
                 }
              } else {
                 try {

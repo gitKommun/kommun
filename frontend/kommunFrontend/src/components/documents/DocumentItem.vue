@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col items-center border border-slate-200 p-2 rounded-2xl gap-x-3 mb-3 w-full max-w-72  hover:shadow-lg hover:bg-slate-50 relative group cursor-pointer transition-all duration-300">
         <div class="bg-blue-300 h-32 w-full rounded-lg"></div>
-        <div class="w-full flex justify-between  px-2 py-2">
+        <div class="w-full flex justify-between items-center  py-2">
             <div class="w-full flex text-sm pl-2">
                <span class="truncate">
                 {{ document.name }} 
@@ -37,13 +37,23 @@
                 </Dropdown>
             </div>
         </div>
+        <div class="w-full flex justify-between items-center">
+            <span class="flex items-center truncate">
+                <span class="min-w-8 mr-1">
+                    <Avatar label="k" shape="circle"/>
+                </span>       
+                <span class="text-xs text-slate-400 truncate">{{ document.upload_user?document.upload_user: 'Kommun' }}</span>
+            </span>
+            <span class="text-xs text-slate-400 min-w-20 flex justify-end">{{ onlyDate }}</span>
+            
+        </div>
 
         
         
     </div>
 </template>
 <script setup>
-import { ref, shallowRef, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
 import { useToast } from 'primevue/usetoast';
@@ -92,5 +102,11 @@ const downloadFile = () => {
         });
     }
 }
+
+// formateo fecha
+const onlyDate = computed(() => {
+  // Dividimos la cadena por el espacio para separar la fecha de la hora
+  return props.document.upload_date.split(' ')[0]
+})
     
 </script>

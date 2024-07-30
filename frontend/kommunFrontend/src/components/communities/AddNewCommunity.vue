@@ -56,11 +56,23 @@ const createCommunity = async () => {
     communityCreateLoading.value =true 
     if (communityName.value !== '') {
         try {
-            const respone = await http.post(`communities/${user?.current_community?.community_id}/add-user/`, form.value);
-            toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado una nueva comunidad', life: 3000 });
+            const respone = await http.post(`communities/create/`, {
+                name:communityName.value
+            });
+            toast.add({
+                severity: 'success',
+                summary: 'Ok',
+                detail: 'Has creado una nueva comunidad',
+                life: 3000
+            });
             
         } catch (error) {
-            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+            toast.add({
+                severity: 'danger',
+                summary: 'Upps!! algo ha fallado',
+                detail: error,
+                life: 3000
+            });
         }
         showCreateCommunity.value = false;
         communityCreateLoading.value = false 

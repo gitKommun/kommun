@@ -5,9 +5,6 @@
           {{title}}
           <span class="text-sm text-slate-500 font-medium">Comunidad "Las Veredillas"</span>
       </div>
-      <div class=" p-4 flex justify-end">
-        <Button severity="contrast" class="inline">Guardar</Button>
-      </div>
     </div>
     <div class="flex justify-center px-3 pb-6">
       <div class="w-full max-w-4xl flex flex-col gap-y-3">

@@ -56,7 +56,7 @@
               <div v-if="folders.length" class="flex items-center justify-between py-4">
                 <span class="text-slate-950 font-semibold text-lg">Carpetas <span class="text-slate-400 text-sm font-medium">({{ folders.length }})</span></span>
               </div>
-              <div class="w-full flex flex-wrap gap-3">
+              <div class="w-full flex flex-wrap gap-3 pb-4">
                 <FolderItem
                   v-for="folder in folders"
                   :key="folder.folder_id"
@@ -88,7 +88,7 @@
               <!-- cards view -->
               <div
                 v-if="toggleView === 'card'"
-                class="w-full flex flex-wrap gap-3"
+                class="w-full flex flex-wrap gap-3 pb-4"
                 key="cards"
                 >
                 <DocumentItem
@@ -105,7 +105,56 @@
                   class="w-full"
                   key="table"
                   >
-                tabla
+                <DataTable :value="documents" class="text-sm">
+                  <Column header="Documento">
+                    <template #body="slotProps">
+                      <span class="flex items-center">
+                        <FileType :type="slotProps.data.type"/>
+                        <span class="text-sm ml-2">{{ slotProps.data.name }}</span>
+                      </span>  
+                    </template>
+                  </Column>
+                  <Column header="Propietario">
+                    <template #body="slotProps">
+                      <span class="min-w-8 mr-1">
+                          <Avatar label="k" shape="circle"/>
+                      </span>       
+                      <span class="text-xs text-slate-400 truncate">{{ slotProps.data.upload_user?document.upload_user: 'Kommun' }}</span>
+                    </template>
+                  </Column>
+                  <column field="upload_date" header="Fecha"/>
+                  <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:right">
+                    <template #body="slotProps">
+                        <Dropdown strategy="fixed">
+                          <template #reference="{ open }">
+                              <div 
+                                  class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer "
+                                  @click.stop="open"
+                              >
+                                  <IconDotsHorizontal class="text-slate-500"/>
+                              </div>
+                          </template>
+
+                          <template #content="{ close }">
+                              <div class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
+                                  <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
+                                      @click="downloadFile(slotProps.data.document_id)"
+                                  >
+                                      <IconDownload class="scale-75"/>
+                                      <span>Descargar</span>
+                                  </div>
+                                  <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
+                                      @click="deleteFolder(slotProps.data.document_id)"
+                                      >
+                                      <IconTrash class="scale-75"/>
+                                      <span>Eliminar</span>
+                                  </div>
+                              </div>
+                          </template>
+                      </Dropdown>
+                    </template>
+                  </Column>
+                </DataTable>
                </div>
               <!-- table view -->
                </transition>
@@ -132,6 +181,11 @@ import IconFolder from '@/components/icons/IconFolder.vue'
 import IconFolders from '@/components/icons/IconFolders.vue'
 import IconTable from '@/components/icons/IconTable.vue'
 import IconGrid from '@/components/icons/IconGrid.vue'
+import FileType from '/src/components/FileType.vue'
+import Dropdown from "/src/components/Dropdown.vue"
+import IconDotsHorizontal from "/src/components/icons/IconDotsHorizontal.vue"
+import IconTrash from "/src/components/icons/IconTrash.vue"
+import IconDownload from "/src/components/icons/IconDownload.vue"
 
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
@@ -196,7 +250,12 @@ async function getFolders() {
     foldersLoading.value = false;
     
   } catch (error) {
-    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+      toast.add({
+        severity: 'danger', 
+        summary: 'Upps!! algo ha fallado', 
+        detail: error,
+        life: 3000
+      });
   }
   } else {
     try {
@@ -209,7 +268,12 @@ async function getFolders() {
       foldersLoading.value = false;
       
     } catch (error) {
-      toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+      toast.add({
+        severity: 'danger',
+        summary: 'Upps!! algo ha fallado',
+        detail: error,
+        life: 3000
+      });
     }
   }
 }
@@ -231,7 +295,25 @@ const resetPath = () => {
   updateItems()
 }
 
-
+//Descarga doc
+const downloadFile = (id) => {
+    try {
+        const response = http.get(`documents/${user?.current_community?.community_id}/d/${id}/download/`);
+        toast.add({
+            severity: 'success',
+            summary: 'Ok', 
+            detail: 'El documento se ha descargado con exito',
+            life: 3000
+        });
+    } catch (error) {
+        toast.add({
+            severity: 'danger',
+            summary: 'Upps!! algo ha fallado',
+            detail: error,
+            life: 3000
+        });
+    }
+}
 
 
 
