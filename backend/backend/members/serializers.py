@@ -37,8 +37,4 @@ class UserSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'name', 'surnames', 'birthdate', 'addressLetters',
-            'phoneNumber', 'bankAccount', 'languageConf', 
-            'documentID', 'documentType', 'contactIsPublic', 'current_community'
-        ]
+        fields = '__all__'

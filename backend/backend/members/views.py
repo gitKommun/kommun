@@ -21,8 +21,10 @@ from rest_framework.permissions import IsAuthenticated
 
 from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer, UserUpdateSerializer
 from .models import User
-from communities.models import Community, UserCommunityRole, PropertyRelationship
+from communities.models import Community, UserCommunityRole
 from communities.serializers import CommunitySerializer
+from properties.models import Property, PropertyRelationship
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserRegistrationAPIView(APIView):
@@ -41,7 +43,7 @@ class UserMainContactCommunityRegistrationAPIView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            community = Community.objects.create(mainUser=user)
+            community = Community.objects.create(main_contact_user=user)
             
             # Asignar el rol de administrador al usuario en la comunidad recién creada
             UserCommunityRole.objects.create(
@@ -143,16 +145,15 @@ def get_user_data(request):
             'name': user.name,
             'surnames': user.surnames,
             'birthdate': user.birthdate, 
-            'addressLetters': user.addressLetters,
-            'phoneNumber': user.phoneNumber,
-            'bankAccount': user.bankAccount,
-            'languageConf': user.languageConf,
-            'documentID': user.documentID,
-            'documentType': user.documentType,
+            'address': user.address,
+            'phone_number': user.phone_number,
+            'language_config': user.language_config,
+            'personal_id_number': user.personal_id_number,
+            'personal_id_type': user.personal_id_type,
             'date_joined': user.date_joined,
-            'contactIsPublic': user.contactIsPublic,
-
         }
+
+
         user_communities = UserCommunityRole.objects.filter(user=user).select_related('community')
         user_communities_data = []
         user_current_community = UserCommunityRole.objects.filter(user=user, community=user.current_community)
@@ -160,8 +161,8 @@ def get_user_data(request):
         user_current_community_data = {}
         if user.current_community:
             user_current_community_data = {
-                'community_id': user.current_community.IDcommunity,
-                'community_name': user.current_community.nameCommunity,
+                'community_id': user.current_community.community_id,
+                'community_name': user.current_community.name,
                 'community_role': user_current_community.first().role,
                 'community_user_status': user_current_community.first().user_status
             
@@ -183,8 +184,8 @@ def get_user_data(request):
             #]
 
             user_community_data = {
-                'community_id': community.IDcommunity,
-                'community_name': community.nameCommunity,
+                'community_id': community.community_id,
+                'community_name': community.name,
                 #'role': user_community.role,
             #    'properties': properties_data
             }

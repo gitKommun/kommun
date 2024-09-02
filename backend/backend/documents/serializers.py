@@ -3,6 +3,7 @@ from .models import Document, Folder
 
 class DocumentSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
+    size = serializers.SerializerMethodField()
     upload_user = serializers.SerializerMethodField()
     upload_date = serializers.SerializerMethodField()
 
@@ -26,6 +27,9 @@ class DocumentSerializer(serializers.ModelSerializer):
     def get_upload_date(self, obj):
         # Formatear la fecha al formato 'dd/mm/yyyy hh:ss'
         return obj.upload_date.strftime('%d/%m/%Y %H:%M')
+
+    def get_size(self, obj):
+        return obj.file.size
 
 class FolderSerializer(serializers.ModelSerializer):
     folder_id = serializers.IntegerField(read_only=True)
