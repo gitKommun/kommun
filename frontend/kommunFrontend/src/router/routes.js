@@ -79,7 +79,7 @@ export default function routes({ authGuard, guestGuard }) {
                 component: () => import('../views/admin/Providers.vue')
             }, 
             {
-                path: '/settings',
+                path: '/settings/:id',
                 name: 'settings',
                 component: () => import('../views/admin/Settings.vue')
             }, 
@@ -87,6 +87,11 @@ export default function routes({ authGuard, guestGuard }) {
                 path: '/profile',
                 name: 'profile',
                 component: () => import('../views/admin/Profile.vue')
+            }, 
+            {
+                path: '/onboarding',
+                name: 'onboarding',
+                component: () => import('../views/admin/Onboarding.vue')
             },
         ]),
 

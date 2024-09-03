@@ -6,6 +6,7 @@ import router from './router';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 import { createPinia } from 'pinia';
 import kommunTheme from './kommunTheme';
 
@@ -25,6 +26,8 @@ app.use(router);
 //DIRECTIVAS
 import Ripple from 'primevue/ripple';
 app.directive('ripple', Ripple);
+import AnimateOnScroll from 'primevue/animateonscroll';
+app.directive('animateonscroll', AnimateOnScroll);
 
 app.use(PrimeVue, {
     ripple:true,
@@ -45,6 +48,7 @@ app.use(PrimeVue, {
     
 });
 app.use(ToastService);
+app.use(ConfirmationService);
 
 
 
@@ -140,8 +144,11 @@ import SelectButton from 'primevue/selectbutton';
 app.component('SelectButton', SelectButton)
 
 
+import ConfirmDialog from 'primevue/confirmdialog';
+app.component('ConfirmDialog', ConfirmDialog)
 
-
+import MeterGroup from 'primevue/metergroup';
+app.component('MeterGroup', MeterGroup)
 
 
 app.mount('#app');

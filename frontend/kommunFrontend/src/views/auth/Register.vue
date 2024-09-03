@@ -90,45 +90,13 @@ import { useRouter } from 'vue-router';
 //Jakub: enlazando con API
 import { useHttp } from '/src/composables/useHttp.js'; 
 
-//API
+//utils
 const http = useHttp();
-// router
 const router = useRouter();
-
-//use toast
 const toast = useToast();
 
-const registerLoading = ref(false);
-const registerUser = async () => {
-    registerLoading.value = true
-    try {
-        if (passFormatValid.value) {
-            console.log('valido')
-            if (password_1.value===password_2.value) {
-                const response = await http.post(`members/register/`, {
-                    name: name.value,
-                    surnames: surnames.value,
-                    email: email.value,
-                    password: password_1.value
-                    // Agrega aquí los demás campos del formulario que desees enviar
-                    });
-                
-                router.push({ name: 'login' });
-            } else {
-                toast.add({ severity: 'danger', summary: 'Las contraseñas no coinciden', detail: 'Comprueba que has introducido la misma contraseña en los dos campos', life: 3000 });
-            }
-        } else {
-             toast.add({ severity: 'danger', summary: 'Formato de contraseña no valido', detail: 'Revisa los requisitos para tener una contraseña segura', life: 3000 });
-        }
-        registerLoading.value = false
-    } catch (error) {
-        toast.add({ severity: 'danger', summary: 'Error en el registro', detail: error, life: 3000 });
-        registerLoading.value = false
-    }
-};
-//Jakub: fin
 
-    defineOptions({
+   defineOptions({
         name: 'register',
         layout:Authentication
     });
@@ -137,6 +105,77 @@ const registerUser = async () => {
     const email = ref('');
     const password_1 = ref('');
     const password_2 = ref('');
+
+//login
+ const login = () => {
+    try {
+        const response =  http.post(`members/login/`, {
+            email: email.value,
+            password: password.value,
+        });
+        
+        const { csrftoken, sessionid } = response.data;
+
+        setCookie('csrftoken', csrftoken, 30);
+        setCookie('sessionid', sessionid, 30);
+
+        router.push({ name: 'onboarding' });
+    } catch (error) {
+
+        // Manejar el error de autenticación
+        toast.add({
+            severity: 'danger',
+            summary: 'Upps!! algo ha fallado',
+            detail: error,
+            life: 3000
+        });
+
+    }
+}
+//register
+const registerLoading = ref(false);
+const registerUser = () => {
+    registerLoading.value = true
+    try {
+        if (passFormatValid.value) {
+            if (password_1.value===password_2.value) {
+                const response = http.post(`members/register/`, {
+                    name: name.value,
+                    surnames: surnames.value,
+                    email: email.value,
+                    password: password_1.value
+                    // Agrega aquí los demás campos del formulario que desees enviar
+                    });
+                
+                
+            } else {
+                toast.add({
+                    severity: 'danger',
+                    summary: 'Las contraseñas no coinciden',
+                    detail: 'Comprueba que has introducido la misma contraseña en los dos campos',
+                    life: 3000
+                });
+            }
+        } else {
+            toast.add({
+                severity: 'danger',
+                summary: 'Formato de contraseña no valido',
+                detail: 'Revisa los requisitos para tener una contraseña segura',
+                life: 3000
+            });
+        }
+        registerLoading.value = false
+
+    } catch (error) {
+        toast.add({ severity: 'danger', summary: 'Error en el registro', detail: error, life: 3000 });
+        registerLoading.value = false
+    }
+    login()
+
+};
+//Jakub: fin
+
+ 
 
     const passValidationNumber = computed(() => {
         if (/\d/.test(password_1.value)) {
@@ -180,6 +219,8 @@ const registerUser = async () => {
         }
         return false
     })
+
+   
 
     
 </script>

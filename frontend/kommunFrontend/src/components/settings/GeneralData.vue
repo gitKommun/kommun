@@ -47,10 +47,11 @@
                     placeholder="CIF" variant="filled" />
             </div>
             <div class="w-full flex justify-end">
+               {{ props.id }} 
                 <Button
                     severity="contrast"
                     size="small"
-                    :disabled="!hasChanged"
+                    
                     @click="updateCommunity()"
                     >
                     Guardar
@@ -60,7 +61,7 @@
 
 </template>
 <script setup>
-    import { ref, watch, reactive } from 'vue'
+    import { ref, watch, reactive, onMounted, shallowReactive} from 'vue'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
     import { useToast } from 'primevue/usetoast';
@@ -68,14 +69,20 @@
     defineOptions({
         name: 'GeneralData'
     })
+
+    const props = defineProps({
+        community: {
+            type: Object,
+        },
+    });
     //utils
     const http = useHttp();
     const { user } = useUserStore();
     const toast = useToast();
 
     // //variables
-    const form = reactive({
-        name: user?.current_community?.community_name,
+    const form = ref({
+        name: '',
         address: '',
         city:'',
         postalCode: '',
@@ -92,10 +99,28 @@ watch(form, (newValue) => {
         //console.log('cambiando')
 })
 
+watch(
+  () => props.community,
+  (newCommunity) => {
+    form.value.name = props.community.nameCommunity || ''
+    form.value.address = props.community.address || ''
+    form.value.city = props.community.city || ''
+    form.value.postalCode = props.community.postal_code || ''
+    // Puedes inicializar otros campos según sea necesario
+  },
+  { immediate: true } // Ejecutar el watcher inmediatamente
+)
+
+
+
 const updateCommunity = () => {
     try {
-        const response = http.put(`communities/${user?.current_community?.community_id}/update/`, {
-            ...form.value
+        const response = http.put(`communities/${props.community.IDcommunity}/update/`, {
+            //...form.value
+            nameCommunity: form.value.name,
+            address: form.value.address,
+            city: form.value.city,
+            postal_code:form.value.postalCode
         })
         toast.add({
             severity: 'success',
@@ -113,6 +138,5 @@ const updateCommunity = () => {
         });
     }
 }
-
 
 </script>

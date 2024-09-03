@@ -218,6 +218,11 @@ import IconPlus from "/src/components/icons/IconPlus.vue";
     defineOptions({
         name: 'CommonZones'
     })
+    const props = defineProps({
+        id: {
+            type: String,
+        },
+    });
 
     //variables
     const showCreateZoneModal = ref(false)
@@ -247,16 +252,17 @@ import IconPlus from "/src/components/icons/IconPlus.vue";
 
     //getZones
     async function getZones() { 
-    
-        try {
+        if (props.id) {
+            try {
 
-            const response = await http.get(`common_areas/${user?.current_community?.community_id}/`);
-            zones.value = response.data
-            zonesLoading.value = false;
+                const response = await http.get(`common_areas/${props.id}/`);
+                zones.value = response.data
+                zonesLoading.value = false;
 
-        } catch (error) {
-            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
-        }
+            } catch (error) {
+                toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+            }
+        }     
     }
     getZones();
 
@@ -267,7 +273,7 @@ import IconPlus from "/src/components/icons/IconPlus.vue";
         if (zone.name != '') {
             zonesNameValidation.value = true;
             try {
-            const response = http.post(`common_areas/${user?.current_community?.community_id}/create/`, zone.value );
+            const response = http.post(`common_areas/${props.id}/create/`, zone.value );
             getZones();
             toast.add({ severity: 'success', summary: 'Ok', detail: 'Zona creada con exito', life: 3000 });
             
@@ -297,7 +303,7 @@ const openUpdateZone = (item) => {
 } 
 const updateZone = () => {
     try {
-        const response = http.put(`common_areas/${user?.current_community?.community_id}/${zone.value.area_id}/`, zone.value);
+        const response = http.put(`common_areas/${props.id}/${zone.value.area_id}/`, zone.value);
         toast.add({ severity: 'success', summary: 'Ok', detail: 'La zona se ha actualizado con exito', life: 3000 });
 
         showUpdateZone.value = false;
@@ -320,7 +326,7 @@ const deleteZone = (zone) => {
 
     console.log('deleteeeee')
     try {
-        const response = http.delete(`common_areas/${user?.current_community?.community_id}/${zone.value.area_id}/`);
+        const response = http.delete(`common_areas/${props.id}/${zone.value.area_id}/`);
         toast.add({ severity: 'success', summary: 'Ok', detail: 'La zona se ha eliminado con exito', life: 3000 });
 
     } catch (error) {

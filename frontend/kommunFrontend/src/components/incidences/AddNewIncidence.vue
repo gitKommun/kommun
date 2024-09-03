@@ -4,7 +4,7 @@
             <IconPlus/>
              <span class="hidden md:flex">Nueva incidencia</span> 
         </Button>
-        <Dialog v-model:visible="showCreateIncidence" modal header="Crear nuevo propietario" class="w-120">
+        <Dialog v-model:visible="showCreateIncidence" modal header="Crear nueva incidendia" class="w-120">
             <div class="">
               <div class="flex gap-x-3 mb-4">
                     <InputText 
@@ -104,7 +104,7 @@ const form = ref({
     priority: '',
     category: '',
     status:'reported',
-    date: getFormattedDate,
+    incident_date: getFormattedDate,
     //community_id:
 })
 const categories = ref([
@@ -134,32 +134,9 @@ const priorityLabel = {
 }
 
 
-const statusColor = (priority) => {
-    switch (priority) {
-        case 'low':
-            return 'text-blue-500'
-            break;
-        case 'medium':
-            return 'text-amber-500'
-            break;
-        case 'high':
-            return 'text-orange-500'
-            break;
-        case 'urgent':
-            return 'text-red-500'
-            break;
-    
-        default:
-            break;
-    }
-}
-
     //instancia API
     const http = useHttp();
-    //user store
-const { user } = useUserStore();
-    
-  //use toast
+    const { user } = useUserStore();
     const toast = useToast();
 
     const emit = defineEmits(['update:owners']);
@@ -169,10 +146,20 @@ const createIncidence = async () => {
     if (validatedForm) {
         try {
             const respone = await http.post(`claims/${user?.current_community?.community_id}/create/`, form.value);
-            toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
+            toast.add({
+                severity: 'success',
+                summary: 'Ok',
+                detail: 'Has creado un nuevo propietario',
+                life: 3000
+            });
             
         } catch (error) {
-            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+            toast.add({
+                severity: 'danger',
+                summary: 'Upps!! algo ha fallado',
+                detail: error,
+                life: 3000
+            });
         }
         showCreateIncidence.value = false;
         incidenceCreateLoading.value = false 
@@ -183,7 +170,7 @@ const createIncidence = async () => {
             priority: '',
             category: '',
             status:'reported',
-            date: null,
+            incident_date: null,
         }
     }
 }

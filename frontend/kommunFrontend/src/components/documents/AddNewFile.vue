@@ -9,7 +9,7 @@
         <Dialog v-model:visible="showUploadFile" modal header="Cargar archivo" class="w-96">
 
             <div class="">
-              <inputFileDraggable @update:files="updateFiles"/>
+              <InputFileDraggable @update:files="updateFiles"/>
             </div>
               <!-- <div v-for="(f,i) in files" :key="'k'+i">
                 {{ f.name }}
@@ -40,7 +40,7 @@
 <script setup>
     import { ref, shallowRef, watch, toRaw } from 'vue'
     import IconFileAdd from "/src/components/icons/IconFileAdd.vue"
-    import inputFileDraggable from '/src/components/inputFileDraggable.vue';
+    import InputFileDraggable from '/src/components/InputFileDraggable.vue';
     import EventBus from '/src/utils/event-bus.js'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';

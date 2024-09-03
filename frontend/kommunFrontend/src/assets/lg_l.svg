@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 130 130">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-3 {
+        fill: url(#Degradado_sin_nombre);
+      }
+
+      .cls-4 {
+        fill: url(#Degradado_sin_nombre_2);
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-1" width="130" height="130"/>
+    </clipPath>
+    <linearGradient id="Degradado_sin_nombre" data-name="Degradado sin nombre" x1="46.2" y1="36.7" x2="65.8" y2="64.4" gradientTransform="translate(0 132) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000098"/>
+      <stop offset="1" stop-color="#06f"/>
+    </linearGradient>
+    <linearGradient id="Degradado_sin_nombre_2" data-name="Degradado sin nombre 2" x1="31.9" y1="44.2" x2="71.7" y2="107.7" gradientTransform="translate(0 132) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#984eff"/>
+      <stop offset="1" stop-color="#00ffcb"/>
+    </linearGradient>
+  </defs>
+  <!-- Generator: Adobe Illustrator 28.6.0, SVG Export Plug-In . SVG Version: 1.2.0 Build 709)  -->
+  <g>
+    <g id="Capa_1">
+      <g class="cls-5">
+        <g>
+          <path class="cls-2" d="M82.1,0h-34.2C21.4,0,0,21.4,0,47.9v34.2c0,26.4,21.4,47.9,47.9,47.9h34.2c26.4,0,47.9-21.4,47.9-47.9v-34.2C130,21.4,108.6,0,82.1,0Z"/>
+          <path class="cls-3" d="M85.5,102.1h-39.5c-5.8,0-8-4.3-8-9.6v-50.1c0-7.7,7-10.5,12.3-5.3l40.6,51.7c4.8,6.2.5,13.3-5.4,13.3h0Z"/>
+          <path class="cls-4" d="M81.9,28h-34c-5.5,0-10,4.7-10,10.5v54.9c0,8.4,6.4,11.5,11.4,5.8l37.6-56.6c4.5-6.8.5-14.5-5-14.5h0Z"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

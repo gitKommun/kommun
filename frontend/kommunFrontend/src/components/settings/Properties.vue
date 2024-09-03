@@ -1,6 +1,9 @@
 <template>
 
     <Fieldset legend="Propiedades">
+            <div class="w-full py-2 text-sm">
+                <MeterGroup :value="value" />
+            </div>
         
             <div class="md:columns-3 text-xs uppercase text-slate-500 mb-2">
                 <div>Tipo</div>
@@ -121,8 +124,14 @@
 
     //instancia API
     const http = useHttp();
-    //user store
     const { user } = useUserStore();
+
+const value = ref([
+    { label: 'Residencial', color: '#34d399', value: 56 },
+    { label: 'Almacén-Estacionamiento', color: '#fbbf24', value: 24 },
+    { label: 'Oficina', color: '#60a5fa', value: 8 },
+    { label: 'Industria', color: '#c084fc', value: 10 }
+]);
 
 
 </script>

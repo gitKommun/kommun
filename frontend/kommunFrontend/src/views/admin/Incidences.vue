@@ -12,7 +12,7 @@
     <div class="w-full flex justify-center px-4 flex-1 min-h-0 overflow-y-scroll">
       <div class="w-full max-w-4xl  flex flex-col">
         <!-- resumen -->
-        <div class="flex gap-x-3">
+        <!-- <div class="flex gap-x-3">
           <div class="flex w-1/3 flex-col rounded-2xl bg-slate-50 justify-center items-center py-4">
             <span class="text-xs text-red-500 uppercase">Pendientes</span>
             <span class="text-2xl font-bold">12</span>
@@ -25,13 +25,24 @@
             <span class="text-xs text-green-500 uppercase">Cerradas</span>
             <span class="text-2xl font-bold">48</span>
           </div>
-        </div>
+        </div> -->
         <!-- resumen -->
          <!-- lista incidencias -->
 
-         <div class=""></div>
+         <div class="">
+          <div class="text-xl font-semibold mb-3">
+              Últimas incidencias reportadas
+          </div>
+          <div class="flex flex-nowrap w-full gap-x-2 overflow-x-scroll">
+            <LastIncidenceItem 
+              v-for="(incidence, index) in incidences"
+              :key="'#'+index"
+              :incidence="incidence"/>
+          </div>
+          
+         </div>
   
-          <Button @click="openDetail =! openDetail" rised> <IconClose class="group-hover:rotate-90 transition-all duration-300"/> yrryry</Button>
+          <!-- <Button @click="openDetail =! openDetail" rised> <IconClose class="group-hover:rotate-90 transition-all duration-300"/> yrryry</Button> -->
           <!-- lista incidencias -->
       </div>
     </div>
@@ -71,6 +82,7 @@ import { useToast } from 'primevue/usetoast';
 import Main from '/src/layouts/Main.vue';
 import IconClose from "/src/components/icons/IconClose.vue";
 import AddNewIncidence from "/src/components/incidences/AddNewIncidence.vue"
+import LastIncidenceItem from "/src/components/incidences/LastIncidenceItem.vue"
 
 defineOptions({
   name: 'incidences',
@@ -89,19 +101,28 @@ const { user } = useUserStore();
     const toast = useToast();
 
 
-const getIncidences = async ()=>{
-  try {
-    const respone = await http.get(`claims/${user?.current_community?.community_id}/`);
-            incidences.value = response.data
-            toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
-            
-        } catch (error) {
-            toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
-        }
-        showCreateIncidence.value = false;
-        incidenceCreateLoading.value = false      
+const getIncidences = async () => {
+    try {
+      const response = await http.get(`claims/${user?.current_community?.community_id}/`);
+      incidences.value = response.data
+
+    } catch (error) {
+        toast.add({
+          severity: 'danger',
+          summary: 'Upps!! algo ha fallado',
+          detail: error,
+          life: 3000
+        });
+      } 
 }
-getIncidences()
+getIncidences();
+
+function updateItems() {
+   window.location.reload(); // intentar cambiar
+  setTimeout(() => {
+    getIncidences();
+  }, 300);
+}
 
 </script>
 

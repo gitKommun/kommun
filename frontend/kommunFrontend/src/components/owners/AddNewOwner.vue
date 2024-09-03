@@ -58,6 +58,7 @@ import { ref, watch, computed} from 'vue'
 import IconPlus from "/src/components/icons/IconPlus.vue";
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
+import { useToast } from 'primevue/usetoast';
 
 defineOptions({
     name: 'AddNewOwner',
@@ -80,10 +81,10 @@ const userTypes = ref([
 {label:'Temporal',value:'temp'},
 ])
 
-    //instancia API
+    //utils
     const http = useHttp();
-    //user store
     const { user } = useUserStore();
+    const toast = useToast();
 
     const emit = defineEmits(['update:owners']);
 

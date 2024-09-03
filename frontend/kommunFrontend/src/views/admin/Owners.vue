@@ -11,10 +11,10 @@
     </div>
     
     <div class="px-4">
-        <DataTable :value="owners" tableStyle="min-width: 50rem">
+        <DataTable :value="owners" tableStyle="min-width: 50rem" class="text-sm">
             <Column field="name" header="Nombre">
               <template #body="slotProps">
-                <Avatar label="J" shape="circle"/>
+                <CustomAvatar :name="'Candela PlazaJames Bond'"/>
                 <span>{{ slotProps.data.name }}</span>
                 
               </template>
@@ -32,7 +32,7 @@
               </template>
             </Column>
             <Column field="properties" header="Propiedades vinculadas"></Column>
-            <Column header="..." class="flex justify-end" >
+            <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:right">
               <template #body="slotProps">
                     <Dropdown strategy="fixed">
                         <template #reference="{ open }">
@@ -126,6 +126,7 @@ import IconDotsHorizontal from "/src/components/icons/IconDotsHorizontal.vue";
 import Dropdown from "/src/components/Dropdown.vue";
 import { useToast } from 'primevue/usetoast';
 import CustomTag from '/src/components/CustomTag.vue'
+import CustomAvatar from '/src/components/CustomAvatar.vue'
 
   defineOptions({
     name: 'members',

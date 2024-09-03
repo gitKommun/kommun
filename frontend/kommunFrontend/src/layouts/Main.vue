@@ -28,16 +28,7 @@
         
         </div>
         <div class="w-full gap-y-3 flex flex-col items-center pt-4 border-t border-slate-20">
-            <router-link
-              v-if="isAdmin" 
-              class="h-10 flex  items-center hover:bg-slate-200 rounded-xl cursor pointer"
-              :class="isAsideOpen?'w-full pl-4 gap-4':'w-10 justify-center'"
-              to="/settings"
-            >
-              <IconSettings class="text-slate-400"/>
-              <span v-if="isAsideOpen" class="text-sm">Configuración</span>
             
-            </router-link>
             <div class="h-10 flex  items-center rounded-xl cursor pointer"
               :class="isAsideOpen?'w-full pl-2 gap-4':'w-10 justify-center'"
             >
@@ -47,7 +38,7 @@
                         class="rounded-xl hover:bg-slate-100 items-center flex flex-none transition-all duration-300 cursor-pointer "
                         @click="open"
                     >
-                        <Avatar :label="getInitials()" size="large" shape="circle"/>
+                        <CustomAvatar :name="getName()" :size="'large'"/>
                         <span v-if="isAsideOpen" class="text-sm font-semibold ml-3">{{ user?.name+' '+user?.surnames }}</span>  
                     </div>
                 </template>
@@ -91,8 +82,8 @@
                     <div 
                         class="rounded-xl hover:bg-slate-100 items-center flex flex-none transition-all duration-300 cursor-pointer "
                         @click="open"
-                    >
-                        <Avatar :label="getInitials()" size="large" shape="circle"/>
+                    > 
+                    <CustomAvatar :name="getName()" :size="'large'"/>
                     </div>
                 </template>
 
@@ -204,6 +195,7 @@ import IconSpaces from "/src/components/icons/IconSpaces.vue"
 import Dropdown from "/src/components/Dropdown.vue"
 import { useUserStore } from '/src/stores/useUserStore.js';
 import { useToast } from 'primevue/usetoast';
+import CustomAvatar from '/src/components/CustomAvatar.vue'
 defineOptions({
   name:'home'
 })
@@ -234,11 +226,9 @@ const logout = async () => {
 
 
 //iniciales avatar
-const getInitials = () => {
+const getName = () => {
   const fullName = user?.name+' '+user?.surnames
-  const namesArray = fullName.split(' ').slice(0, 2); // Tomar solo las primeras dos palabras
-  const initials = namesArray.map(name => name.charAt(0).toUpperCase()).join('');
-  return initials;
+  return fullName;
  
 }
 

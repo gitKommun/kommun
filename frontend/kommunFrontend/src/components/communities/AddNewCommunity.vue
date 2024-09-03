@@ -57,7 +57,7 @@ const createCommunity = async () => {
     if (communityName.value !== '') {
         try {
             const respone = await http.post(`communities/create/`, {
-                name:communityName.value
+                nameCommunity:communityName.value
             });
             toast.add({
                 severity: 'success',
@@ -65,6 +65,7 @@ const createCommunity = async () => {
                 detail: 'Has creado una nueva comunidad',
                 life: 3000
             });
+            emit('update:communities',true)
             
         } catch (error) {
             toast.add({
