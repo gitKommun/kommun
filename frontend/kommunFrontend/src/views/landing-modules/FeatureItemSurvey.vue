@@ -1,9 +1,9 @@
 <template>
     <section class="flex flex-col items-center py-3 w-full duration-500" v-animateonscroll="{ enterClass: 'animate-zoomin', leaveClass: 'animate-fadeout' }">
-        <div class=" max-w-[1280px] flex  justify-center items-center py-6 mb-8 flex-col md:flex-row">
+        <div class=" max-w-[1280px] flex  justify-center items-center py-6 mb-8  flex-col-reverse md:flex-row px-6 md:px-0">
 
             
-            <div class="flex flex-col py-2 text-white mr-12 max-w-screen-sm"
+            <div class="flex flex-col py-2 text-white md:mr-12 max-w-screen-sm"
                 >
                 <span class="font-bold text-3xl mb-3 text-transparent bg-clip-text bg-gradient-to-r from-violet-600  to-purple-300">Votaciones online</span>
                 <span class="text-slate-400 ">Facilita la toma de decisiones en tu comunidad con votaciones online. Participa desde cualquier lugar, agiliza los procesos y garantiza la voz de todos.</span>

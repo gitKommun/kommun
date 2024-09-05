@@ -1,12 +1,12 @@
 <template>
     <section class="flex flex-col items-center py-3 w-full duration-500" v-animateonscroll="{ enterClass: 'animate-zoomin', leaveClass: 'animate-fadeout' }">
-        <div class=" max-w-[1280px] flex  justify-center items-center py-6 mb-8 flex-col md:flex-row">
+        <div class=" max-w-[1280px] flex  justify-center items-center py-6 mb-8 flex-col md:flex-row px-6 md:px-0">
 
             <div class="flex justify-center items-center backdrop-blur-xl bg-gradient-to-tr from-white/5  to-white/15 rounded-3xl shadow-2xl p-4 perspective-item "
                >
                             <img class="h-40 -rotate-45" src="@/assets/docs2.svg">
             </div>
-            <div class="flex flex-col py-2 text-white ml-12 max-w-screen-sm"
+            <div class="flex flex-col py-2 text-white md:ml-12 max-w-screen-sm"
                 >
                 <span class="font-bold text-3xl mb-3 text-transparent bg-clip-text bg-gradient-to-r from-green-600  to-lime-300">Gestión documental</span>
                 <span class="text-slate-400 "> Accede y gestiona la documentación de tu comunidad de forma organizada y segura. Con Kommun, todo está siempre disponible y actualizado.</span>

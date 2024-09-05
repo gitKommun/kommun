@@ -9,3 +9,9 @@ body {
 .bounce-transition {
     transition-timing-function: cubic-bezier(0.39, 0.93, 0.37, 1.18);
 }
+
+.p-inputtext::placeholder {
+  color: #cbd5e1 !important; /* Cambia el color del placeholder */
+  font-style: italic; /* Cambia el estilo de la fuente */
+  font-size: 14px; /* Cambia el tamaño de la fuente */
+}

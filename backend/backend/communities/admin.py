@@ -1,21 +1,40 @@
 from django.contrib import admin
-from .models import Community
+from .models import Community, UserCommunityRole
+from django.utils.translation import gettext_lazy as _
 
-@admin.register(Community)
 class CommunityAdmin(admin.ModelAdmin):
-    list_display = ('IDcommunity', 'nameCommunity', 'address', 'city', 'postal_code')
-    search_fields = ('nameCommunity', 'address', 'city')
-    list_filter = ('city',)
+    # Campos que se mostrarán en la lista de comunidades
+    list_display = ('community_id', 'name', 'province', 'city', 'postal_code', 'cif', 'main_contact_user', 'configuration_is_completed')
+    # Campos por los que se puede filtrar en la lista
+    list_filter = ('province', 'configuration_is_completed')
+    # Campos por los que se puede buscar
+    search_fields = ('name', 'cif', 'address', 'province')
+    # Campos editables directamente desde la lista de comunidades
+    list_editable = ('configuration_is_completed',)
+    # Campos de solo lectura
+    readonly_fields = ('community_id',)
 
-# Puedes hacer lo mismo con otros modelos:
-from .models import Property, PersonCommunity
+    # Secciones para organizar los campos en el formulario de detalle
+    fieldsets = (
+        (None, {
+            'fields': ('community_id', 'name', 'main_contact_user', 'configuration_is_completed', 'image'),
+        }),
+        (_('Location Info'), {
+            'fields': ('address', 'city', 'province', 'postal_code'),
+        }),
+        (_('Legal Info'), {
+            'fields': ('cif', 'catastral_ref'),
+        }),
+    )
 
-@admin.register(Property)
-class PropertyAdmin(admin.ModelAdmin):
-    list_display = ('community', 'numberProperty', 'typeProperty', 'communityPropertyPercentage')
-    search_fields = ('numberProperty', 'typeProperty')
+    # Define el orden de las comunidades en la lista (opcional)
+    ordering = ('name',)
 
-@admin.register(PersonCommunity)
-class PersonCommunityAdmin(admin.ModelAdmin):
-    list_display = ('community', 'name', 'surnames', 'email', 'phone_number')
-    search_fields = ('name', 'surnames', 'email')
+admin.site.register(Community, CommunityAdmin)
+
+class UserCommunityRoleAdmin(admin.ModelAdmin):
+    list_display = ('user', 'community')
+
+    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'community__name')
+
+admin.site.register(UserCommunityRole, UserCommunityRoleAdmin)

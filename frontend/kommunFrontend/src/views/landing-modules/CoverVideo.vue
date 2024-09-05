@@ -13,9 +13,16 @@
                 <div class="md:w-1/2 mb-8 md:mb-0 text-center md:text-left pl-8 pr-8 md:pl-12">
                     <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Donde la Transparencia y la Eficiencia se Encuentran</h1>
                     <p class="text-lg text-white mb-8">En Kommun, simplificamos la gestión de tu comunidad, asegurando transparencia y participación en cada decisión, sin complicaciones ni sorpresas.</p>
-                    <Button severity="contrast" label="Registrar mi comunidad" raised   size="large"/>
+                    <router-link :to="{name:'register'}">
+                        <Button 
+                            severity="contrast" 
+                            label="Registrar mi comunidad" 
+                            raised   
+                            size="large"/>
+                    </router-link>
+                    
                 </div>
-                <div class="md:w-1/2 flex justify-center items-center ">
+                <div class="md:w-1/2 flex justify-center items-center px-12 md:px-0">
                     <div class="flex justify-center items-center backdrop-blur-xl bg-gradient-to-tr from-white/15  to-white/50 rounded-3xl shadow-2xl p-4 perspective transition-all">
                             <img src="@/assets/house.svg">
                     </div>

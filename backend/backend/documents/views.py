@@ -67,12 +67,7 @@ class FolderCreateAPIView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-class FolderDetailAPIView(APIView):
-    def get(self, request, IDcommunity, IDfolder):
-        folder = get_object_or_404(Folder, folder_id=IDfolder, community_id=IDcommunity)
-        serializer = FolderSerializer(folder)
-        return Response(serializer.data)
-
+class FolderUpdateAPIView(APIView):
     def put(self, request, IDcommunity, IDfolder):
         folder = get_object_or_404(Folder, folder_id=IDfolder, community_id=IDcommunity)
         serializer = FolderSerializer(folder, data=request.data, partial=True)
@@ -81,17 +76,13 @@ class FolderDetailAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
     
+
+class FolderDeleteAPIView(APIView):
     def delete(self, request, IDcommunity, IDfolder):
         folder = get_object_or_404(Folder, folder_id=IDfolder, community_id=IDcommunity)
         folder.delete()
         return Response(status=204)
-    
-class FolderOpenAPIView(APIView):
-    def get(self, request, IDcommunity, IDfolder):
-        folder = get_object_or_404(Folder, folder_id=IDfolder, community_id=IDcommunity)
-        serializer = FolderDetailSerializer(folder)
-        return Response(serializer.data)
-    
+
 class FolderOpenDetailView(APIView):
  def get(self, request, IDcommunity, IDfolder):
         folder = get_object_or_404(Folder, community_id=IDcommunity, folder_id=IDfolder)
@@ -128,25 +119,6 @@ class FolderOpenDetailView(APIView):
 
         return Response(result)
 
-class OLDFolderOpenDetailView(APIView):
-    def get(self, request, IDcommunity, IDfolder):
-        folder = get_object_or_404(Folder, community_id=IDcommunity, folder_id=IDfolder)
-        subfolders = Folder.objects.filter(community_id=IDcommunity, parent_folder_id=IDfolder)
-        documents = Document.objects.filter(community_id=IDcommunity, folder_id=IDfolder)
-        
-        folder_data = {}
-        documents_data = {}
-        folder_data['folders'] = FolderOpenSerializer(folder).data.folder_id
-        folder_data['subfolders'] = FolderListCompleteSerializer(subfolders, many=True).data
-        documents_data['documents'] = DocumentSerializer(documents, many=True).data
-
-        result = {
-            'folders': [folder_data],
-            'documents': [documents_data],
-            'path': ""
-        }
-
-        return Response(result)
 
 ### Document views ###  
 
@@ -231,4 +203,7 @@ class DocumentDownloadAPIView(APIView):
         filename = os.path.basename(document.file.name)
         response = FileResponse(file_handle, content_type='application/octet-stream')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        response.close = file_handle.close
+
         return response

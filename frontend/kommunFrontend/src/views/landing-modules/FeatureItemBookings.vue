@@ -1,12 +1,12 @@
 <template>
     <section class="flex flex-col items-center py-3 w-full duration-500" v-animateonscroll="{ enterClass: 'animate-zoomin', leaveClass: 'animate-fadeout' }">
-        <div class=" max-w-[1280px] flex  justify-center items-center py-6 mb-8 flex-col md:flex-row">
+        <div class=" max-w-[1280px] flex  justify-center items-center py-6 mb-8 flex-col md:flex-row px-6 md:px-0">
 
-            <div class="flex justify-center items-center backdrop-blur-xl bg-gradient-to-tr from-white/5  to-white/15 rounded-3xl shadow-2xl p-4 perspective-item "
+            <div class="flex justify-center items-center backdrop-blur-xl bg-gradient-to-tr from-white/5  to-white/15 rounded-3xl shadow-2xl p-6 perspective-item "
                >
-                            <img class="h-40 -rotate-45" src="@/assets/bookings2.svg">
+                            <img class="h-32 -rotate-45" src="@/assets/bookings2.svg">
             </div>
-            <div class="flex flex-col py-2 text-white ml-12 max-w-screen-sm"
+            <div class="flex flex-col py-2 text-white md:ml-12 max-w-screen-sm "
                 >
                 <span class="font-bold text-3xl mb-3 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600  to-pink-300">Reserva de espacios comunes</span>
                 <span class="text-slate-400 "> Resuelve cualquier incidencia de manera rápida y eficiente, con total transparencia. Kommun te permite mantener todo bajo control y a los vecinos siempre informados.</span>

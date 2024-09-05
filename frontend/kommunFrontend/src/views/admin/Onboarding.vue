@@ -11,43 +11,37 @@
                 <div class="w-110 py-3">
                     <InputText  v-model="form.name" placeholder="Nombre de la comunidad" class="w-full" variant="filled"/>
                 </div>
-                <div class="w-110 py-3 flex flex-col">
-                    <span class="text-sm mb-2"> Importar datos de los inmuebles por referencia catastral:</span>
-                    <div class="flex gap-x-3">
-                        <div class="w-full flex flex-col items-center justify-center h-32 rounded-xl bg-slate-100 border cursor-pointer hover:shadow-xl transition-all duration-300"
-                            :class="catastral_import_mode==='global'?'border-purple-500 shadow-lg':'border-slate-200'"
-                            @click="catastral_import_mode='global'"    
-                        >
-                            <IconCloudDownload class="mb-2" :class="catastral_import_mode==='global'?'text-purple-500':'text-slate-400'"/>
-                            <span class="text-center text-sm">Global <br> <span class="text-xs text-slate-400">(por parcela)</span></span>
-                        </div>
-                        <div class="w-full flex flex-col items-center justify-center h-32 rounded-xl bg-slate-100 border cursor-pointer hover:shadow-xl transition-all duration-300"
-                            :class="catastral_import_mode==='list'?'border-purple-500 shadow-lg':'border-slate-200'"
-                            @click="catastral_import_mode='list'"    
-                        >
-                            <IconBuilding class="mb-2" :class="catastral_import_mode==='list'?'text-purple-500':'text-slate-400'"/>
-                            <span class="text-center text-sm">Por Inmuebles <br> <span class="text-xs text-slate-400">(Plantilla de referencias)</span></span>
-                        </div>
-                    </div>  
-                </div>
                 <div class="w-110 py-3 ">
-                    <transition-group
-                    enter-active-class="transition-all transition-slow ease-in-out "
-                    leave-active-class="absolute hidden transition-all transition-slow ease-in-out"
-                    enter-from-class="opacity-0 translate-y-12"
-                    enter-to-class="opacity-100 mt-0"
-                    leave-class="opacity-100 mt-0"
-                    leave-to-class="opacity-0 mt-6"
-                    
-                    >
-                        <div v-if="catastral_import_mode==='global'" class="w-110 py-3" key="global_ref">
-                            <InputText  v-model="form.catastral_ref" placeholder="Referencia de Parcela" class="w-full" variant="filled"/>
-                        </div>
-                        <div v-if="catastral_import_mode==='list'" class="w-110 py-3" key="list_ref">
-                            <InputFileDraggable @update:files="updateFiles"/>
-                        </div>
-                    
-                    </transition-group>
+                    <div class="text-slate-400 text-xs mb-2">Indica la referencia catastral de la parcela de tu comunidad o de los inmuebles y nos otros nos encargamos del resto. Si no la conoces puedes consultarla 
+                        <a 
+                        href="https://www1.sedecatastro.gob.es/Cartografia/mapa.aspx?buscar=S" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="text-blue-500 hover:text-blue-700 underline"
+                        >Aqui</a>
+                    </div>
+                    <div v-for="(option, index) in form.catastral_refs" :key="index" class="flex items-center w-full gap-x-2 py-1 mb-2 relative">
+                        <InputText 
+                        v-model="form.catastral_refs[index]"  
+                        placeholder="Ejem:8428904VK6892N" 
+                        variant="filled"
+                        class="w-full"/>
+                        <Button 
+                        severity="danger"
+                        text 
+                        class="min-w-10 absolute right-0 -mr-14"
+                        v-if="index>0"
+                        @click="removeOption(index)">
+                            <IconTrash/>
+                        </Button>
+                    </div>
+                    <Button 
+                        text
+                        @click="addOption()"
+                        >
+                        <IconPlus/>
+                        Nueva referencia catastral
+                    </Button>
                     
                 </div>
                 <div class="w-110  flex justify-center">
@@ -71,9 +65,8 @@ import { useHttp } from '/src/composables/useHttp.js';
 import { useUserStore } from '/src/stores/useUserStore.js';
 import { useToast } from 'primevue/usetoast';
 
-import IconBuilding from '@/components/icons/IconBuilding.vue';
-import IconCloudDownload from '@/components/icons/IconCloudDownload.vue';
-import InputFileDraggable from '/src/components/InputFileDraggable.vue';
+import IconTrash from '@/components/icons/IconTrash.vue';
+import IconPlus from '@/components/icons/IconPlus.vue';
 
 
 defineOptions({
@@ -83,10 +76,19 @@ defineOptions({
 
 const form = ref({
     name: '',
-    catastral_ref:''
+    catastral_refs: ['']
+    
 })
 
-const catastral_import_mode = ref('')
+const addOption = () => {
+  form.value.catastral_refs.push('')
+}
+
+const removeOption = (index) => {
+  if (form.value.catastral_refs.length > 1) {
+    form.value.catastral_refs.splice(index, 1);
+  }
+};
 
 //utils
 const http = useHttp();
