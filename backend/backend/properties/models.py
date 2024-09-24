@@ -3,9 +3,9 @@ from django.utils.translation import gettext_lazy as _
 # Create your models here.
 class Property(models.Model):
     PROPERTY_USAGE_CHOICES = (
-        ('COMMERCIAL', 'Comercial'),
-        ('STORAGE', 'Almacén-Estacionamiento'),
-        ('RESIDENTIAL', 'Residencial'),
+        ('COMERCIAL', 'Comercial'),
+        ('ALMACEN-ESTACIONAMIENTO', 'Almacén-Estacionamiento'),
+        ('RESIDENCIAL', 'Residencial'),
         ('INDUSTRIAL', 'Industrial'),
     )
 
@@ -16,7 +16,7 @@ class Property(models.Model):
     #Datos economicos
     surface_area = models.DecimalField(_('surface area'), max_digits=10, decimal_places=2, null=True, blank=True)  # SUPERFICIE
     participation_coefficient = models.DecimalField(_('participation coefficient'), max_digits=5, decimal_places=4, null=True, blank=True)  # COEFICIENTE DE PARTICIPACIÓN
-    usage = models.CharField(max_length=50, choices=PROPERTY_USAGE_CHOICES)
+    usage = models.CharField(max_length=50, choices=PROPERTY_USAGE_CHOICES, null=True, blank=True)
 
     #Ubicación
     address_complete = models.CharField(_('address'), max_length=200, null=True, blank=True)
@@ -51,10 +51,14 @@ class PropertyRelationship(models.Model):
         OWNER = 'owner', _('Owner')
         TENANT = 'tenant', _('Tenant')
 
+    community = models.ForeignKey('communities.Community', on_delete=models.CASCADE, related_name='properties_person_relationships', blank=True, null=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='relationships')
     type = models.CharField(max_length=10, choices=RelationType.choices, default=RelationType.OWNER)
-    person = models.ForeignKey('communities.UserCommunityRole', on_delete=models.CASCADE, related_name='property_relationships')
+    person = models.ForeignKey('communities.PersonCommunity', on_delete=models.CASCADE, related_name='property_relationships')
+
+    class Meta:
+        unique_together = (('community', 'property', 'person', 'type'),)
 
     def __str__(self):
-        return f"{self.user.name} - {self.role} of {self.property.number}"
+        return f"{self.person.name} - {self.type} of {self.property}"
     
