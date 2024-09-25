@@ -70,7 +70,8 @@ class RoleBasedAccessMiddleware:
             '/members/register_user_community/',
             '/members/register/',
             '/members/login/',
-            '/members/logout/',    
+            '/members/logout/',
+            '/core/swagger/',    
         ]
 
     def __call__(self, request):
@@ -93,7 +94,7 @@ class RoleBasedAccessMiddleware:
 
         community_id = view_kwargs.get('IDcommunity')
         if community_id:
-            user_roles = request.user.roles.filter(community_id=community_id)
+            user_roles = request.user.profiles.filter(community_id=community_id)
             if not user_roles.exists():
                 return HttpResponseForbidden("No tienes permisos para acceder a esta comunidad")
 

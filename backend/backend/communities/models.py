@@ -44,16 +44,36 @@ class Community(models.Model):
         verbose_name_plural = _("Communities")
 
     def __str__(self):
-        return f"{self.community_id} - {self.address}, {self.city} "
-    
+        return f"{self.name} - {self.city}, {self.province} "
+
+class Role(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class PersonCommunity(models.Model):
+    USER_STATUS = (
+        ('active', 'Activo'),
+        ('disabled', 'Deshabilitado'),
+        ('temp', 'Temporal'),
+        ('not_registered', 'No registrado'),
+    )
+
+    #PK
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='people')
     person_id = models.PositiveIntegerField() # Número secuencial dentro de la comunidad
 
-    #Personal data
-    email = models.EmailField(_('email address'))
-    name = models.CharField(_('name'), max_length=30)
-    surnames = models.CharField(_('surnames'), max_length=120)
+    user = models.ForeignKey('members.User', on_delete=models.SET_NULL, related_name='profiles', null=True, blank=True)
+
+    roles = models.ManyToManyField(Role, null=True, blank=True)  # Relación muchos a muchos con la tabla de roles
+    user_status = models.CharField(max_length=14, choices=USER_STATUS, null=True, blank=True)
+
+    #Profile data
+    email = models.EmailField(_('email address'), null=True, blank=True)
+    name = models.CharField(_('name'), null=True, blank=True, max_length=30)
+    surnames = models.CharField(_('surnames'), null=True, blank=True, max_length=120)
     birthdate = models.DateField(verbose_name=_("Birthdate"), null=True, blank=True)
     address = models.CharField(_('postal address'), null=True, blank=True, max_length=255)
     phone_number = models.CharField(_('phone number'), max_length=20, null=True, blank=True)
@@ -62,14 +82,14 @@ class PersonCommunity(models.Model):
 
     class Meta:
         # Clave primaria compuesta
-        unique_together = (('community', 'person_id'), ('community', 'email'))
+        unique_together = (('community', 'person_id'))
         ordering = ['community']
 
     def __str__(self):
         return f"{self.name} {self.surnames}"
     
     def save(self, *args, **kwargs):
-        if not self.person_id:  # Asegúrate de que solo asignamos person_id si aún no ha sido asignado
+        if not self.person_id:  
             last_person = PersonCommunity.objects.filter(community=self.community).order_by('person_id').last()
             if last_person:
                 self.person_id = last_person.person_id + 1
@@ -77,47 +97,4 @@ class PersonCommunity(models.Model):
                 self.person_id = 1
 
         super().save(*args, **kwargs)
-
-class Role(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-
-    def __str__(self):
-        return self.name
-
-class UserCommunityRole(models.Model):
-    USER_STATUS = (
-        ('active', 'Activo'),
-        ('disabled', 'Deshabilitado'),
-        ('temp', 'Temporal'),
-        ('not_registered', 'No registrado'),
-    )
-    
-    #Clave primaria
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='user_roles')
-    neighbour_id = models.PositiveIntegerField()  # Número secuencial dentro de la comunidad
-
-    user = models.ForeignKey('members.User', on_delete=models.SET_NULL, related_name='roles', null=True, blank=True)
-    person = models.ForeignKey(PersonCommunity, on_delete=models.SET_NULL, related_name='roles', null=True, blank=True)
-    
-    roles = models.ManyToManyField(Role)  # Relación muchos a muchos con la tabla de roles
-    user_status = models.CharField(max_length=14, choices=USER_STATUS, default='active')
-
-    class Meta:
-        unique_together = (('community', 'neighbour_id'), ('user', 'community'), ('person', 'community'))
-
-
-    def clean(self):
-        # Asegurarse de que al menos uno de los campos esté presente
-        if not self.user and not self.person:
-            raise ValidationError('Debe haber al menos un user o un person asignado.')
-        
-        # Verificar que ambos campos no estén vacíos
-        if self.user and self.person:
-            raise ValidationError('No puede haber un user y un person al mismo tiempo. Solo uno debe ser asignado.')
-
-    def save(self, *args, **kwargs):
-        # Llamar a la validación manualmente
-        self.clean()
-        super().save(*args, **kwargs)
-
 

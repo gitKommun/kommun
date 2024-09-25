@@ -13,75 +13,56 @@ import pandas as pd
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
 
-from .models import Community, PersonCommunity, UserCommunityRole, Role
-from .serializers import CommunitySerializer, PersonCommunitySerializer, UserCommunityRoleSerializer, CommunityDetailSerializer, UserCommunityRoleSerializerTest
+from .models import Community, PersonCommunity, Role
+from .serializers import CommunitySerializer, PersonCommunitySerializer, CommunityDetailSerializer, PersonCommunityNeighborsSerializer
 from properties.serializers import PropertySerializer
 
 from members.serializers import UserRegistrationSerializer
 from members.decorators import community_admin_required
 
-### Comunity management views ###
-class CommunityListAPIView(generics.ListAPIView):
-    queryset = Community.objects.all()
-    serializer_class = CommunitySerializer
-
-
-class CommunityUserListAPIView(generics.ListAPIView): #Returns the list of the communities linked with the user, using the CommunityDetailSerializer
-    serializer_class = CommunityDetailSerializer
-
-    def get(self, request):
-        com_data = {}
-        user = request.user
-        user_communities = UserCommunityRole.objects.filter(user=user).select_related('community')
-        communities_data = []
-        for user_community in user_communities:
-            community = user_community.community
-            community_data = CommunityDetailSerializer(community).data
-            
-            roles = user_community.roles.all()  # Añadir los roles del usuario
-            role_names = [role.name for role in roles]  
-            
-            community_data['roles'] = role_names
-
-            communities_data.append(community_data)
-
-        com_data['communities'] = communities_data
-        return Response(com_data) 
-
-
 class CommunityCreateAPIView(APIView):
     @swagger_auto_schema(
-        operation_description="Crea una nueva comunidad y asigna al usuario actual como administrador.",
+        operation_description="Crear una nueva comunidad",
         request_body=CommunitySerializer,
         responses={
-            status.HTTP_201_CREATED: CommunitySerializer,
-            status.HTTP_400_BAD_REQUEST: 'Bad Request'
+            201: openapi.Response('Comunidad creada exitosamente', CommunitySerializer),
+            400: 'Solicitud inválida',
         }
     )
-
     def post(self, request):
+        # Obtener el usuario autenticado que será el contacto principal de la comunidad
         user = request.user
+        
+        # Serialización de la comunidad con los datos proporcionados en el cuerpo de la solicitud
         serializer = CommunitySerializer(data=request.data)
+        
+        # Validación de los datos proporcionados
         if serializer.is_valid():
+            # Crear la comunidad con el usuario como contacto principal
             community = serializer.save(main_contact_user=user)
 
-            # Obtener el rol de administrador
-            admin_role = Role.objects.get(name='admin')
-
-            # Asignar el rol de administrador al usuario en la comunidad recién creada
-            user_community_role = UserCommunityRole.objects.create(
+            # Crear el PersonCommunity para el usuario creador
+            person = PersonCommunity.objects.create(
+                community=community,
                 user=user,
-                community=community
+                name=user.name,
+                surnames=user.surnames,
+                email=user.email,
+                user_status='active'
             )
 
-            # Asignar el rol al usuario
-            user_community_role.roles.add(admin_role)
-            user_community_role.save()
+            # Asignar el rol de administrador al PersonCommunity
+            admin_role = Role.objects.get(name='admin')
+            person.roles.add(admin_role)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Guardar el PersonCommunity con los roles asignados
+            person.save()
+
+            # Retornar la respuesta de éxito con los datos de la comunidad creada
+            return Response(CommunitySerializer(community).data, status=status.HTTP_201_CREATED)
         
+        # Retornar errores de validación si los datos no son válidos
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @swagger_auto_schema(
     method='get',
@@ -100,7 +81,7 @@ def community_detail(request, IDcommunity):
             return Response(serializer.data)
         except Community.DoesNotExist:
             return Response({'error': 'Comunidad no encontrada'}, status=404)
- 
+        
 
 @swagger_auto_schema(
     method='put',
@@ -122,261 +103,149 @@ def community_update(request, IDcommunity):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 class CommunityDeleteAPIView(APIView):
     def delete(self, request, IDcommunity):
         community = get_object_or_404(Community, community_id=IDcommunity)
         community.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-### User managemente views ###
-
-class AddUserToCommunityAPIView(APIView):
-    def post(self, request, IDcommunity):
-        # Registro de usuario
-        user_serializer = UserRegistrationSerializer(data=request.data)
-        if user_serializer.is_valid():
-            user = user_serializer.save()
-
-            # Asignar rol en la comunidad
-            community = get_object_or_404(Community, pk=IDcommunity)
-            role_data = {
-                'user': user.id,
-                'community': community.IDcommunity,
-                'role': request.data.get('role')
-            }
-            role_serializer = UserCommunityRoleSerializer(data=role_data)
-            if role_serializer.is_valid():
-                role_serializer.save()
-                return Response({
-                    'user': user_serializer.data,
-                    'role': role_serializer.data
-                }, status=status.HTTP_201_CREATED)
-            else:
-                # Si la creación del rol falla, eliminar usuario creado
-                user.delete()
-                return Response(role_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class CommunityUsersAPIView(APIView):
-    def get(self, request, IDcommunity):
-        community_roles = UserCommunityRole.objects.filter(community_id=IDcommunity)
-        serializer = UserCommunityRoleSerializer(community_roles, many=True)
+#NEIGHBORS = PERSONCOMMUNITY VIEWS
+
+class ListPersonCommunityAPIView(generics.ListAPIView):
+    serializer_class = PersonCommunitySerializer
+
+    def get(self, request, IDcommunity, *args, **kwargs):
+        # Obtener la comunidad
+        community = get_object_or_404(Community, community_id=IDcommunity)
+        # Obtener el listado de personas asociadas a esa comunidad
+        neighbors = PersonCommunity.objects.filter(community=community)
+        serializer = self.serializer_class(neighbors, many=True)
         return Response(serializer.data)
 
+class AddMultiplePersonCommunityAPIView(APIView):
 
-class CommunityUserRolesAPIView(APIView):
-    def get(self, request, IDcommunity):
-        # Obtén todos los roles de usuario para la comunidad dada
-        roles = UserCommunityRole.objects.filter(community_id=IDcommunity)
-        serializer = UserCommunityRoleSerializerTest(roles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)    
-
-
-class ManageUserCommunityRoleAPIView(APIView):
-    
-    def post(self, request, IDcommunity):
-        # Asegurar que la comunidad exista
-        community = get_object_or_404(Community, pk=IDcommunity)
-        request.data['community'] = community.IDcommunity
-        
-        # Crear un nuevo rol
-        serializer = UserCommunityRoleSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, IDcommunity, role_id):
-        # Actualizar un rol existente
-        role = get_object_or_404(UserCommunityRole, pk=role_id, community_id=IDcommunity)
-        serializer = UserCommunityRoleSerializer(role, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, IDcommunity, role_id):
-        # Eliminar un rol existente
-        role = get_object_or_404(UserCommunityRole, pk=role_id, community_id=IDcommunity)
-        role.delete()
-        return Response({'message': 'Rol eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)
-
-
-class ManageUserRolesAPIView(APIView):
     @swagger_auto_schema(
-        operation_description="Gestiona los roles de un vecino en la comunidad.",
-        responses={
-            200: 'ok',
-            404: 'El vecino no existe en la comunidad.',
-        },
+        operation_description="Añade múltiples personas (PersonCommunity) a una comunidad.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'roles_to_add': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING), description='Lista de roles a añadir'),
-                'roles_to_remove': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING), description='Lista de roles a eliminar'),
-            },
-            required=[],
+                'profiles': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'user': openapi.Schema(type=openapi.TYPE_STRING, description="ID del usuario, si aplica."),
+                            'email': openapi.Schema(type=openapi.TYPE_STRING, description="Correo electrónico de la persona."),
+                            'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre de la persona."),
+                            'surnames': openapi.Schema(type=openapi.TYPE_STRING, description="Apellidos de la persona."),
+                            'birthdate': openapi.Schema(type=openapi.FORMAT_DATE, description="Fecha de nacimiento."),
+                            'address': openapi.Schema(type=openapi.TYPE_STRING, description="Dirección postal."),
+                            'phone_number': openapi.Schema(type=openapi.TYPE_STRING, description="Número de teléfono."),
+                            'personal_id_number': openapi.Schema(type=openapi.TYPE_STRING, description="Número de identificación personal (DNI, NIE, pasaporte)."),
+                            'personal_id_type': openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                                description="Tipo de documento de identificación.",
+                                enum=['DNI', 'NIE', 'PASSPORT']
+                            ),
+                            'roles': openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(type=openapi.TYPE_STRING),
+                                description="Lista de roles que se asignarán a la persona (ej: 'admin', 'tenant', 'owner')."
+                            )
+                        },
+                        required=['name', 'surnames']  # Campos obligatorios
+                    ),
+                    description="Lista de perfiles (personas) que se desean añadir a la comunidad."
+                )
+            }
         ),
+        responses={
+            201: openapi.Response(description="Perfiles creados exitosamente."),
+            400: openapi.Response(description="Error en los datos proporcionados."),
+        }
     )
-        
-    def post(self, request, IDcommunity, neighbour_id):
-        # Asegurar que la comunidad exista
-        community = get_object_or_404(Community, pk=IDcommunity)
-        
-        # Buscar el UserCommunityRole existente
-        try:
-            user_community_role = UserCommunityRole.objects.get(community=community, neighbour_id=neighbour_id)
-        except UserCommunityRole.DoesNotExist:
-            return Response({"error": "El vecino no existe en la comunidad."}, status=status.HTTP_404_NOT_FOUND)
-        
-        roles_to_add = request.data.get('roles_to_add', [])
-        roles_to_remove = request.data.get('roles_to_remove', [])
-        
-        # Agregar roles
-        if roles_to_add:
-            roles = Role.objects.filter(name__in=roles_to_add)
-            user_community_role.roles.add(*roles)
 
-        # Eliminar roles
-        if roles_to_remove:
-            roles = Role.objects.filter(name__in=roles_to_remove)
-            user_community_role.roles.remove(*roles)
-        
-        user_community_role.save()
-        return Response(status=status.HTTP_200_OK)
-
-
-### Neighbour management views ###
-
-class BulkPersonCommunityUploadAPIView(APIView):
     def post(self, request, IDcommunity):
         community = get_object_or_404(Community, community_id=IDcommunity)
-
-        # Verificar si se ha subido un archivo
-        if 'file' not in request.FILES:
-            return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
         
-        file = request.FILES['file']
-
-        # Leer el archivo usando pandas
-        try:
-            df = pd.read_excel(file)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Validar las columnas esperadas en el archivo Excel
-        expected_columns = [
-            'email', 'name', 'surnames', 'birthdate', 'address', 'phone_number', 
-            'personal_id_number', 'personal_id_type', 'role'
-        ]
+        profiles_data = request.data.get('profiles', [])
         
-        if not all(col in df.columns for col in expected_columns):
-            return Response({"error": "Invalid Excel format. Columns do not match."}, status=status.HTTP_400_BAD_REQUEST)
+        if not profiles_data:
+            return Response({'error': 'No profiles provided'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Procesar cada fila del archivo y crear la persona correspondiente
-        for _, row in df.iterrows():
-            try:
-                # Obtener el último person_id y asignar el siguiente
-                last_person = PersonCommunity.objects.filter(community=community).order_by('person_id').last()
-                if last_person:
-                    next_person_id = last_person.person_id + 1
-                else:
-                    next_person_id = 1
+        created_profiles = []
 
-                # Crear la instancia de `PersonCommunity` y asignar el person_id manualmente
-                person = PersonCommunity.objects.create(
-                    community=community,
-                    person_id=next_person_id,
-                    email=row['email'],
-                    name=row['name'],
-                    surnames=row['surnames'],
-                    birthdate=row['birthdate'],
-                    address=row['address'],
-                    phone_number=row['phone_number'],
-                    personal_id_number=row['personal_id_number'],
-                    personal_id_type=row['personal_id_type']
-                )
+        for profile_data in profiles_data:
+            profile_data['community'] = community.pk  # Set the community for each profile
+            
+            # If the profile includes a user ID, retrieve the user
+            user = None
+            if 'user' in profile_data:
+                user = get_object_or_404('members.User', pk=profile_data['user'])
+                profile_data['user'] = user.pk  # Ensure the user is set properly
+            
+            serializer = PersonCommunitySerializer(data=profile_data)
+            
+            if serializer.is_valid():
+                person = serializer.save(community=community, user=user)
+                
+                # Add roles to the person if specified
+                roles_to_add = profile_data.get('roles', [])
+                if roles_to_add:
+                    for role in roles_to_add:
+                        role_obj = get_object_or_404(Role, name=role)
+                        person.roles.add(role_obj)
 
-                # Crear el rol para la persona recién creada
-                UserCommunityRole.objects.create(
-                    community=community,
-                    person=person,
-                    role=row['role'],
-                    user_status='not_registered'
-                )
+                created_profiles.append(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            except Exception as e:
-                return Response({"error": f"Error creating person or role: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"message": "Persons and roles uploaded successfully"}, status=status.HTTP_201_CREATED)
-
-
-class PersonCommunityListAPIView(generics.ListCreateAPIView):
-    serializer_class = PersonCommunitySerializer
-
-    def get_queryset(self):
-        IDcommunity = self.kwargs['IDcommunity']
-        return PersonCommunity.objects.filter(community_id=IDcommunity)
-
-
-class PersonCommunityCreateAPIView(APIView):
-    def post(self, request, IDcommunity):
-        data = request.data.copy()
-        community = get_object_or_404(Community, community_id=IDcommunity) 
-        data['community'] = community.community_id  # Asigna el ID de la comunidad directamente
-        
-        # Calcular el siguiente person_id secuencial para la comunidad
-        last_person = PersonCommunity.objects.filter(community=community).order_by('person_id').last()
-        if last_person:
-            data['person_id'] = last_person.person_id + 1
-        else:
-            data['person_id'] = 1
-
-        serializer = PersonCommunitySerializer(data=data)
-        if serializer.is_valid():
-            person = serializer.save()  # Guarda la instancia de PersonCommunity
-
-            # Crear UserCommunityRole con Role y User como null
-            UserCommunityRole.objects.create(
-                user=None,  # Usuario aún no asignado
-                person=person,  # Relación con PersonCommunity
-                community=community,  # Relación con la comunidad
-                role='pending',  # Rol inicial (puede ser "pending" o el que prefieras)
-                user_status='temp'  # Estado del usuario (puede ser "temp" o el que prefieras)
-            )
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class PersonCommunityDetailAPIView(APIView):
-    def get_object(self, IDcommunity, person_id):
-        community = get_object_or_404(Community, IDcommunity=IDcommunity)
-        return get_object_or_404(PersonCommunity, community=community, person_id=person_id)
+        return Response({'created_profiles': created_profiles}, status=status.HTTP_201_CREATED)
     
-    def get(self, request, IDcommunity, person_id):
-        person = self.get_object(IDcommunity, person_id)
-        serializer = PersonCommunitySerializer(person)
-        return Response(serializer.data)
-    
-    def put(self, request, IDcommunity, person_id):
-        person = self.get_object(IDcommunity, person_id)
-        serializer = PersonCommunitySerializer(person, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def delete(self, request, IDcommunity, person_id):
-        person = self.get_object(IDcommunity, person_id)
-        person.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
+@api_view(['GET'])
+def get_person_community(request, IDcommunity, person_id):
+    person = get_object_or_404(PersonCommunity, community_id=IDcommunity, person_id=person_id)
+    serializer = PersonCommunitySerializer(person)
+    return Response(serializer.data)
 
+@api_view(['PUT'])
+def update_person_community(request, IDcommunity, person_id):
+    # Obtener la persona de la comunidad
+    person = get_object_or_404(PersonCommunity, community_id=IDcommunity, person_id=person_id)
+    
+    # Obtener los datos enviados en la solicitud
+    data = request.data.copy()
+    
+    # Actualizar los datos del perfil de la persona
+    serializer = PersonCommunitySerializer(person, data=data, partial=(request.method == 'PATCH'))
+    
+    if serializer.is_valid():
+        # Guardar los cambios en los datos de la persona
+        serializer.save()
+
+        # Gestionar los roles que se añaden
+        roles_to_add = data.get('roles', [])
+        if roles_to_add:
+            for role in roles_to_add:
+                role_obj = get_object_or_404(Role, name=role)
+                person.roles.add(role_obj)  # Añadir el rol a la persona
+
+        # Gestionar los roles que se eliminan (si es necesario)
+        roles_to_remove = data.get('roles_to_remove', [])
+        if roles_to_remove:
+            for role in roles_to_remove:
+                role_obj = get_object_or_404(Role, name=role)
+                person.roles.remove(role_obj)  # Eliminar el rol de la persona
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def delete_person_community(request, IDcommunity, person_id):
+    person = get_object_or_404(PersonCommunity, community_id=IDcommunity, person_id=person_id)
+    person.delete()
+    return Response({'message': 'PersonCommunity eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)

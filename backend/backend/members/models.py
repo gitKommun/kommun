@@ -29,16 +29,16 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = None  # Eliminar el campo de nombre de usuario
+    email = models.EmailField(_('email address'), unique=True)
     
     #Personal data
-    email = models.EmailField(_('email address'), unique=True)
-    name = models.CharField(_('name'), max_length=30)
-    surnames = models.CharField(_('surnames'), max_length=120)
-    birthdate = models.DateField(verbose_name=_("Birthdate"), null=True, blank=True)
-    address = models.CharField(_('postal address'), max_length=255)
-    phone_number = models.CharField(_('phone number'), max_length=20, null=True, blank=True)
-    personal_id_number = models.CharField(_('user ID'), max_length=20, null=True, blank=True)  # DNI, NIE, or passport
-    personal_id_type = models.CharField(_('document type'), null=True, blank=True, max_length=20, choices=[('DNI', 'DNI'), ('NIE', 'NIE'), ('PASSPORT', 'Passport')])
+    name = models.CharField(_('name'), max_length=30, blank=True, null=True) 
+    surnames = models.CharField(_('surnames'), max_length=120, blank=True, null=True)
+    #birthdate = models.DateField(verbose_name=_("Birthdate"), null=True, blank=True)
+    #address = models.CharField(_('postal address'), max_length=255)
+    #phone_number = models.CharField(_('phone number'), max_length=20, null=True, blank=True)
+    #personal_id_number = models.CharField(_('user ID'), max_length=20, null=True, blank=True)  # DNI, NIE, or passport
+    #personal_id_type = models.CharField(_('document type'), null=True, blank=True, max_length=20, choices=[('DNI', 'DNI'), ('NIE', 'NIE'), ('PASSPORT', 'Passport')])
 
     #Configuration and usage
     current_community = models.ForeignKey(Community, on_delete=models.SET_NULL, null=True, blank=True)

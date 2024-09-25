@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Community, UserCommunityRole
+from .models import Community, PersonCommunity, Role
 from django.utils.translation import gettext_lazy as _
 
 class CommunityAdmin(admin.ModelAdmin):
@@ -32,9 +32,18 @@ class CommunityAdmin(admin.ModelAdmin):
 
 admin.site.register(Community, CommunityAdmin)
 
-class UserCommunityRoleAdmin(admin.ModelAdmin):
-    list_display = ('user', 'community')
+class PersonCommunityAdmin(admin.ModelAdmin):
+    list_display = ('community', 'user', 'name', 'surnames', 'email', 'user_status')
 
-    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'community__name')
+        # Secciones para organizar los campos en el formulario de detalle
 
-admin.site.register(UserCommunityRole, UserCommunityRoleAdmin)
+    # Campos por los que se puede buscar
+    search_fields = ('community', 'email')
+
+
+admin.site.register(PersonCommunity, PersonCommunityAdmin)
+
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+admin.site.register(Role, RoleAdmin)
