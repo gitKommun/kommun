@@ -15,9 +15,8 @@ import requests
 
 from .models import  Property, PropertyRelationship
 from .serializers import  PropertySerializer, PropertyRelationshipSerializer, PropertyDetailSerializer
-
 from communities.models import Community, PersonCommunity
-
+from core.models import Municipality, Province, PostalCode
 
 # Create your views here.
 ### Property managemente views ###
@@ -206,8 +205,10 @@ class BulkCreatePropertiesFromCatastroAPIView(APIView):
                 errors.append({"ref_catastro": ref_catastro, "error": "No se encontraron datos para la referencia catastral proporcionada"})
                 continue
 
+           
             # Procesar cada inmueble y crear una propiedad
             for inmueble in inmuebles:
+            
                 try:
                     address_data = inmueble['dt']['locs']['lous']['lourb']['dir']
                     economic_data = inmueble['debi']
@@ -216,11 +217,63 @@ class BulkCreatePropertiesFromCatastroAPIView(APIView):
                     continue
 
                 location_internal = inmueble['dt']['locs']['lous']['lourb']
-                print(location_internal)
+                #print(location_internal)
                 block = location_internal['loint'].get('bq', '')
                 staircase = location_internal['loint'].get('es', '')
                 floor = location_internal['loint'].get('pt', '')
                 door = location_internal['loint'].get('pu', '')
+
+                # Construir address_complete con el formato "Bl: 1 Es: 2 Pl: 3 Pt: 4"
+                address_complete = f"{address_data.get('tv', '')} {address_data.get('nv', '')}, {address_data.get('pnp', '')}".strip()
+                adress_stret = address_complete
+
+                # Añadir bloque, escalera, planta y puerta solo si existen, y siguiendo el formato del Catastro
+                if block:
+                    address_complete += f" Bl:{block}"
+                if staircase:
+                    address_complete += f" Es:{staircase}"
+                if floor:
+                    address_complete += f" Pl:{floor}"
+                if door:
+                    address_complete += f" Pt:{door}"
+
+                # Actualizar los datos de la comunidad con la primera referencia catastral
+                if total_propiedades_creadas == 1:
+                    print("Actualizando los datos de la comunidad con la primera referencia catastral")
+                    try:
+                        city_code = inmueble['dt']['loine']['cp'] + inmueble['dt']['loine']['cm'].zfill(3)
+                        province_code = inmueble['dt']['loine']['cp']
+                        #postal_code = address_data.get('dp')
+
+                        #print(f"city_code: {city_code}, province_code: {province_code}, postal_code: {postal_code}")
+
+                        # Buscar el municipio y provincia por su código INE
+                        try:
+                            city = Municipality.objects.get(code_ine=city_code)
+                            province = Province.objects.get(code=province_code)
+
+                            print(f"City: {city.name}, Province: {province.name}")
+
+                            # Actualizar los campos de la comunidad
+                            community.city = city
+                            community.province = province
+                            #community.postal_code = postal_code
+                            community.catastral_ref = ref_catastro
+                            community.address = adress_stret
+                            community.save()
+                            #print(f"Community updated: {community.city.name}, {community.province.name}, {community.postal_code}")
+
+                        except Municipality.DoesNotExist:
+                            print(f"Municipio con código INE {city_code} no encontrado.")
+                            errors.append({"ref_catastro": ref_catastro, "error": "Municipio no encontrado"})
+                        except Province.DoesNotExist:
+                            print(f"Provincia con código INE {province_code} no encontrada.")
+                            errors.append({"ref_catastro": ref_catastro, "error": "Provincia no encontrada"})
+                    except KeyError:
+                        print("No se encontraron los datos de ubicación de la comunidad en la referencia catastral")
+                        errors.append({"ref_catastro": ref_catastro, "error": "No se encontraron los datos de ubicación de la comunidad en la referencia catastral"})
+
+                    print("FIN")
 
                 # Extraer los datos relevantes para cada inmueble
                 try:
@@ -229,7 +282,7 @@ class BulkCreatePropertiesFromCatastroAPIView(APIView):
                         'surface_area': economic_data.get('sfc'),
                         'participation_coefficient': float(economic_data.get('cpt').replace(',', '.')),  # Asegurarse de que el formato numérico sea válido .replace(',', '.')
                         'usage': economic_data.get('luso', '').upper(),  # Convierte el uso a mayúsculas para que coincida con las opciones
-                        'address_complete': f"{address_data.get('tv', '')} {address_data.get('nv', '')}, {address_data.get('pnp', '')}",
+                        'address_complete': address_complete,
                         'block': block,
                         'staircase': staircase,
                         'floor': floor,
@@ -260,7 +313,8 @@ class BulkCreatePropertiesFromCatastroAPIView(APIView):
         # Respuesta final con las propiedades creadas y los posibles errores
         if errors:
             return Response({
-                "created_properties": created_properties,
+                "resumen": resumen,
+                #"created_properties": created_properties,
                 "errors": errors
             }, status=status.HTTP_207_MULTI_STATUS)  # Multi-status para indicar que hubo éxitos y errores
 

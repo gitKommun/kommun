@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import UserLoginView, UserRegistrationAPIView, UserListAPIView, UserMainContactCommunityRegistrationAPIView, get_user_data,UserLogoutAPIView, UserUpdateAPIView
+from .views import UserLoginView, UserRegistrationAPIView, UserListAPIView, get_user_data, UserLogoutAPIView, UserUpdateAPIView
 
 urlpatterns = [
-    path('register/', UserMainContactCommunityRegistrationAPIView.as_view(), name='register-main-contact-community'), #POST/registrar usuario y crear una comunidad vacia
+    path('register/', UserRegistrationAPIView.as_view(), name='register-main-contact-community'), #POST/registrar usuario y crear una comunidad vacia
 
     path('login/', UserLoginView.as_view(), name='user-login'), #POST/iniciar sesión
     path('logout/', UserLogoutAPIView.as_view(), name='user-logout'), #POST/cerrar sesión
