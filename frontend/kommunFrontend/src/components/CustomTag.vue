@@ -1,5 +1,5 @@
 <template>
-  <span :class="computedClasses" class="inline-flex items-center ">
+  <span :class="computedClasses" class="inline-flex items-center whitespace-nowrap ">
     <slot></slot>
   </span>
 </template>
@@ -25,8 +25,8 @@ const props = defineProps({
 });
 const computedClasses = computed(() => {
   if (props.solid) {
-    return `h-6 px-2 py-1 rounded-md text-xs text-${props.color}-100 bg-${props.color}-500`;
+    return `h-6 px-2 py-1 rounded-md text-[10px] text-${props.color}-100 bg-${props.color}-500`;
   }
-  return `h-6 px-2 py-1 rounded-md text-xs text-${props.color}-600 bg-${props.color}-100`;
+  return `h-6 px-2 py-1 rounded-md text-[10px] text-${props.color}-600 bg-${props.color}-100`;
 });
 </script>

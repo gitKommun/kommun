@@ -57,7 +57,7 @@ const createCommunity = async () => {
     if (communityName.value !== '') {
         try {
             const respone = await http.post(`communities/create/`, {
-                nameCommunity:communityName.value
+                name: communityName.value,
             });
             toast.add({
                 severity: 'success',

@@ -3,7 +3,7 @@
     <div class="pl-4 md:pl-16 py-6 flex sticky top-0  backdrop-blur z-10">
       <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
           {{title}}
-          <span class="text-sm text-slate-500 font-medium">Comunidad "{{ community.nameCommunity }}"</span>
+          <span class="text-sm text-slate-500 font-medium">Comunidad : {{ user.current_community?.community_name }}</span>
       </div>
     </div>
     <div class="flex justify-center px-3 pb-6">
@@ -34,7 +34,6 @@
               <Button
                 @click="confirmDelete()"
                 severity="danger" 
-                outlined
                 >Eliminar comunidad
               </Button>
             </div>
@@ -107,10 +106,10 @@ const getCommunity = async() => {
     
 }
 getCommunity()
-console.log(confirm);
+
 const confirmDelete = () => {
     confirm.require({
-        message: 'Esta acción no se puede revertir, ¿estas seguro de borrar esta comunidad?',
+        message: 'Esta acción no se puede revertir, ¿ Estas seguro de borrar esta comunidad?',
         header: 'Confirmación',
         rejectProps: {
             label: 'Cancel',

@@ -1,137 +1,207 @@
 <template>
 
     <Fieldset legend="Propiedades">
-            <div class="w-full py-2 text-sm">
-                <MeterGroup :value="value" />
-            </div>
-        
-            <div class="md:columns-3 text-xs uppercase text-slate-500 mb-2">
-                <div>Tipo</div>
-                <transition
-                    enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-                    leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-                    enter-class="opacity-0"
-                    enter-to-class="opacity-100"
-                    leave-class="opacity-100"
-                    leave-to-class="opacity-0"
-                    mode="out-in"
+
+            <div class="flex flex-col mb-3">
+                <p class="text-slate-500 text-xs">Carga de propiedades por referencia catastral.</p>
+                <div class="flex gap-x-3 py-3 w-full md:w-1/2">
+                    <InputText 
+                    v-model="reference" 
+                    placeholder="Referencia catastral" 
+                    class="w-full"
+                    size="small"
+                    variant="filled"/>
+                     <Button 
+                    severity="contrast"
+                    size="small"
+                    @click="loadProperties()"
+                    :loading="propertiesCreationLoading"
+                    :disabled="properties.length"
                     >
-                    <div v-if="form.propertyTypes.length">Cantidad</div>
-                </transition>
-            </div>
-            <div class="columns-1 md:columns-3  mb-2">
-                <div class="flex items-center gap-x-2">
-                    <Checkbox 
-                        v-model="form.propertyTypes" 
-                        inputId="apartment" 
-                        value="apartment"
-                        variant="filled"/> 
-                    <label for="apartment">Apartamento</label> 
+                        Cargar
+                    </Button>
                 </div>
-                
-                <transition
-                    enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-                    leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-                    enter-class="opacity-0"
-                    enter-to-class="opacity-100"
-                    leave-class="opacity-100"
-                    leave-to-class="opacity-0"
-                    mode="out-in"
-                >
-                    <InputNumber 
-                        v-if="form.propertyTypes.includes('apartment')"
-                        v-model="form.apartmentAccount" 
-                        placeholder="Nº de viviendas"  
-                        showButtons
-                        variant="filled"
-                        />
-                </transition>
             </div>
-            <div class="columns-1 md:columns-3 mb-2">
-                <div class="flex items-center gap-x-2">
-                    <Checkbox 
-                        v-model="form.propertyTypes" 
-                        inputId="garage" 
-                        value="garage"
-                        variant="filled"/> 
-                    <label for="garage">Plazas de aparcamiento</label> 
+            <div v-if="properties.length" class="flex gap-x-3 mb-4">
+                <div 
+                v-for="prop in groupedData"
+                :key="prop.key"
+                class="w-full flex flex-col justify-center items-center bg-slate-100 rounded-xl p-3">
+                    <span 
+                    class="uppercase text-xs mb-2"
+                    :class="`text-[${prop.color}]`">
+                        {{ prop.label }}
+                    </span>
+                    <span class="font-bold text-lg">{{ prop.count }}</span>
                 </div>
-                <transition
-                    enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-                    leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-                    enter-class="opacity-0"
-                    enter-to-class="opacity-100"
-                    leave-class="opacity-100"
-                    leave-to-class="opacity-0"
-                    mode="out-in"
-                >
-                    <InputNumber 
-                        v-if="form.propertyTypes.includes('garage')"
-                        v-model="form.garageAccount" 
-                        placeholder="Nº de plazas"
-                        variant="filled"  
-                        showButtons
-                    />
-                </transition>
             </div>
-            <div class="columns-1 md:columns-3">
-                <div class="flex items-center gap-x-2">
-                    <Checkbox 
-                        v-model="form.propertyTypes"
-                        inputId="storageRoom"
-                        value="storageRoom"
-                        variant="filled"/> 
-                    <label for="storageRoom">Trasteros</label> 
-                </div>
-                <transition
-                    enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-                    leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-                    enter-class="opacity-0"
-                    enter-to-class="opacity-100"
-                    leave-class="opacity-100"
-                    leave-to-class="opacity-0"
-                    mode="out-in"
-                >
-                    <InputNumber 
-                        v-if="form.propertyTypes.includes('storageRoom')"
-                        v-model="form.storageRoomAccount" 
-                        placeholder="Nº de trasteros" 
-                        variant="filled" 
-                        showButtons
-                    />
-                </transition>
+            <div v-if="properties.length" class="w-full py-2 text-sm mb-4">
+                <span class="text-xs text-slate-400 mb-2">Propiedades por superficie</span>
+                <MeterGroup :value="groupedData" />
             </div>
-        
+            <div v-if="properties.length" class="w-full flex justify-end gap-x-3">
+                <Button 
+                    severity="danger"
+                    size="small"
+                    @click="deleteAll"
+                    outlined
+                    >
+                        Eliminar propiedades
+                </Button>
+            </div>
+
+            <Toast />
     </Fieldset>
 
 </template>
 <script setup>
-    import { ref } from 'vue'
+    import { ref, computed } from 'vue'
     import { useHttp } from '/src/composables/useHttp.js'; 
-    import { useUserStore } from '/src/stores/useUserStore.js';
+import { useUserStore } from '/src/stores/useUserStore.js';
+import { useToast } from 'primevue/usetoast';
+import { USAGES_HEX } from '/src/constants/colors.js';
+    import { useConfirm } from "primevue/useconfirm";
 
     defineOptions({
         name: 'Properties'
     })
 
-    //variables
-    const form = ref({
-        propertyTypes: [],
-        apartmentAccount: null,
-        garageAccount: null,
-        storageRoomAccount: null,    
-    })
+    
 
     //instancia API
-    const http = useHttp();
-    const { user } = useUserStore();
+const http = useHttp();
+const { user } = useUserStore();
+const confirm = useConfirm();
+const toast = useToast();
 
-const value = ref([
-    { label: 'Residencial', color: '#34d399', value: 56 },
-    { label: 'Almacén-Estacionamiento', color: '#fbbf24', value: 24 },
-    { label: 'Oficina', color: '#60a5fa', value: 8 },
-    { label: 'Industria', color: '#c084fc', value: 10 }
-]);
+//variables
+
+const properties = ref([]);
+const reference = ref('');
+const propertiesCreationLoading = ref(false)
+
+const getProperties = async () => {
+  try {
+      const response = await http.get(`properties/${user?.current_community?.community_id}/`);
+      properties.value = response.data
+      
+    } catch (error) {
+     toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+    }
+}
+
+getProperties()
+
+
+const groupedData = computed(() => {
+  const usageCount = {};
+  const usageArea = {};
+  let totalSurfaceArea = 0;
+
+  // Agrupar y sumar superficie total
+  properties.value.forEach((property) => {
+    const usage = property.usage;
+    const surfaceArea = parseFloat(property.surface_area);
+
+    if (!usageCount[usage]) {
+      usageCount[usage] = 0;
+      usageArea[usage] = 0;
+    }
+
+    usageCount[usage] += 1;
+    usageArea[usage] += surfaceArea;
+    totalSurfaceArea += surfaceArea;
+  });
+
+  // Formatear los resultados para la salida esperada
+  return Object.keys(usageCount).map((key) => {
+    return {
+      label: key,
+      color: key ==='ALMACEN-ESTACIONAMIENTO'? USAGES_HEX.ALMACEN_ESTACIONAMIENTO: USAGES_HEX[key] || '#000000', // Color por defecto si no está en el objeto
+      value: ((usageArea[key] / totalSurfaceArea) * 100).toFixed(2), // Porcentaje basado en surface_area,
+      count: usageCount[key]
+    };
+  });
+});
+
+
+//load
+
+
+function loadProperties  () {
+    console.log('entra');
+    propertiesCreationLoading.value = true
+    if (reference.value !== '') {
+            createProperties()
+    } else {
+        console.log('entra no tiene-vacio')
+        toast.add({
+        severity: 'error',
+        summary: 'Upps!!',
+        detail: 'El campo de referencia catastral no puede estar vacio',
+        life: 3000
+        });
+    propertiesCreationLoading.value = false
+    }
+    
+
+}
+
+const deleteAll = () => {
+    confirm.require({
+        message: 'Esta acción no se puede revertir, ¿ Estas seguro de borrar todas las propiedades?',
+        header: 'Confirmación ',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+          label: 'Borrar',
+          severity:'danger'
+        },
+        accept: () => {
+            //llamada aborrar propiedades
+          //const response =  http.delete(`communities/${community_id.value}/delete/`)
+          toast.add({
+            severity: 'info',
+            summary: 'Ok',
+            detail: 'Todas las propiedades se han eliminado con exito',
+            life: 3000
+          });
+         
+        },
+        reject: () => {
+          toast.add({
+            severity: 'error',
+            summary: 'Upps!!',
+            detail: 'No se han podido eliminar las propieddades',
+            life: 3000
+          });
+        }
+    });
+};
+const createProperties = async () => {
+    
+    try {
+        const response = await http.post(`properties/${user?.current_community?.community_id}/load-properties-API/`, {
+            //...form.value
+            ref_catastrales: [reference.value],
+
+        })
+    } catch (error) {
+        toast.add({
+            severity: 'danger',
+            summary: 'Upps!! algo ha fallado',
+            detail: error,
+            life: 3000
+        });
+    }
+    getProperties()
+    propertiesCreationLoading.value = false
+}
+
+
 
 
 </script>

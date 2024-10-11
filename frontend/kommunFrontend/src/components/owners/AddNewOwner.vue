@@ -24,12 +24,13 @@
                     class="w-full"
                     variant="filled"/>
                 <div class="mt-4">
-                    <Select 
+                    <MultiSelect 
                         v-model="form.role" 
-                        :options="userTypes" 
+                        :options="userTypes"
+                        filter
                         optionLabel="label" 
                         optionValue="value" 
-                        placeholder="Rol..." 
+                        placeholder="Select role" 
                         class="w-full mb-4"
                         variant="filled"/>
                 </div>
@@ -72,13 +73,13 @@ const form = ref({
     surname: '',
     email: '',
     password: '1234',
-    role:''
+    roles:[]
 })
 const userTypes = ref([
 { label: 'Administrador', value: 'admin' },
 { label: 'Propietario', value: 'owner' },
 { label: 'Inquilino', value: 'tenant' },
-{label:'Temporal',value:'temp'},
+// {label:'Temporal',value:'temp'},
 ])
 
     //utils
@@ -89,10 +90,15 @@ const userTypes = ref([
     const emit = defineEmits(['update:owners']);
 
 const createOwner = async () => {
+    const member = {
+        profiles: [
+            form.value
+        ]
+    }
     ownerCreateLoading.value =true 
     if (validatedForm) {
         try {
-            const respone = await http.post(`communities/${user?.current_community?.community_id}/add-user/`, form.value);
+            const respone = await http.post(`communities/${user?.current_community?.community_id}/neighbors/add/`,member);
             toast.add({ severity: 'success', summary: 'Ok', detail: 'Has creado un nuevo propietario', life: 3000 });
             
         } catch (error) {
@@ -105,8 +111,9 @@ const createOwner = async () => {
             surname: '',
             email: '',
             password: '1234',
-            role:''
+            roles:[]
         }
+         emit('update:owners', true);
     }
 }
 const validatedForm = computed(() => {

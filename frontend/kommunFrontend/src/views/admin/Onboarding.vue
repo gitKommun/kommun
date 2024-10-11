@@ -45,7 +45,7 @@
                     
                 </div>
                 <div class="w-110  flex justify-center">
-                    <Button severity="contrast" @click="updateCommunity()" raised>
+                    <Button severity="contrast" @click="createProperties()" raised>
                         Comenzar
                     </Button>
                 </div>
@@ -109,6 +109,25 @@ const updateCommunity = () => {
             life: 3000
         });
 
+    } catch (error) {
+        toast.add({
+            severity: 'danger',
+            summary: 'Upps!! algo ha fallado',
+            detail: error,
+            life: 3000
+        });
+    }
+}
+const createProperties = async () => {
+    console.log('RC',{
+            ref_catastral: [...form.value.catastral_refs],
+        })
+    try {
+        const response = await http.post(`properties/${user?.current_community?.community_id}/load-properties-API/`, {
+            //...form.value
+            ref_catastrales: [...form.value.catastral_refs],
+
+        })
     } catch (error) {
         toast.add({
             severity: 'danger',

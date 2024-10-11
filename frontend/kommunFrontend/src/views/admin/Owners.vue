@@ -6,7 +6,7 @@
           <span class="text-sm text-slate-500 font-medium">{{ user.current_community?.community_name }}"</span>
       </div>
       <div class="w-full p-4 flex justify-end">
-        <AddNewOwner @update:owner="updateOwners"/>
+        <AddNewOwner @update:owners="updateOwners"/>
       </div>
     </div>
     
@@ -14,21 +14,23 @@
         <DataTable :value="owners" tableStyle="min-width: 50rem" class="text-sm">
             <Column field="name" header="Nombre">
               <template #body="slotProps">
-                <CustomAvatar :name="'Candela PlazaJames Bond'"/>
-                <span>{{ slotProps.data.name }}</span>
+                <CustomAvatar :name="slotProps.data.name+' '+slotProps.data.surnames"/>
+                <span class="ml-3">{{ slotProps.data.name }}</span>
+                <span class="ml-1">{{ slotProps.data.surnames }}</span>
                 
               </template>
             </Column>
-            <Column field="surname" header="Apellidos"></Column>
             <Column field="email" header="Email"></Column>
             <Column  header="Rol">
               <template #body="slotProps">
-                  <!-- <Tag :severity="tagColor[slotProps.data.role]" :value="tagLabel[slotProps.data.role]"></Tag> -->
-                  <CustomTag class="w-auto"
-                  :color="tagColor[slotProps.data.role]"
-                  >
-                    {{ tagLabel[slotProps.data.role] }}
-                  </CustomTag>
+                {{ slotProps.data.roles }}
+                  <!-- <template v-for="rol in slotProps.data.roles">
+                    <CustomTag class="w-auto"
+                      :color="tagColor[rol]"
+                      >
+                      {{ tagLabel[rol] }}
+                    </CustomTag>
+                  </template>  -->
               </template>
             </Column>
             <Column field="properties" header="Propiedades vinculadas"></Column>
@@ -175,7 +177,7 @@ const showUpdateOwner = ref(false);
   const getOwners = async () => {
     try {
 
-      const response = await http.get(`communities/${user?.current_community?.community_id}/users/`);
+      const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
       owners.value = response.data
       
     } catch (error) {
@@ -217,6 +219,7 @@ const openUpdateOwner = (item) => {
   }
 
 function updateOwners() {
+  console.log('update');
   setTimeout(() => {
     getOwners();
   }, 300);

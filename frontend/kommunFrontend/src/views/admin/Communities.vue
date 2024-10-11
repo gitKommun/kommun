@@ -10,7 +10,7 @@
       </div>
     </div>
     <!-- search and view -->
-    <div v-if="communities.length" class="flex items-center justify-between pb-4 w-full max-w-4xl mx-auto px-4 md:px-0">
+    <div v-if="communities.length" class="flex items-center justify-between pb-4 w-full max-w-4xl mx-auto px-4 ">
       <InputText 
           v-model="search" 
           placeholder="Buscar" 
@@ -72,7 +72,7 @@
                         >
                         Actual
                         </CustomTag>
-                      <span class="font-medium" :class="isCurrent(slotProps.data.community_id)?'ml-2':''">{{slotProps.data.nameCommunity}}</span>
+                      <span class="font-medium" :class="isCurrent(slotProps.data.community_id)?'ml-2':''">{{slotProps.data.name}}</span>
                     </span>
                     <span class="text-xs text-slate-400"> {{slotProps.data.address}}, {{slotProps.data.city}}</span>
                   </span>

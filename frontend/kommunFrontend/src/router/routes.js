@@ -88,11 +88,11 @@ export default function routes({ authGuard, guestGuard }) {
                 name: 'profile',
                 component: () => import('../views/admin/Profile.vue')
             }, 
-            // {
-            //     path: '/onboarding',
-            //     name: 'onboarding',
-            //     component: () => import('../views/admin/Onboarding.vue')
-            // },
+            {
+                path: '/onboarding',
+                name: 'onboarding',
+                component: () => import('../views/admin/Onboarding.vue')
+            },
         ]),
 
         // {

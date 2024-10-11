@@ -33,7 +33,7 @@
                     class="w-full"
                     variant="filled"/>
                 <InputText 
-                    v-model="form.postalCode" 
+                    v-model="form.postal_code" 
                     placeholder="Código postal" 
                     variant="filled"/>
             </div>
@@ -82,14 +82,14 @@
 
     // //variables
     const form = ref({
-        name: '',
-        address: '',
-        city:'',
-        postalCode: '',
-        cif: '',
-        province: '',
+        name: props.community.name,
+        address: props.community.address,
+        city:props.community.city,
+        postal_code: props.community.postal_code,
+        cif: props.community.cif,
+        province: props.community.province,
         image: '',
-        catastral_ref:''
+        catastral_ref:props.community.catastral_ref
     })
 
 const hasChanged = ref(false);
@@ -102,10 +102,10 @@ watch(form, (newValue) => {
 watch(
   () => props.community,
   (newCommunity) => {
-    form.value.name = props.community.nameCommunity || ''
+    form.value.name = props.community.name || ''
     form.value.address = props.community.address || ''
     form.value.city = props.community.city || ''
-    form.value.postalCode = props.community.postal_code || ''
+    form.value.postal_code = props.community.postal_code || ''
     // Puedes inicializar otros campos según sea necesario
   },
   { immediate: true } // Ejecutar el watcher inmediatamente
@@ -117,10 +117,10 @@ const updateCommunity = () => {
     try {
         const response = http.put(`communities/${props.community.IDcommunity}/update/`, {
             //...form.value
-            nameCommunity: form.value.name,
+            name: form.value.name,
             address: form.value.address,
             city: form.value.city,
-            postal_code:form.value.postalCode
+            postal_code:form.value.postal_code
         })
         toast.add({
             severity: 'success',
