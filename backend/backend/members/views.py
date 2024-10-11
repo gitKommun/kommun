@@ -25,42 +25,16 @@ from communities.models import Community, PersonCommunity, Role
 from communities.serializers import CommunitySerializer
 from properties.models import Property, PropertyRelationship
 
-
-@method_decorator(csrf_exempt, name='dispatch')
 class UserRegistrationAPIView(APIView):
-    def post(self, request):
-        print("Received POST request to register user.")
-        serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-# Crea Usuario gestor de comunidad y genera una comunidad en blanco
-
-class UserMainContactCommunityRegistrationAPIView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            community = Community.objects.create(main_contact_user=user)
-            
-            #Asignar el rol de administrador al usuario en la comunidad recién creada
-            profile = PersonCommunity.objects.create(
-                user=user,
-                community=community,
-            )
-            profile.roles.set([Role.objects.get(name='admin')])
-
-            # Asignar current community al usuario
-            user.current_community = community
-            user.save()
-
-            community_serializer = CommunitySerializer(community)
             return Response({
                 'user': serializer.data,
-                'community': community_serializer.data
             }, status=status.HTTP_201_CREATED)
+
+            #TODO: Validacion email !cubrir casos de uso de suplantación de email
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -146,8 +120,7 @@ def get_user_data(request):
             'surnames': user.surnames,
     
             'language_config': user.language_config,
-            'date_joined': user.date_joined,
-            'current_community_id': user.current_community_id if user.current_community else None
+            'date_joined': user.date_joined
         }
 
 
@@ -156,35 +129,48 @@ def get_user_data(request):
         user_current_community = user.current_community if user.current_community else None
 
         user_current_community_data = {}
+
+        if not user.current_community:
+         if user_communities:
+             user.current_community = user_communities.first().community
+             
+
         if user.current_community:
+            person_community = user_communities.filter(community=user.current_community).first()
+            if person_community:
+                # Obtener los nombres de los roles
+                roles = person_community.roles.all()
+                roles_names = [role.name for role in roles]
+                
             user_current_community_data = {
                 'community_id': user.current_community.community_id,
                 'community_name': user.current_community.name,
-                #'community_role': user_current_community.first().role,
-                #'community_user_status': user_current_community.first().user_status
-            
+                'community_user_status': person_community.user_status,
+                'community_roles': roles_names  # Devolver los nombres de los roles
+                
             }
+
         user_data['current_community'] = user_current_community_data
-
-
 
         for user_community in user_communities:
             community = user_community.community
-            #properties = PropertyRelationship.objects.filter(user=user, property__community=community).select_related('property')
-            #properties_data = [
-            #    {
-            #        'property_id': property.property.id,
-            #        'property_number': property.property.numberProperty,
-            #        'type': property.property.typeProperty,
-            #        'role': property.role
-            #    } for property in properties
-            #]
+            # Obtener las propiedades relacionadas con este perfil en cada comunidad
+            properties = PropertyRelationship.objects.filter(person=user_community, community=community).select_related('property')
+            properties_data = [
+                {
+                    'property_id': property.property.property_id,
+                    'address': property.property.address_complete,
+                    'type': property.type,
+                }
+                for property in properties
+            ]
+
 
             user_community_data = {
                 'community_id': community.community_id,
                 'community_name': community.name,
                 #'role': user_community.role,
-            #    'properties': properties_data
+                'properties': properties_data
             }
             user_communities_data.append(user_community_data)
 

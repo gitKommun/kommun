@@ -125,7 +125,6 @@ class ListPersonCommunityAPIView(generics.ListAPIView):
         return Response(serializer.data)
 
 class AddMultiplePersonCommunityAPIView(APIView):
-
     @swagger_auto_schema(
         operation_description="Añade múltiples personas (PersonCommunity) a una comunidad.",
         request_body=openapi.Schema(

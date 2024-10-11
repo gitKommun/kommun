@@ -39,7 +39,7 @@ class PersonCommunitySerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = PersonCommunity
-        fields = '__all__'
+        exclude = ['id']
         read_only_fields = ['community', 'person_id', 'roles']
         
 class PersonCommunityNeighborsSerializer(serializers.ModelSerializer):
