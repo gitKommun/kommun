@@ -21,11 +21,6 @@ export default function routes({ authGuard, guestGuard }) {
                 name: 'recovery',
                 component: () => import('../views/auth/Recovery.vue')
             }, 
-            {
-                path: '/onboarding',
-                name: 'onboarding',
-                component: () => import('../views/admin/Onboarding.vue')
-            },
         ]),
         ...authGuard([
             {

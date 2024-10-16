@@ -37,7 +37,7 @@
                     <div class="flex gap-x-3 py-4">
                         <div class="w-full">
                             <Password
-                            v-model="password_1" 
+                            v-model="password" 
                             placeholder="Contraseña" 
                             inputClass="min-w-full"
                             toggleMask
@@ -46,18 +46,18 @@
                             :fluid="true">
                             <template #footer>
                                 <ul class="text-xs mt-2 pl-2">
-                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationNumber},{'text-green-500':passValidationNumber}]" type="disc">Numbers</li>
-                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationUppercase},{'text-green-500':passValidationUppercase}]"type="disc">Capital letters</li>
-                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationLowercase},{'text-green-500':passValidationLowercase}]"type="disc">Lowercase</li>
-                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationDigits},{'text-green-500':passValidationDigits}]"type="disc">8 Digits</li>
-                                    <li :class="[{'text-red-500':password_1!=''&&!passValidationCharacter},{'text-green-500':passValidationCharacter}]"type="disc">Special characters</li>
+                                    <li :class="[{'text-red-500':password!=''&&!passValidationNumber},{'text-green-500':passValidationNumber}]" type="disc">Numbers</li>
+                                    <li :class="[{'text-red-500':password!=''&&!passValidationUppercase},{'text-green-500':passValidationUppercase}]"type="disc">Capital letters</li>
+                                    <li :class="[{'text-red-500':password!=''&&!passValidationLowercase},{'text-green-500':passValidationLowercase}]"type="disc">Lowercase</li>
+                                    <li :class="[{'text-red-500':password!=''&&!passValidationDigits},{'text-green-500':passValidationDigits}]"type="disc">8 Digits</li>
+                                    <li :class="[{'text-red-500':password!=''&&!passValidationCharacter},{'text-green-500':passValidationCharacter}]"type="disc">Special characters</li>
                                 </ul>
                             </template>
                         </Password>
                         </div>
                         <div class="w-full">
                             <Password
-                            v-model="password_2" 
+                            v-model="confirmPassword" 
                             placeholder="Confirmar contraseña"
                             inputClass="w-full"
                             :feedback="false"
@@ -73,12 +73,14 @@
                 </div>            
                 <div class="flex justify-between items-center mt-4">
                     <RouterLink to="/">
-                        <Button size="small" text><IconArrowBack class="mr-1 "/>Back to home</Button>
+                        <Button size="small" class="first-letter:uppercase" text><IconArrowBack class="mr-1 "/>Back to home</Button>
                     </RouterLink>
-                    <Button  @click="registerUser" :loading="registerLoading" label="crear" severity="contrast" class="min-w-32" raised/>
+                    <Button  @click="registerUser" :loading="registerLoading" label="Crear" severity="contrast" class="min-w-32 " raised/>
                 </div> 
             
         </div>
+
+        <Toast />
     </div>
 </template>
 <script setup>
@@ -89,6 +91,7 @@ import Authentication from '/src/layouts/Authentication.vue';
 import { useRouter } from 'vue-router';
 //Jakub: enlazando con API
 import { useHttp } from '/src/composables/useHttp.js'; 
+import { setCookie } from '/src/utils/cookies.js';
 
 //utils
 const http = useHttp();
@@ -103,25 +106,33 @@ const toast = useToast();
     const name = ref('');
     const surnames = ref('');
     const email = ref('');
-    const password_1 = ref('');
-    const password_2 = ref('');
+    const password = ref('');
+    const confirmPassword = ref('');
 
 //login
- const login = () => {
-    try {
-        const response =  http.post(`members/login/`, {
+ const login = async () => {
+     try {
+         console.log('login');
+        const response = await http.post(`members/login/`, {
             email: email.value,
             password: password.value,
         });
-        
+
         const { csrftoken, sessionid } = response.data;
 
         setCookie('csrftoken', csrftoken, 30);
-        setCookie('sessionid', sessionid, 30);
+         setCookie('sessionid', sessionid, 30);
 
-        router.push({ name: 'onboarding' });
+         const { data: me } = await http.get(`members/me/`);
+
+         if (me.available_communities?.length === 0) { 
+             router.push({ name: 'onboarding' });
+             return;
+         }
+
+         router.push({ name: 'properties' });
     } catch (error) {
-
+         console.log('error: ', error);
         // Manejar el error de autenticación
         toast.add({
             severity: 'danger',
@@ -134,20 +145,22 @@ const toast = useToast();
 }
 //register
 const registerLoading = ref(false);
-const registerUser = () => {
+const registerUser = async () => {
     registerLoading.value = true
+
     try {
         if (passFormatValid.value) {
-            if (password_1.value===password_2.value) {
-                const response = http.post(`members/register/`, {
+            if (password.value === confirmPassword.value) {
+                 await http.post(`members/register/`, {
                     name: name.value,
                     surnames: surnames.value,
                     email: email.value,
-                    password: password_1.value
+                    password: password.value
                     // Agrega aquí los demás campos del formulario que desees enviar
-                    });
+                });
                 
-                
+                await login()
+                console.log('weba!');
             } else {
                 toast.add({
                     severity: 'danger',
@@ -170,7 +183,8 @@ const registerUser = () => {
         toast.add({ severity: 'danger', summary: 'Error en el registro', detail: error, life: 3000 });
         registerLoading.value = false
     }
-    login()
+
+ 
 
 };
 //Jakub: fin
@@ -178,31 +192,31 @@ const registerUser = () => {
  
 
     const passValidationNumber = computed(() => {
-        if (/\d/.test(password_1.value)) {
+        if (/\d/.test(password.value)) {
             return true
         }
         return false
     })
     const passValidationUppercase = computed(() => {
-        if (/(.*[A-Z].*)/.test(password_1.value)) {
+        if (/(.*[A-Z].*)/.test(password.value)) {
             return true
         }
         return false
     })
     const passValidationLowercase = computed(() => {
-        if (/(.*[a-z].*)/.test(password_1.value))  {
+        if (/(.*[a-z].*)/.test(password.value))  {
             return true
         }
         return false
     })
     const passValidationDigits = computed(() => {
-        if (password_1.value.length >= 8) {
+        if (password.value.length >= 8) {
             return true
         }
         return false
     })
     const passValidationCharacter = computed(() => {
-        if (/[^A-Za-z0-9]/.test(password_1.value)) {
+        if (/[^A-Za-z0-9]/.test(password.value)) {
             return true
         }
         return false
@@ -214,7 +228,7 @@ const registerUser = () => {
         return false
     })
     const passConfirm = computed (() => {
-        if (passFormatValid.value && password_1.value===password_2.value) {
+        if (passFormatValid.value && password.value===confirmPassword.value) {
           return true  
         }
         return false

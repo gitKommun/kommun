@@ -13,7 +13,7 @@
     
 </template>
 <script setup>
-import { ref, onMounted} from 'vue'
+import { ref, onMounted, watch} from 'vue'
 import { useHttp } from '/src/composables/useHttp.js';
 import { useUserStore } from '/src/stores/useUserStore.js'; 
 
@@ -27,6 +27,18 @@ defineOptions({
 //variables
     const owners = ref([]);
     const selected = ref(null);
+
+    // const props = defineProps({
+    //     property: {
+    //         type: Object,
+    //     },
+    // });
+    const emit = defineEmits(['update:selected']);
+
+    watch(selected, (newValue) => {
+        // console.log('nv',newValue)
+        emit('update:selected', newValue);   
+    })
 
 
     const getOwners = async () => {
@@ -43,9 +55,9 @@ defineOptions({
         }
     }
 
-onMounted(() => {
-  getOwners()
-});
+    onMounted(() => {
+        getOwners()
+    });
 
 
 </script>

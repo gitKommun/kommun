@@ -74,7 +74,7 @@
 
     // createFolders
 const crateFolder = async () => {
-        console.log('cick ddesdw')
+
     folderCreateLoading.value = true;
    
         if (folderName.value != '') {

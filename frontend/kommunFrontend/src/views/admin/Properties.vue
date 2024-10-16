@@ -40,15 +40,16 @@
             <Column field="door" sortable header="Pta"></Column>
             <Column  header="Propietario">
               <template #body="slotProps">
-                <UserSelector/>
+                <UserSelector  @update:selected="(owner) => updateOwner(owner, slotProps.data)"/>
               </template>
             </Column>
         </DataTable>
     </div>
+    <toast/>
   </div>  
 </template>
 <script setup>
-import { ref ,  shallowRef} from 'vue'
+import { ref , toRef, shallowRef} from 'vue'
 import Main from '/src/layouts/Main.vue';
 import IconPlus from "/src/components/icons/IconPlus.vue";
 import { useHttp } from '/src/composables/useHttp.js'; 
@@ -71,7 +72,9 @@ const { user } = useUserStore();
 const toast = useToast();
 const route = useRouter();
 
+//variables
 const properties = ref([]);
+const updating = ref(null);
 
 const getProperties = async () => {
   try {
@@ -87,6 +90,29 @@ getProperties()
 
 const usageTagColor = (usage) => {
   return USAGES[usage];
+}
+
+const updateOwner =  (owner, data) => {
+  console.log('owner :>> ', owner, data);
+  const { person_id } = owner;
+  const { property_id } = data;
+
+  console.log('des', person_id, property_id);
+  try {
+    http.post(`properties/${user?.current_community?.community_id}/property-relationship/create/`, {
+      property_id: property_id,
+      person_id: person_id,
+      type:'owner'
+      });  
+      toast.add({
+            severity: 'success',
+            summary: 'Ok',
+            detail: 'Prpietario vinculado con exito',
+            life: 3000
+        });    
+    } catch (error) {
+     toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+    }
 }
 
 </script>

@@ -45,7 +45,7 @@
                     
                 </div>
                 <div class="w-110  flex justify-center">
-                    <Button severity="contrast" @click="createProperties()" raised>
+                    <Button severity="contrast" @click="start()" raised>
                         Comenzar
                     </Button>
                 </div>
@@ -64,7 +64,7 @@ import { ref } from 'vue'
 import { useHttp } from '/src/composables/useHttp.js'; 
 import { useUserStore } from '/src/stores/useUserStore.js';
 import { useToast } from 'primevue/usetoast';
-
+import { useRouter } from 'vue-router';
 import IconTrash from '@/components/icons/IconTrash.vue';
 import IconPlus from '@/components/icons/IconPlus.vue';
 
@@ -94,13 +94,12 @@ const removeOption = (index) => {
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
+const router = useRouter();
 
-const updateCommunity = () => {
+const createCommunity = () => {
     try {
-        const response = http.put(`communities/${user?.current_community?.community_id}/update/`, {
-            //...form.value
-            nameCommunity: form.value.name,
-
+            http.post(`communities/create/`, {
+            name: form.value.name !== ''? form.value.name : 'Comunidad sin nombre',
         })
         toast.add({
             severity: 'success',
@@ -108,6 +107,7 @@ const updateCommunity = () => {
             detail: 'Carpeta creada con exito',
             life: 3000
         });
+        
 
     } catch (error) {
         toast.add({
@@ -119,23 +119,26 @@ const updateCommunity = () => {
     }
 }
 const createProperties = async () => {
-    console.log('RC',{
-            ref_catastral: [...form.value.catastral_refs],
-        })
-    try {
-        const response = await http.post(`properties/${user?.current_community?.community_id}/load-properties-API/`, {
-            //...form.value
+    if (form.value.catastral_refs[0] !== '') {
+        try {
+            await http.post(`properties/${user?.current_community?.community_id}/load-properties-API/`, {
             ref_catastrales: [...form.value.catastral_refs],
 
-        })
-    } catch (error) {
-        toast.add({
-            severity: 'danger',
-            summary: 'Upps!! algo ha fallado',
-            detail: error,
-            life: 3000
-        });
-    }
+            })
+        } catch (error) {
+            toast.add({
+                severity: 'danger',
+                summary: 'Upps!! algo ha fallado',
+                detail: error,
+                life: 3000
+            });
+        }
+    }    
+}
+const start =  () => {
+    createCommunity()
+    createProperties()
+    router.push({ name: 'owners' });
 }
 
 </script>

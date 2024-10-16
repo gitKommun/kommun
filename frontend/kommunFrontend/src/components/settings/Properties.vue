@@ -134,7 +134,6 @@ function loadProperties  () {
     if (reference.value !== '') {
             createProperties()
     } else {
-        console.log('entra no tiene-vacio')
         toast.add({
         severity: 'error',
         summary: 'Upps!!',
