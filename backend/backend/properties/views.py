@@ -97,6 +97,20 @@ class PropertyDeleteAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class DeleteAllPropertiesAPIView(APIView):
+    def delete(self, request, IDcommunity):
+        # Obtener la comunidad
+        community = get_object_or_404(Community, community_id=IDcommunity)
+        
+        # Eliminar todas las propiedades asociadas a la comunidad
+        properties = Property.objects.filter(community=community)
+        count = properties.count()
+        properties.delete()
+        
+        return Response({
+            'message': f'Se han eliminado {count} propiedades de la comunidad {community.name}.'
+        }, status=status.HTTP_200_OK)
+
 class BulkUploadPropertiesView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     @swagger_auto_schema(
@@ -424,3 +438,5 @@ class DeletePropertyRelationshipAPIView(APIView):
         relationship_instance.delete()
 
         return Response({'message': 'Relationship deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    
+
