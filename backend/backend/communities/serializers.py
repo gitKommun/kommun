@@ -3,10 +3,15 @@ from .models import Community, PersonCommunity, Role
 from properties.models import Property
 from common_areas.models import CommonArea
 
-class CommunitySerializer(serializers.ModelSerializer):
+class CommunitySerializer(serializers.ModelSerializer):    
+    province_name = serializers.CharField(source='province.name', read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
+
     class Meta:
         model = Community
         fields = '__all__'
+        extra_fields = ['province_name', 'city_name']
+
 
 class CommunityDetailSerializer(serializers.ModelSerializer):
     properties = serializers.SerializerMethodField()
@@ -32,6 +37,8 @@ class CommunityDetailSerializer(serializers.ModelSerializer):
         
 
 class PersonCommunitySerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+
     roles = serializers.SlugRelatedField(
         many=True,
         slug_field='name',  # Devolver el nombre del rol en lugar del ID
@@ -41,6 +48,9 @@ class PersonCommunitySerializer(serializers.ModelSerializer):
         model = PersonCommunity
         exclude = ['id']
         read_only_fields = ['community', 'person_id', 'roles']
+
+    def get_full_name(self, obj):
+        return f"{obj.name} {obj.surnames}"
         
 class PersonCommunityNeighborsSerializer(serializers.ModelSerializer):
     roles = serializers.SlugRelatedField(
