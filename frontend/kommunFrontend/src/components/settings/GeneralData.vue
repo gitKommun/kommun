@@ -114,8 +114,9 @@ watch(
 
 
 const updateCommunity = () => {
+    console.log('object :>> ', props.community);
     try {
-        const response = http.put(`communities/${props.community.IDcommunity}/update/`, {
+        const response = http.put(`communities/${props.community.community_id}/update/`, {
             //...form.value
             name: form.value.name,
             address: form.value.address,
