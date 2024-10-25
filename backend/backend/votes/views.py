@@ -19,8 +19,8 @@ class CreateVoteAPIView(APIView):
             properties={
                 'title': openapi.Schema(type=openapi.TYPE_STRING, description="Título de la votación"),
                 'description': openapi.Schema(type=openapi.TYPE_STRING, description="Descripción de la votación"),
-                'start_date': openapi.Schema(type=openapi.TYPE_STRING, description="Fecha de inicio"),
-                'end_date': openapi.Schema(type=openapi.TYPE_STRING, description="Fecha de finalización"),
+                'start_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Fecha de inicio"),
+                'end_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Fecha de finalización"),
                 'vote_type': openapi.Schema(type=openapi.TYPE_STRING, enum=['simple', 'multiple_choice'], description="Tipo de votación"),
                 'eligible_voters': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
@@ -29,11 +29,8 @@ class CreateVoteAPIView(APIView):
                 ),
                 'options': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
-                        'text': openapi.Schema(type=openapi.TYPE_STRING, description="Texto de la opción"),
-                        'description': openapi.Schema(type=openapi.TYPE_STRING, description="Descripción de la opción")
-                    }),
-                    description="Opciones de la votación"
+                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    description="Lista de opciones de votación"
                 )
             }
         ),
@@ -42,7 +39,7 @@ class CreateVoteAPIView(APIView):
     def post(self, request, IDcommunity):
         # Obtener la comunidad
         community = get_object_or_404(Community, community_id=IDcommunity)
-        
+
         # Extraer los datos de la solicitud
         title = request.data.get('title')
         description = request.data.get('description')
@@ -63,24 +60,26 @@ class CreateVoteAPIView(APIView):
             community=community
         )
 
-        # Asignar los votantes elegibles
-        eligible_voters = PersonCommunity.objects.filter(
-            community=community,
-            person_id__in=eligible_voters_ids
-        )
+        # Asignar los votantes elegibles usando person_id relativo dentro de la comunidad
+        valid_voters = []
+        for person_id in eligible_voters_ids:
+            try:
+                voter = PersonCommunity.objects.get(community=community, person_id=person_id)
+                valid_voters.append(voter)
+            except PersonCommunity.DoesNotExist:
+                return Response({'error': f'El vecino con person_id {person_id} no existe en esta comunidad.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if eligible_voters.exists():
-            vote.eligible_voters.set(eligible_voters)
+        # Asignar los votantes válidos a la votación
+        if valid_voters:
+            vote.eligible_voters.set(valid_voters)
         else:
-            return Response({'error': 'No se encontraron votantes elegibles con los IDs proporcionados'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'No se encontraron votantes elegibles válidos.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Crear las opciones de la votación
-        for option_data in options_data:
-            Option.objects.create(vote=vote, text=option_data['text'], description=option_data.get('description', ''))
+        for option_text in options_data:
+            Option.objects.create(vote=vote, option_text=option_text)
 
         return Response({"message": "Votación creada exitosamente", "vote_id": vote.vote_id}, status=status.HTTP_201_CREATED)
-
-
 
 
 class CastVoteAPIView(APIView):
@@ -234,7 +233,7 @@ class VoteDetailAPIView(APIView):
         options = vote.options.all()
 
         # Inicializar los resultados por opción
-        option_results = {option.option_id: {'text': option.text, 'description': option.description, 'votes': 0} for option in options}
+        option_results = {option.option_id: {'text': option.option_text, 'votes': 0} for option in options}
 
         # Obtener todos los registros de votos
         vote_records = VoteRecord.objects.filter(vote=vote)
@@ -287,15 +286,11 @@ class UpdateVoteAPIView(APIView):
                 'description': openapi.Schema(type=openapi.TYPE_STRING, description="Descripción de la votación"),
                 'start_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Fecha de inicio de la votación"),
                 'end_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Fecha de finalización de la votación"),
-                'vote_type': openapi.Schema(type=openapi.TYPE_STRING, description="Tipo de votación (simple o multiple_choice)"),
+                'vote_type': openapi.Schema(type=openapi.TYPE_STRING, enum=['simple', 'multiple_choice'], description="Tipo de votación"),
                 'options': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
-                        'option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo de la opción"),
-                        'text': openapi.Schema(type=openapi.TYPE_STRING, description="Texto de la opción"),
-                        'description': openapi.Schema(type=openapi.TYPE_STRING, description="Descripción de la opción"),
-                    }),
-                    description="Lista de opciones a actualizar"
+                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    description="Lista de opciones de la votación (como strings)"
                 ),
             }
         ),
@@ -316,16 +311,33 @@ class UpdateVoteAPIView(APIView):
 
             # Actualizar las opciones si se proporcionan
             options_data = request.data.get('options', [])
-            for option_data in options_data:
-                option_id = option_data.get('option_id')
-                option = get_object_or_404(Option, vote=updated_vote, option_id=option_id)
-                option_serializer = OptionSerializer(option, data=option_data, partial=True)
-                if option_serializer.is_valid():
-                    option_serializer.save()
+            existing_options = {opt.option_id: opt for opt in Option.objects.filter(vote=updated_vote)}
+
+            # Actualizar opciones existentes o crear nuevas si es necesario
+            new_option_id = max(existing_options.keys(), default=0) + 1
+            updated_option_ids = []
+
+            for index, option_text in enumerate(options_data, start=1):
+                if index in existing_options:
+                    # Actualizar el texto de las opciones existentes
+                    existing_option = existing_options[index]
+                    if existing_option.option_text != option_text:
+                        existing_option.option_text = option_text
+                        existing_option.save()
+                    updated_option_ids.append(existing_option.option_id)
+                else:
+                    # Crear nuevas opciones si no existen
+                    Option.objects.create(vote=updated_vote, option_id=new_option_id, option_text=option_text)
+                    updated_option_ids.append(new_option_id)
+                    new_option_id += 1
+
+            # Eliminar las opciones que no están en la lista actualizada
+            for option_id, option in existing_options.items():
+                if option_id not in updated_option_ids:
+                    option.delete()
 
             return Response(VoteSerializer(updated_vote).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
 class DeleteVoteAPIView(APIView):
     @swagger_auto_schema(

@@ -40,8 +40,7 @@ class Vote(models.Model):
 class Option(models.Model):
     option_id = models.PositiveIntegerField()
     vote = models.ForeignKey(Vote, on_delete=models.CASCADE, related_name='options')
-    text = models.CharField(_('text'), max_length=255)
-    description = models.TextField(_('description'), null=True, blank=True)
+    option_text = models.CharField(_('option_text'), max_length=255)
 
     def __str__(self):
         return self.text
