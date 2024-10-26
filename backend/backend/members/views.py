@@ -43,23 +43,7 @@ class UserListAPIView(APIView):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
-    
-
-class UserLoginAPIView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        user = User.objects.filter(email=email).first()
-        if user is not None:
-            user = authenticate(request, email=user.email, password=password)
-            if user is not None:
-                # Usuario autenticado correctamente
-                return Response({'message': 'Inicio de sesión exitoso'}, status=status.HTTP_200_OK)
-        return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
-    
-
-
-  
+      
 
 @method_decorator(csrf_exempt, name='dispatch')
 @method_decorator(require_POST, name='dispatch')
@@ -123,6 +107,11 @@ def get_user_data(request):
             'date_joined': user.date_joined
         }
 
+
+        # Verificar si hay PersonCommunity con el mismo email del usuario en cualquier comunidad
+        for person in PersonCommunity.objects.filter(email=user.email, user__isnull=True):
+            person.user = user
+            person.save()
 
         user_communities = PersonCommunity.objects.filter(user=user).select_related('community')
         user_communities_data = []
