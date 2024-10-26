@@ -150,116 +150,111 @@ class CastVoteAPIView(APIView):
         return Response({'message': 'Voto registrado correctamente.'}, status=status.HTTP_201_CREATED)
     
 class VoteDetailAPIView(APIView):
-
     @swagger_auto_schema(
-        operation_description="Obtiene el detalle de una votación específica.",
+        operation_description="Obtener los detalles y resultados de una votación específica.",
         responses={
-            200: openapi.Response(
-                description="Detalles de la votación",
-                examples={
-                    "application/json": {
-                        "vote_id": 1,
-                        "title": "Elección de presidente",
-                        "description": "Votación para elegir al nuevo presidente de la comunidad",
-                        "start_date": "2023-01-01T09:00:00Z",
-                        "end_date": "2023-01-02T18:00:00Z",
-                        "vote_type": "simple",
-                        "results": {
-                            "1": {
-                                "text": "Candidato A",
-                                "description": "Descripción del Candidato A",
-                                "votes": 10
-                            },
-                            "2": {
-                                "text": "Candidato B",
-                                "description": "Descripción del Candidato B",
-                                "votes": 8
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'vote_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de la votación relativa a la comunidad"),
+                    'title': openapi.Schema(type=openapi.TYPE_STRING, description="Título de la votación"),
+                    'description': openapi.Schema(type=openapi.TYPE_STRING, description="Descripción de la votación"),
+                    'start_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Fecha de inicio de la votación"),
+                    'end_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Fecha de finalización de la votación"),
+                    'vote_type': openapi.Schema(type=openapi.TYPE_STRING, description="Tipo de votación"),
+                    'results': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo de la opción"),
+                                'option_text': openapi.Schema(type=openapi.TYPE_STRING, description="Texto de la opción"),
+                                'vote_count': openapi.Schema(type=openapi.TYPE_INTEGER, description="Número de votos recibidos")
                             }
-                        },
-                        "pending_voters": [
-                            {
-                                "neighbor_id": 3,
-                                "name": "Juan Pérez"
-                            },
-                            {
-                                "neighbor_id": 5,
-                                "name": "Ana López"
-                            }
-                        ],
-                        "vote_details": [
-                            {
-                                "neighbor_id": 1,
-                                "neighbor_name": "Carlos Rodríguez",
-                                "options_selected": [
-                                    {
-                                        "option_id": 1,
-                                        "text": "Candidato A"
+                        ),
+                        description="Lista de resultados de la votación"
+                    ),
+                    'pending_votes': openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'total': openapi.Schema(type=openapi.TYPE_INTEGER, description="Número total de votos pendientes"),
+                            'details': openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(
+                                    type=openapi.TYPE_OBJECT,
+                                    properties={
+                                        'neighbor_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del vecino en la comunidad"),
+                                        'neighbor_name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del vecino"),
+                                        'delegated_to_name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del delegado, si lo hay")
                                     }
-                                ],
-                                "delegated_to": None,
-                                "timestamp": "2023-01-01T10:00:00Z",
-                                "recorded_by": "carlos@example.com"
-                            },
-                            {
-                                "neighbor_id": 2,
-                                "neighbor_name": "María García",
-                                "options_selected": [
-                                    {
-                                        "option_id": 2,
-                                        "text": "Candidato B"
-                                    }
-                                ],
-                                "delegated_to": None,
-                                "timestamp": "2023-01-01T11:00:00Z",
-                                "recorded_by": "maria@example.com"
+                                ),
+                                description="Lista de vecinos con votos pendientes"
+                            )
+                        }
+                    ),
+                    'votes_received': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'neighbor_name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del votante"),
+                                'delegated_to_name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del delegado (si aplica)"),
+                                'options_selected': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                                'timestamp': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Fecha de registro del voto")
                             }
-                        ]
-                    }
+                        ),
+                        description="Detalles de los votos recibidos"
+                    )
                 }
             ),
-            404: openapi.Response(description="Votación no encontrada"),
-        },
-        manual_parameters=[
-            openapi.Parameter('IDcommunity', openapi.IN_PATH, description="ID de la comunidad", type=openapi.TYPE_STRING),
-            openapi.Parameter('vote_id', openapi.IN_PATH, description="ID de la votación dentro de la comunidad", type=openapi.TYPE_INTEGER)
-        ]
+            404: "Votación no encontrada."
+        }
     )
     def get(self, request, IDcommunity, vote_id):
         # Obtener la comunidad y la votación
         community = get_object_or_404(Community, community_id=IDcommunity)
         vote = get_object_or_404(Vote, community=community, vote_id=vote_id)
 
-        # Obtener todas las opciones de la votación
-        options = vote.options.all()
+        # Obtener los resultados como lista
+        results = [
+            {
+                'option_id': option.option_id,
+                'option_text': option.option_text,
+                'vote_count': option.vote_records_multiple.count()
+            }
+            for option in vote.options.all()
+        ]
 
-        # Inicializar los resultados por opción
-        option_results = {option.option_id: {'text': option.option_text, 'votes': 0} for option in options}
+        # Votos pendientes
+        total_eligible_voters = vote.eligible_voters.count()
+        votes_received_count = vote.vote_records.count()
+        pending_votes_count = total_eligible_voters - votes_received_count
 
-        # Obtener todos los registros de votos
-        vote_records = VoteRecord.objects.filter(vote=vote)
-
-        # Procesar los resultados de los votos
-        for vote_record in vote_records:
-            for option in vote_record.options.all():
-                option_results[option.option_id]['votes'] += 1
-
-        # Votantes pendientes (personas elegibles que no han votado)
-        voted_neighbors = vote_records.values_list('neighbor_id', flat=True)
+        # Obtener detalles de votos pendientes
+        voted_neighbors = vote.vote_records.values_list('neighbor_id', flat=True)
         pending_voters = vote.eligible_voters.exclude(id__in=voted_neighbors)
+        
+        pending_votes_details = [
+            {
+                'neighbor_id': neighbor.person_id,
+                'neighbor_name': f"{neighbor.name} {neighbor.surnames}",
+                'delegated_to_name': None  # Puedes ajustar si necesitas información específica sobre el delegado
+            }
+            for neighbor in pending_voters
+        ]
 
-        # Detalle de cada voto registrado
-        vote_details = []
-        for vote_record in vote_records:
-            vote_details.append({
-                'neighbor_id': vote_record.neighbor.person_id,
-                'neighbor_name': f"{vote_record.neighbor.name} {vote_record.neighbor.surnames}",
-                'options_selected': [{'option_id': option.option_id, 'text': option.text} for option in vote_record.options.all()],
-                'delegated_to': f"{vote_record.delegated_to.name} {vote_record.delegated_to.surnames}" if vote_record.delegated_to else None,
-                'timestamp': vote_record.timestamp,
-                'recorded_by': vote_record.recorded_by.email
-            })
+        # Detalle de votos recibidos
+        votes_received_details = [
+            {
+                'neighbor_name': f"{record.neighbor.name} {record.neighbor.surnames}",
+                'delegated_to_name': f"{record.delegated_to.name} {record.delegated_to.surnames}" if record.delegated_to else None,
+                'options_selected': [opt.option_text for opt in record.options.all()],
+                'timestamp': record.timestamp
+            }
+            for record in vote.vote_records.select_related('neighbor', 'delegated_to').prefetch_related('options')
+        ]
 
-        # Construir la respuesta
+        # Respuesta con la información de la votación y los resultados
         response_data = {
             'vote_id': vote.vote_id,
             'title': vote.title,
@@ -267,13 +262,15 @@ class VoteDetailAPIView(APIView):
             'start_date': vote.start_date,
             'end_date': vote.end_date,
             'vote_type': vote.vote_type,
-            'results': option_results,
-            'pending_voters': [{'neighbor_id': voter.person_id, 'name': f"{voter.name} {voter.surnames}"} for voter in pending_voters],
-            'vote_details': vote_details
+            'results': results,
+            'pending_votes': {
+                'total': pending_votes_count,
+                'details': pending_votes_details
+            },
+            'votes_received': votes_received_details
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-    
 
 class UpdateVoteAPIView(APIView):
     @swagger_auto_schema(
