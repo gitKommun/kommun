@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Property, PropertyRelationship
-
+from communities.serializers import PersonCommunitySerializer
 
 class PropertySerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,6 +8,20 @@ class PropertySerializer(serializers.ModelSerializer):
         #fields = '__all__'
         exclude = ['id']
         read_only_fields = ['community', 'property_id']
+
+
+class PropertyOwnerSerializer(serializers.ModelSerializer):
+    owner = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Property
+        fields = ['property_id', 'address_complete', 'surface_area', 'participation_coefficient', 'usage', 'owner']
+
+    def get_owner(self, obj):
+        owner_relationship = obj.relationships.filter(type='owner').first()
+        if owner_relationship and owner_relationship.person:
+            return PersonCommunitySerializer(owner_relationship.person).data
+        return None
 
 
 class PropertyRelationshipSerializer(serializers.ModelSerializer):

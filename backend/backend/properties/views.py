@@ -14,9 +14,11 @@ import pandas as pd
 import requests
 
 from .models import  Property, PropertyRelationship
-from .serializers import  PropertySerializer, PropertyRelationshipSerializer, PropertyDetailSerializer
+from .serializers import  PropertySerializer, PropertyRelationshipSerializer, PropertyDetailSerializer, PropertyOwnerSerializer
 from communities.models import Community, PersonCommunity
+from communities.serializers import PersonCommunitySerializer
 from core.models import Municipality, Province, PostalCode
+
 
 # Create your views here.
 ### Property managemente views ###
@@ -34,6 +36,69 @@ def list_properties(request, IDcommunity):
     properties = Property.objects.filter(community=community)
     serializer = PropertyDetailSerializer(properties, many=True)
     return Response(serializer.data)
+
+
+class ListPropertiesWithOwnerAPIView(APIView):
+    @swagger_auto_schema(
+        operation_description="Obtener el listado de propiedades con su propietario asociado (owner) en una comunidad específica.",
+        responses={
+            200: openapi.Response(
+                description="Lista de propiedades con el propietario (owner) asociado.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'property_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo de la propiedad"),
+                            'address_complete': openapi.Schema(type=openapi.TYPE_STRING, description="Dirección completa de la propiedad"),
+                            'surface_area': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_DECIMAL, description="Superficie de la propiedad"),
+                            'participation_coefficient': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_DECIMAL, description="Coeficiente de participación"),
+                            'usage': openapi.Schema(type=openapi.TYPE_STRING, description="Uso de la propiedad"),
+                            'owner': openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del perfil en la comunidad"),
+                                    'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del propietario"),
+                                    'surnames': openapi.Schema(type=openapi.TYPE_STRING, description="Apellidos del propietario"),
+                                    'email': openapi.Schema(type=openapi.TYPE_STRING, description="Correo electrónico del propietario"),
+                                    'user_status': openapi.Schema(type=openapi.TYPE_STRING, description="Estado del propietario en la comunidad"),
+                                    'roles': openapi.Schema(
+                                        type=openapi.TYPE_ARRAY,
+                                        items=openapi.Schema(type=openapi.TYPE_STRING),
+                                        description="Roles asociados al propietario"
+                                    )
+                                },
+                                description="Información del propietario de la propiedad"
+                            )
+                        }
+                    )
+                )
+            ),
+            404: openapi.Response(description="Comunidad no encontrada.")
+        }
+    )
+
+
+    def get(self, request, IDcommunity):
+        # Obtener todas las propiedades de la comunidad
+        properties = Property.objects.filter(community__community_id=IDcommunity)
+        properties_data = []
+
+        for property in properties:
+            # Buscar el owner de la propiedad
+            owner_relationship = PropertyRelationship.objects.filter(property=property, type='owner').first()
+            owner_data = None
+
+            if owner_relationship and owner_relationship.person:
+                owner_data = PersonCommunitySerializer(owner_relationship.person).data
+
+            # Serializar los datos de la propiedad y agregar el owner
+            property_data = PropertyOwnerSerializer(property).data
+            property_data['owner'] = owner_data
+
+            properties_data.append(property_data)
+
+        return Response(properties_data, status=status.HTTP_200_OK)
 
 
 class PropertyCreateAPIView(APIView):

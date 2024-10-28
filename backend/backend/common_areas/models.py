@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from communities.models import Community
+from communities.models import Community, PersonCommunity
 from members.models import User
 
 class CommonArea(models.Model):
@@ -35,7 +35,7 @@ class CommonArea(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Common Area {self.area_id} - {self.name} ({self.community.nameCommunity})"
+        return f"Common Area {self.area_id} - {self.name})"
     
 
 
@@ -46,9 +46,11 @@ class Reservation(models.Model):
         ('DAY', 'Days'),
     ]
 
+    reservation_id = models.PositiveIntegerField(null=True, blank=True)  # Número secuencial dentro de la comunidad
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='reservations')
     common_area = models.ForeignKey(CommonArea, on_delete=models.CASCADE, related_name='reservations')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations')  # Usuario que crea la reserva
+    neighbor = models.ForeignKey(PersonCommunity, on_delete=models.CASCADE, related_name='neighbor_reservations', null=True, blank=True)  # Vecino que hará uso de la reserva
     start_time = models.DateTimeField(_('start time'))
     end_time = models.DateTimeField(_('end time'))
     duration = models.PositiveIntegerField(_('duration'))
@@ -59,6 +61,22 @@ class Reservation(models.Model):
         verbose_name = _("Reservation")
         verbose_name_plural = _("Reservations")
         unique_together = ('common_area', 'start_time', 'end_time')
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Calcular el siguiente reservation_id para la comunidad y área común
+            last_reservation = Reservation.objects.filter(
+                community=self.community,
+                common_area=self.common_area
+            ).order_by('reservation_id').last()
+
+            # Asignar reservation_id
+            if last_reservation and last_reservation.reservation_id:
+                self.reservation_id = last_reservation.reservation_id + 1
+            else:
+                self.reservation_id = 1
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Reservation for {self.common_area.name} by {self.user.email} from {self.start_time} to {self.end_time}"
