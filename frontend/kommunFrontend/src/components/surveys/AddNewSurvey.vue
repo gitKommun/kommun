@@ -109,16 +109,7 @@
                             leave-to-class="opacity-0"
                         >  
                           <div v-if="!enableAllAudience" class="mt-4">
-                              <MultiSelect 
-                                v-model="form.eligible_voters" 
-                                :options="owners" 
-                                optionLabel="label" 
-                                optionValue="value"
-                                filter 
-                                variant="filled"
-                                placeholder="Selecciona propietarios"  
-                                :maxSelectedLabels="3" 
-                                class="w-full" />
+                              <UserSelectorMultiple @update:selected="(owners) => form.eligible_voters = owners"/>
                           </div>
                         </transition>
                       </div>
@@ -155,6 +146,7 @@ import { useUserStore } from '/src/stores/useUserStore.js';
 
 import IconPlus from "/src/components/icons/IconPlus.vue";
 import IconTrash from "/src/components/icons/IconTrash.vue";
+import UserSelectorMultiple from '/src/components/UserSelectorMultiple.vue';
 
 
 defineOptions({

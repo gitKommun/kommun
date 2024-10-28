@@ -102,7 +102,7 @@ const form = ref({
     description: '',
     //user: '',
     priority: '',
-    category: '',
+    category: 'low',
     status:'reported',
     incident_date: getFormattedDate,
     //community_id:
@@ -142,7 +142,8 @@ const priorityLabel = {
     const emit = defineEmits(['update:owners']);
 
 const createIncidence = async () => {
-    incidenceCreateLoading.value =true 
+    incidenceCreateLoading.value = true 
+    console.log(user?.current_community?.community_id)
     if (validatedForm) {
         try {
             const respone = await http.post(`claims/${user?.current_community?.community_id}/create/`, form.value);

@@ -1,6 +1,6 @@
 <template>
     <div class="w-full">
-        <Select
+        <MultiSelect
         v-model="selected"
         :options="owners"
         optionLabel="full_name"
@@ -26,7 +26,7 @@ defineOptions({
 
 //variables
     const owners = ref([]);
-    const selected = ref(null);
+    const selected = ref([]);
 
     // const props = defineProps({
     //     property: {

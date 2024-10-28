@@ -65,6 +65,11 @@ import { USAGES_HEX } from '/src/constants/colors.js';
     defineOptions({
         name: 'Properties'
     })
+    const props = defineProps({
+        community: {
+            type: Object,
+        },
+    });
 
     
 
@@ -129,7 +134,7 @@ const groupedData = computed(() => {
 
 
 function loadProperties  () {
-    console.log('entra');
+
     propertiesCreationLoading.value = true
     if (reference.value !== '') {
             createProperties()
@@ -161,13 +166,17 @@ const deleteAll = () => {
         },
         accept: () => {
             //llamada aborrar propiedades
-          //const response =  http.delete(`communities/${community_id.value}/delete/`)
+          const response =  http.delete(`properties/${props.community.community_id}/delete-properties/`)
           toast.add({
             severity: 'info',
             summary: 'Ok',
             detail: 'Todas las propiedades se han eliminado con exito',
             life: 3000
           });
+            setTimeout(() => {
+                getProperties()
+            }, 300);
+          
          
         },
         reject: () => {
