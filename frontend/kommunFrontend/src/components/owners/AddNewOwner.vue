@@ -25,7 +25,7 @@
                     variant="filled"/>
                 <div class="mt-4">
                     <MultiSelect 
-                        v-model="form.role" 
+                        v-model="form.roles" 
                         :options="userTypes"
                         filter
                         optionLabel="label" 
@@ -78,7 +78,7 @@ const form = ref({
 const userTypes = ref([
 { label: 'Administrador', value: 'admin' },
 { label: 'Propietario', value: 'owner' },
-{ label: 'Inquilino', value: 'tenant' },
+// { label: 'Inquilino', value: 'tenant' },
 // {label:'Temporal',value:'temp'},
 ])
 

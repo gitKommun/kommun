@@ -23,14 +23,11 @@
             <Column field="email" header="Email"></Column>
             <Column  header="Rol">
               <template #body="slotProps">
-                {{ slotProps.data.roles }}
-                  <!-- <template v-for="rol in slotProps.data.roles">
-                    <CustomTag class="w-auto"
-                      :color="tagColor[rol]"
-                      >
-                      {{ tagLabel[rol] }}
-                    </CustomTag>
-                  </template>  -->
+                  <CustomTag
+                        :color="rolesTagColor(slotProps.data.roles[0])"
+                        >
+                        {{rolesTagLabel(slotProps.data.roles[0])}}
+                  </CustomTag>
               </template>
             </Column>
             <Column field="properties" header="Propiedades vinculadas"></Column>
@@ -129,6 +126,7 @@ import Dropdown from "/src/components/Dropdown.vue";
 import { useToast } from 'primevue/usetoast';
 import CustomTag from '/src/components/CustomTag.vue'
 import CustomAvatar from '/src/components/CustomAvatar.vue'
+import { ROLES } from '/src/constants/colors.js';
 
   defineOptions({
     name: 'members',
@@ -151,20 +149,21 @@ import CustomAvatar from '/src/components/CustomAvatar.vue'
   //user store
 const { user } = useUserStore();
         //use toast
-    const toast = useToast();
-  
-  const tagColor = {
-    "admin": 'blue',
-    "owner": 'lime',
-    "tenant": 'amber',
-    "temp":'orange'
-  }
+const toast = useToast();
+
+
+const rolesTagColor = (rol) => {
+  return ROLES[rol];
+}
    const tagLabel = {
-    "admin": 'Admin',
-    "owner": 'Propietario',
-    "tenant": 'Inquilino',
-    "temp":'Temporal'
+    admin: 'Admin',
+    owner: 'Propietario',
+    tenant: 'Inquilino',
+    temp:'Temporal'
    }
+  const rolesTagLabel = (rol) => {
+    return tagLabel[rol];
+  }
    const userTypes = ref([
     { label: 'Administrador', value: 'admin' },
     { label: 'Propietario', value: 'owner' },

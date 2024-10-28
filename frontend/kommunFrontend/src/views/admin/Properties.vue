@@ -40,7 +40,7 @@
             <Column field="door" sortable header="Pta"></Column>
             <Column  header="Propietario">
               <template #body="slotProps">
-                <UserSelector  @update:selected="(owner) => updateOwner(owner, slotProps.data)"/>
+                <UserSelector :owners="owners"  :owner="slotProps.data.owner" @update:selected="(owner) => updateOwner(owner, slotProps.data)"/>
               </template>
             </Column>
         </DataTable>
@@ -49,7 +49,7 @@
   </div>  
 </template>
 <script setup>
-import { ref , toRef, shallowRef} from 'vue'
+import { ref ,onMounted, toRef, shallowRef} from 'vue'
 import Main from '/src/layouts/Main.vue';
 import IconPlus from "/src/components/icons/IconPlus.vue";
 import { useHttp } from '/src/composables/useHttp.js'; 
@@ -74,6 +74,7 @@ const route = useRouter();
 
 //variables
 const properties = ref([]);
+const owners = ref([]);
 const updating = ref(null);
 
 const getProperties = async () => {
@@ -114,6 +115,20 @@ const updateOwner =  (owner, data) => {
      toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
     }
 }
+    const getOwners = async () => {
+        try {
+
+        const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
+            owners.value = response.data
+        
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    onMounted(() => {
+        getOwners()
+    });
 
 </script>
 

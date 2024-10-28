@@ -20,12 +20,19 @@ import { useUserStore } from '/src/stores/useUserStore.js';
 defineOptions({
     name: 'UserSelector',
 })
+const props = defineProps({
+        owners: {
+            type: Array
+        },
+        owner: {
+            type: Object
+        },
+});
     //utils
     const http = useHttp();
     const { user } = useUserStore();    
 
 //variables
-    const owners = ref([]);
     const selected = ref(null);
 
     // const props = defineProps({
@@ -36,25 +43,28 @@ defineOptions({
     const emit = defineEmits(['update:selected']);
 
     watch(selected, (newValue) => {
-        // console.log('nv',newValue)
         emit('update:selected', newValue);   
+    })
+    watch(props.owner, (newValue) => {
+       selected.value = newValue
+       
     })
 
 
-    const getOwners = async () => {
-        try {
+    // const getOwners = async () => {
+    //     try {
 
-        const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
-            owners.value = response.data
+    //     const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
+    //         owners.value = response.data
         
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
 
-    onMounted(() => {
-        getOwners()
-    });
+    // onMounted(() => {
+    //     getOwners()
+    // });
 
 
 </script>

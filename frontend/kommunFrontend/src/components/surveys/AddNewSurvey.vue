@@ -177,16 +177,10 @@ const  enableAllAudience = ref(true)
 const answerTypes = ref([
     { label: 'Única', value: 'simple' },
     { label: 'Multiple', value: 'multiple_choice' },
-    {label:'Ranking',value:'ranking'}
+    // {label:'Ranking',value:'ranking'}
 ])
 
-const owners = ref([
-    { label: 'Dani Carvajal', value: 'NY' },
-    { label: 'Luka Modric', value: 'RM' },
-    { label: 'Jude Bellimhan', value: 'LDN' },
-    { label: 'Nacho Fernandez', value: 'IST' },
-    { label: 'Tonni Kross', value: 'PRS' }
-]);
+const owners = ref([]);
 
 const addOption = () => {
   form.value.options.push('')
@@ -198,10 +192,20 @@ const removeOption = (index) => {
   }
 };
 
-const createSurvey = () => {
-  console.log('survey', form)
+const createSurvey = async () => {
+  console.log('survey', form.value)
   try {
-    const response = http.post(`votes/${user?.current_community?.community_id}/create/`, form.value );
+    await http.post(`votes/${user?.current_community?.community_id}/create/`,
+      {
+        title: form.value.title,
+        description: form.value.description,
+        vote_type: form.value.vote_type,
+        options: form.value.options,
+        end_date: form.value.end_date,
+        start_date: form.value.start_date,
+        eligible_voters: form.value.eligible_voters.map(owner => owner.person_id)
+      }
+    );
     toast.add({ severity: 'success', summary: 'Ok', detail: 'Votacion creada con exito', life: 3000 });
     
     } catch (error) {

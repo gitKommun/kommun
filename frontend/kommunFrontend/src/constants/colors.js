@@ -13,3 +13,10 @@ export const USAGES_HEX = {
     OFICINA: '#8b5cf6',
     COMERCIAL:'#d946ef'
 };
+
+export const ROLES = {
+    admin: 'blue',
+    owner: 'lime',
+    tenant: 'amber',
+    temp:'orange'
+};
