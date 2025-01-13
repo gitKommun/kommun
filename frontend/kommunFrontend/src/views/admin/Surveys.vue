@@ -37,6 +37,7 @@ import { ref } from 'vue'
 import { useUserStore } from '/src/stores/useUserStore.js';
 import Main from '/src/layouts/Main.vue';
 import AddNewSurvey from '/src/components/surveys/AddNewSurvey.vue'
+import { s } from 'vite/dist/node/types.d-aGj9QkWt';
 defineOptions({
   name: 'surveys',
   layout: Main
@@ -44,8 +45,24 @@ defineOptions({
 
 //variables
 const title = ref('Votaciones')
+const surveys = ref([]);
 
-//user store
+//utils
+const http = useHttp();
 const { user } = useUserStore();
+const toast = useToast();
+const route = useRouter();
+
+
+// const getSurveys = async () => {
+//   try {
+//       const response = await http.get(`properties/${user?.current_community?.community_id}/`);
+//       surveys.value = response.data
+      
+//     } catch (error) {
+//      toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+//     }
+// }
+
 </script>
 

@@ -130,7 +130,7 @@ const toast = useToast();
              return;
          }
 
-         router.push({ name: 'properties' });
+         router.push({ name: 'communities' });
     } catch (error) {
          console.log('error: ', error);
         // Manejar el error de autenticación

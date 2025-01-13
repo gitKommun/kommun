@@ -43,7 +43,7 @@
                         {{ slotProps.data.reservation_duration }} {{ slotProps.data.time_unit }}
                     </template>
                 </Column>
-                <Column  header="..." class="flex justify-end">
+                <Column  :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:right">
                     <template #body="slotProps">
                         <Dropdown strategy="fixed">
                             <template #reference="{ open }">
@@ -57,13 +57,13 @@
                             <template #content="{ close }">
                                 <div class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
                                     <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300  cursor-pointer"
-                                        @click="openUpdateZone(zone)"
+                                        @click="openUpdateZone(slotProps.data)"
                                     >
                                         <IconPencil class="scale-75"/>
                                         <span>Editar</span>
                                     </div>
                                     <div class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
-                                        @click="deleteZone(zone)"
+                                        @click="deleteZone(slotProps.data.area_id)"
                                         >
                                         <IconTrash class="scale-75"/>
                                         <span>Eliminar</span>
@@ -202,7 +202,7 @@
 
 </template>
 <script setup>
-    import { ref, computed } from 'vue'
+    import { ref, computed, onMounted } from 'vue'
     import { useHttp } from '/src/composables/useHttp.js'; 
     import { useUserStore } from '/src/stores/useUserStore.js';
     import EmptyTask from "/src/components/emptys/EmptyTask.vue";
@@ -231,7 +231,6 @@ import IconPlus from "/src/components/icons/IconPlus.vue";
         reservable: false,
         reservation_duration: '',
         time_unit: '',
-        area_id: null,
     })
     const timePeriods = ref([
         { label: 'Minutos', value: 'MIN' },
@@ -252,7 +251,7 @@ import IconPlus from "/src/components/icons/IconPlus.vue";
 
     //getZones
     async function getZones() { 
-        if (props.id) {
+        if (props.community.community_id) {
             try {
 
                 const response = await http.get(`common_areas/${props.community.community_id}/`);
@@ -274,8 +273,9 @@ import IconPlus from "/src/components/icons/IconPlus.vue";
             zonesNameValidation.value = true;
             try {
             const response = http.post(`common_areas/${props.community.community_id}/create/`, zone.value );
-            getZones();
+            
             toast.add({ severity: 'success', summary: 'Ok', detail: 'Zona creada con exito', life: 3000 });
+            updateItems()
             
             } catch (error) {
 
@@ -283,10 +283,9 @@ import IconPlus from "/src/components/icons/IconPlus.vue";
             }
             zone.value = {
                     name: '',
-                    reservable: null,
+                    reservable: false,
                     reservation_duration: '',
                     time_unit: '',
-                    area_id: null,
                 }
             showCreateZoneModal.value = false;
         } else {
@@ -309,10 +308,9 @@ const updateZone = () => {
         showUpdateZone.value = false;
         zone.value = {
             name: '',
-            reservable: null,
+            reservable: false,
             reservation_duration: '',
             time_unit: '',
-            area_id: null,
         }
 
     } catch (error) {
@@ -322,11 +320,11 @@ const updateZone = () => {
 } 
         //deleteZone
 
-const deleteZone = (zone) => {
+const deleteZone = (id) => {
 
     console.log('deleteeeee')
     try {
-        const response = http.delete(`common_areas/${props.community.community_id}/${zone.value.area_id}/`);
+        http.delete(`common_areas/${props.community.community_id}/${id}/`);
         toast.add({ severity: 'success', summary: 'Ok', detail: 'La zona se ha eliminado con exito', life: 3000 });
 
     } catch (error) {
@@ -339,6 +337,9 @@ function updateItems() {
     getZones();
   }, 300);
 }
+onMounted(() => {
+    updateItems()
+});
 
 
 

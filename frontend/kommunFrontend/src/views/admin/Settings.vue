@@ -74,7 +74,7 @@ import GeneralData from '/src/components/settings/GeneralData.vue'
 
 
   //variables
-  const title = ref('Configuración')
+
   const community_id = ref(null);
   const community = ref({});
   onMounted(() => {
@@ -128,7 +128,9 @@ const confirmDelete = () => {
             detail: 'La comunidad se ha eliminado con exito',
             life: 3000
           });
-          router.push({name:'communities'})
+          router.push({ name: 'communities' }).then(() => {
+    window.location.reload();
+});
         },
         reject: () => {
           toast.add({

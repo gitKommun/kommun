@@ -75,6 +75,9 @@ export default {
       },
       blur: {
         xs: '1px',
+      },
+      zIndex: {
+        100: '100',
       }
     },
   },

@@ -1,16 +1,7 @@
 <template>
-  <div class="h-full w-full flex flex-col">
-    <div class="pl-4 md:pl-16 py-6 flex sticky top-0  backdrop-blur z-10">
-      <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
-          {{title}}
-          <span class="text-sm text-slate-500 font-medium">Comunidad : {{ user.current_community?.community_name }}</span>
-      </div>
-      <div class=" p-4 flex justify-end">
-        <!-- <Button severity="contrast" raised  class="inline flex-none">
-          <IconPlus/>
-          Añadir propiedad
-        </Button> -->
-      </div>
+  <div class="h-full w-full flex flex-col pt-3">
+    <div class="px-3">
+      <Properties/>
     </div>
     
     <div class="px-4 overflow-y-scroll min-h-0 flex-1">
@@ -59,6 +50,7 @@ import { useRouter } from 'vue-router';
 import CustomTag from '/src/components/CustomTag.vue'
 import UserSelector from '/src/components/UserSelector.vue'
 import { USAGES } from '/src/constants/colors.js';
+import Properties from '/src/components/properties/Properties.vue'
 
 defineOptions({
   name: 'properties',

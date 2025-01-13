@@ -107,6 +107,12 @@ const createCommunity = () => {
             detail: 'Carpeta creada con exito',
             life: 3000
         });
+        const { data: me } =  http.get(`members/me/`);
+
+         if (me.available_communities?.length > 0) { 
+             router.push({ name: 'onboarding' });
+             
+         }
         
 
     } catch (error) {

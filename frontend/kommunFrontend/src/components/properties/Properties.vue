@@ -1,8 +1,8 @@
 <template>
 
-    <Fieldset legend="Propiedades">
+    <div class="w-full rounded-xl border border-slate-200 p-3">
 
-            <div class="flex flex-col mb-3">
+            <div v-if="!properties.length" class="flex flex-col mb-3">
                 <p class="text-slate-500 text-xs">Carga de propiedades por referencia catastral.</p>
                 <div class="flex gap-x-3 py-3 w-full md:w-1/2">
                     <InputText 
@@ -49,9 +49,9 @@
                         Eliminar propiedades
                 </Button>
             </div>
-
+            <ConfirmDialog/>
             <Toast />
-    </Fieldset>
+    </div>
 
 </template>
 <script setup>
@@ -166,7 +166,7 @@ const deleteAll = () => {
         },
         accept: () => {
             //llamada aborrar propiedades
-          const response =  http.delete(`properties/${props.community.community_id}/delete-properties/`)
+          const response =  http.delete(`properties/${user?.current_community?.community_id}/delete-properties/`)
           toast.add({
             severity: 'info',
             summary: 'Ok',
@@ -213,34 +213,11 @@ const createProperties = async () => {
   const community_id = ref(null);
   const community = ref({});
   onMounted(() => {
-    const { id } = route.params
-    community_id.value= id
-
+    community_id.value= user?.current_community?.community_id 
   })
 
-watch(community_id, (n) => {
-  getCommunity()
-})
-
-const getCommunity = async() => {
-    if (community_id.value) {
-       try {
-            const response = await http.get(`communities/${community_id.value}/`)
-            community.value=response.data
 
 
-        } catch (erro) {
-            toast.add({
-                severity: 'danger',
-                summary: 'Upps!! algo ha fallado',
-                detail: error,
-                life: 3000
-            });
-        }
-    }
-    
-}
-getCommunity()
 
 
 
