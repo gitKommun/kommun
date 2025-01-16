@@ -27,7 +27,8 @@ class Community(models.Model):
     
     name = models.CharField(_('community name'), max_length=40, default='Mi comunidad') #Nombre residencial
     address = models.CharField(_('address'), max_length=255, null=True, blank=True) #Calle, y si tiene numero 
-    city = models.ForeignKey('core.Municipality', on_delete=models.SET_NULL, related_name='communities', null=True, blank=True)
+    #city = models.ForeignKey('core.Municipality', on_delete=models.SET_NULL, related_name='communities', null=True, blank=True)
+    city = models.CharField(_('city'), max_length=50, null=True, blank=True) #Ciudad
     province = models.ForeignKey('core.Province', on_delete=models.SET_NULL, related_name='communities', null=True, blank=True)
     postal_code = models.CharField(_('postal code'), max_length=12, null=True, blank=True)
 

@@ -322,7 +322,7 @@ class BulkCreatePropertiesFromCatastroAPIView(APIView):
                     try:
                         city_code = inmueble['dt']['loine']['cp'] + inmueble['dt']['loine']['cm'].zfill(3)
                         province_code = inmueble['dt']['loine']['cp']
-                        #postal_code = address_data.get('dp')
+                        postal_code = inmueble['dt']['locs']['lous']['lourb'].get('dp')
 
                         #print(f"city_code: {city_code}, province_code: {province_code}, postal_code: {postal_code}")
 
@@ -334,8 +334,9 @@ class BulkCreatePropertiesFromCatastroAPIView(APIView):
                             print(f"City: {city.name}, Province: {province.name}")
 
                             # Actualizar los campos de la comunidad
-                            community.city = city
+                            community.city = city.name
                             community.province = province
+                            community.postal_code = postal_code
                             #community.postal_code = postal_code
                             community.catastral_ref = ref_catastro
                             community.address = adress_stret
