@@ -1,15 +1,13 @@
 <template>
-  <div class="h-full w-full">
-    <div class="pl-4 md:pl-16 py-6 flex">
-      <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
-          {{title}}
-          <span class="text-sm text-slate-500 font-medium">{{ user.current_community?.community_name }}"</span>
-      </div>
-      <div class="w-full p-4 flex justify-end">
-        <AddNewOwner @update:owners="updateOwners"/>
-      </div>
-    </div>
-    
+  <div class="h-full w-full flex flex-col overflow-y-scroll relative">
+    <div class="w-full p-4 flex justify-between">
+        <InputText 
+          v-model="search" 
+          placeholder="Buscar"
+          size="small"
+          variant="filled"/>
+        <AddNewOwner @update:owners="updateOwners" class="h-auto"/>  
+    </div>   
     <div class="px-4">
         <DataTable :value="owners" tableStyle="min-width: 50rem" class="text-sm">
             <Column field="name" header="Nombre">
@@ -134,7 +132,7 @@ import { ROLES } from '/src/constants/colors.js';
   })
 
   //variables
-  const title = ref('Propietarios')
+  const search = ref('')
   const owners = ref([]);
   const owner = ref({
     name: '',
@@ -144,11 +142,9 @@ import { ROLES } from '/src/constants/colors.js';
     role:''
   });
   const ownerUpdateLoading = ref(false);
-  //Instancia API
-  const http = useHttp();
-  //user store
+//utils
+const http = useHttp();
 const { user } = useUserStore();
-        //use toast
 const toast = useToast();
 
 

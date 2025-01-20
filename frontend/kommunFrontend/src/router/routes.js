@@ -64,9 +64,9 @@ export default function routes({ authGuard, guestGuard }) {
                 component: () => import('../views/admin/Communication.vue')
             }, 
             {
-                path: '/bookings',
-                name: 'bookings',
-                component: () => import('../views/admin/Bookings.vue')
+                path: '/zones',
+                name: 'zones',
+                component: () => import('../views/admin/Zones.vue')
             }, 
             {
                 path: '/providers',
