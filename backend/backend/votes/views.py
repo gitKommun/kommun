@@ -1,14 +1,18 @@
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 from .serializers import VoteSerializer, OptionSerializer
 from communities.models import Community, PersonCommunity
 from .models import Vote, Option, VoteRecord
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 
 class CreateVoteAPIView(APIView):
@@ -81,7 +85,6 @@ class CreateVoteAPIView(APIView):
 
         return Response({"message": "Votación creada exitosamente", "vote_id": vote.vote_id}, status=status.HTTP_201_CREATED)
 
-
 class CastVoteAPIView(APIView):
     @swagger_auto_schema(
         operation_description="Registrar un voto para una votación específica.",
@@ -148,7 +151,93 @@ class CastVoteAPIView(APIView):
         vote_record.options.add(*Option.objects.filter(vote=vote, option_id__in=option_ids))
 
         return Response({'message': 'Voto registrado correctamente.'}, status=status.HTTP_201_CREATED)
-    
+
+
+class CommunityVotesListAPIView(APIView):
+    @swagger_auto_schema(
+        operation_description="Obtiene el listado de todas las votaciones de una comunidad, con un resumen de votos por cada opción y el estado de la votación.",
+        responses={
+            200: openapi.Response(
+                description="Lista de votaciones de la comunidad",
+                examples={
+                    "application/json": [
+                        {
+                            "vote_id": 1,
+                            "title": "Presupuesto 2023",
+                            "description": "Aprobación del presupuesto",
+                            "start_date": "2023-10-01T10:00:00Z",
+                            "end_date": "2023-10-31T23:59:00Z",
+                            "status": "open",
+                            "options": [
+                                {"option_id": 1, "option_text": "A favor", "vote_count": 30},
+                                {"option_id": 2, "option_text": "En contra", "vote_count": 10}
+                            ],
+                            "pending_votes": 15
+                        },
+                        {
+                            "vote_id": 2,
+                            "title": "Renovación de la piscina",
+                            "description": "Renovación de las instalaciones de la piscina",
+                            "start_date": "2023-09-01T10:00:00Z",
+                            "end_date": "2023-09-30T23:59:00Z",
+                            "status": "closed",
+                            "options": [
+                                {"option_id": 1, "option_text": "A favor", "vote_count": 45},
+                                {"option_id": 2, "option_text": "En contra", "vote_count": 5}
+                            ],
+                            "pending_votes": 0
+                        }
+                    ]
+                }
+            ),
+            404: "Comunidad no encontrada"
+        }
+    )
+    def get(self, request, IDcommunity):
+        # Filtrar votaciones por comunidad
+        votes = Vote.objects.filter(community__community_id=IDcommunity)
+
+        # Lista para almacenar la información de cada votación
+        votes_data = []
+        current_time = timezone.now()
+
+
+        for vote in votes:
+            # Determinar el estado de la votación
+            if vote.start_date > current_time:
+                vote_status = "not_started"
+            elif vote.end_date < current_time or vote.eligible_voters.count() == vote.vote_records.count():
+                vote_status = "closed"
+            else:
+                vote_status = "open"
+
+            # Resumen de votos por cada opción
+            options_summary = []
+            for option in vote.options.all():
+                vote_count = VoteRecord.objects.filter(vote=vote, options=option).count()
+                options_summary.append({
+                    "option_id": option.option_id,
+                    "option_text": option.option_text,
+                    "vote_count": vote_count
+                })
+
+            # Calcular votos pendientes
+            pending_votes = vote.eligible_voters.count() - vote.vote_records.count()
+
+            # Agregar datos de la votación al resultado final
+            votes_data.append({
+                "vote_id": vote.vote_id,
+                "title": vote.title,
+                "description": vote.description,
+                "start_date": vote.start_date,
+                "end_date": vote.end_date,
+                "status": vote_status,
+                "options": options_summary,
+                "pending_votes": pending_votes
+            })
+
+        return Response(votes_data, status=status.HTTP_200_OK)
+
 class VoteDetailAPIView(APIView):
     @swagger_auto_schema(
         operation_description="Obtener los detalles y resultados de una votación específica.",
