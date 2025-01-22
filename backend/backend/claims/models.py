@@ -27,6 +27,7 @@ class Claim(models.Model):
     ]
 
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='claims')
+    claim_id = models.PositiveIntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='claims')
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -44,6 +45,16 @@ class Claim(models.Model):
     def __str__(self):
         return f"{self.title} - {self.status}"
 
+    def save(self, *args, **kwargs):
+        if not self.claim_id:  # Si no se ha asignado un claim_id
+            last_vote = Claim.objects.filter(community=self.community).order_by('claim_id').last()
+            if last_vote:
+                self.claim_id = last_vote.claim_id + 1
+            else:
+                self.claim_id = 1  # Primer voto de la comunidad
+        super().save(*args, **kwargs)
+
+
 class ClaimStatusRecord(models.Model):
     claim = models.ForeignKey(Claim, on_delete=models.CASCADE, related_name='status_records')
     status = models.CharField(max_length=20, choices=Claim.STATUS_CHOICES)
@@ -52,8 +63,13 @@ class ClaimStatusRecord(models.Model):
 
     def __str__(self):
         return f"{self.claim.title} - {self.status} at {self.timestamp}"
+    
+    @property
+    def changed_by_full_name(self):
+        return f"{self.changed_by.name} {self.changed_by.surnames}"
 
 class ClaimComment(models.Model):
+    claim_comment_id = models.PositiveIntegerField()
     claim = models.ForeignKey(Claim, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='claim_comments')
     comment = models.TextField()
@@ -61,3 +77,10 @@ class ClaimComment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user} on {self.claim}"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Solo se asigna un id relativo al crear un nuevo comentario
+            last_comment = ClaimComment.objects.filter(claim=self.claim).order_by('claim_comment_id').last()
+            self.claim_comment_id = (last_comment.claim_comment_id + 1) if last_comment else 1
+        super().save(*args, **kwargs)
+   
