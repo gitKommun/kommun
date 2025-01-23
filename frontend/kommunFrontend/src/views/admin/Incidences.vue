@@ -1,10 +1,7 @@
 <template>
   <div class="h-full w-full relative">
-    <div class="pl-4 md:pl-16 py-6 flex ">
-
-      <div class="w-full p-4 flex justify-end">
+    <div class="w-full p-4 flex justify-end">
         <AddNewIncidence @update:items="updateItems" class="h-auto"/>  
-      </div>
     </div>
     <div class="w-full flex justify-center px-4 flex-1 min-h-0 overflow-y-scroll">
       <div class="w-full max-w-4xl  flex flex-col">

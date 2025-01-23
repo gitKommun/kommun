@@ -1,6 +1,7 @@
 <template>
     <div class="h-full w-full">
-        <CoverVideo/>
+        <Cover/>
+        <MultyCommunity/>
         <FeaturesContent/>
         <!-- <Cover/>
         <Features/> -->
@@ -12,7 +13,7 @@ import Guests from '/src/layouts/Guests.vue';
 import Features from '/src/views/landing-modules/Features.vue';
 import FeaturesContent from '/src/views/landing-modules/FeaturesContent.vue';
 import Cover from '/src/views/landing-modules/Cover.vue';
-import CoverVideo from '/src/views/landing-modules/CoverVideo.vue';
+import MultyCommunity from '/src/views/landing-modules/MultyCommunity.vue';
 import Pricing from '/src/views/landing-modules/Pricing.vue';
 import { ref } from 'vue';
         defineOptions ({

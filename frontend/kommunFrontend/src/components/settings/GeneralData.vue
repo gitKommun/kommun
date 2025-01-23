@@ -8,26 +8,16 @@
         variant="filled"
       />
     </div>
-    <!-- <div class="py-4">
-                <InputText 
-                    v-model="form.address" 
-                    placeholder="Dirección" 
-                    class="w-full"
-                    variant="filled"/>
-            </div> -->
     <div class="py-4 flex gap-x-3">
       <Select
         v-model="form.province"
         :options="provinces"
+        optionLabel="name"
+        optionValue="code"
         placeholder="Provincia"
         class="w-full"
         variant="filled"
       />
-      <!-- <InputText 
-                    v-model="form.province" 
-                    placeholder="Provincia" 
-                    class="w-full"
-                    variant="filled"/> -->
       <InputText
         v-model="form.city"
         placeholder="Ciudad"

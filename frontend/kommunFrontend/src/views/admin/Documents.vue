@@ -41,189 +41,147 @@
     </div>
     <!-- breadcrum -->
     <div class="w-full p-4 flex justify-between">
-      <InputText
-        v-model="search"
-        placeholder="Buscar"
-        size="small"
-        variant="filled"
-      />
+      <div class="flex gap-x-3">
+        <InputText
+          v-model="search"
+          placeholder="Buscar"
+          size="small"
+          variant="filled"
+        />
+      </div>
+
       <AddContent
         @update:items="updateItems"
         class="h-auto"
         :selected="selectedFolder"
       />
     </div>
-
-    <div
-      class="w-full flex justify-center px-4 flex-1 min-h-0 overflow-y-scroll"
-    >
-      <div class="w-full max-w-4xl flex flex-col">
-        <div
-          v-if="foldersLoading"
-          class="flex items-center justify-center py-24"
-        >
-          <Loading />
-        </div>
-        <div v-else class="flex flex-wrap gap-x-4">
-          <template v-if="!folders.length">
-            <div class="w-full flex flex-col items-center justify-center py-24">
-              <EmptyFolder class="scale-75" />
-              <span
-                class="text-2xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-sky-500 to-green-300"
-              >
-                Actualmente no hay documentos
-              </span>
-              <span class="text-sm text-slate-500 max-w-80 text-center"
-                >Comienza ahora creando la estructura de documentacion de tu
-                comunidad</span
+    <!-- content -->
+    <div class="px-4">
+      <div v-if="foldersLoading" class="flex items-center justify-center py-24">
+        <Loading />
+      </div>
+      <div v-else class="flex flex-wrap gap-x-4">
+        <template v-if="!folders.length">
+          <div class="w-full flex flex-col items-center justify-center py-24">
+            <EmptyFolder class="scale-75" />
+            <span
+              class="text-2xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-sky-500 to-green-300"
+            >
+              Actualmente no hay documentos
+            </span>
+            <span class="text-sm text-slate-500 max-w-80 text-center"
+              >Comienza ahora creando la estructura de documentacion de tu
+              comunidad</span
+            >
+          </div>
+        </template>
+        <template v-else>
+          <div class="w-full flex flex-col">
+            <div
+              v-if="folders.length"
+              class="flex items-center justify-between py-4"
+            >
+              <span class="text-slate-950 font-semibold text-lg"
+                >Carpetas
+                <span class="text-slate-400 text-sm font-medium"
+                  >({{ folders.length }})</span
+                ></span
               >
             </div>
-          </template>
-          <template v-else>
-            <div class="w-full flex flex-col">
-              <div
-                v-if="folders.length"
-                class="flex items-center justify-between py-4"
+            <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 content-start gap-3 pb-4">
+              <FolderItem
+                v-for="folder in folders"
+                :key="folder.folder_id"
+                :folder="folder"
+                @update:items="updateItems"
+                @click="selectFolder(folder)"
+              />
+              <!-- -->
+            </div>
+            <div
+              v-if="documents.length"
+              class="flex items-center justify-between py-4"
+            >
+              <span class="text-slate-950 font-semibold text-lg"
+                >Archivos
+                <span class="text-slate-400 text-sm font-medium"
+                  >({{ documents.length }})</span
+                ></span
               >
-                <span class="text-slate-950 font-semibold text-lg"
-                  >Carpetas
-                  <span class="text-slate-400 text-sm font-medium"
-                    >({{ folders.length }})</span
-                  ></span
-                >
-              </div>
-              <div class="w-full flex flex-wrap gap-3 pb-4">
-                <FolderItem
-                  v-for="folder in folders"
-                  :key="folder.folder_id"
-                  :folder="folder"
-                  @update:items="updateItems"
-                  @click="selectFolder(folder)"
-                />
-                <!-- -->
-              </div>
-              <div
-                v-if="documents.length"
-                class="flex items-center justify-between py-4"
-              >
-                <span class="text-slate-950 font-semibold text-lg"
-                  >Archivos
-                  <span class="text-slate-400 text-sm font-medium"
-                    >({{ documents.length }})</span
-                  ></span
-                >
-                <SelectButton
-                  v-model="toggleView"
-                  :options="toggleViewOptions"
-                  optionLabel="value"
-                >
-                  <template #option="slotProps">
-                    <IconGrid v-if="slotProps.option === 'card'" />
-                    <IconTable v-else />
+            </div>
+
+            <div class="w-full" key="table">
+              <DataTable :value="documents" class="text-sm">
+                <Column header="Documento">
+                  <template #body="slotProps">
+                    <span class="flex items-center">
+                      <FileType :type="slotProps.data.type" />
+                      <span class="text-sm ml-2">{{
+                        slotProps.data.name
+                      }}</span>
+                    </span>
                   </template>
-                </SelectButton>
-              </div>
-              <transition
-                enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-                leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-                enter-class="opacity-0"
-                enter-to-class="opacity-100"
-                leave-class="opacity-100 "
-                leave-to-class="opacity-0"
-                mode="out-in"
-              >
-                <!-- cards view -->
-                <div
-                  v-if="toggleView === 'card'"
-                  class="w-full flex flex-wrap gap-3 pb-4"
-                  key="cards"
+                </Column>
+                <Column header="Propietario">
+                  <template #body="slotProps">
+                    <span class="min-w-8 mr-1">
+                      <Avatar label="k" shape="circle" />
+                    </span>
+                    <span class="text-xs text-slate-400 truncate">{{
+                      slotProps.data.upload_user
+                        ? document.upload_user
+                        : "Kommun"
+                    }}</span>
+                  </template>
+                </Column>
+                <column field="upload_date" header="Fecha" />
+                <Column
+                  :rowEditor="true"
+                  style="width: 10%; min-width: 8rem"
+                  bodyStyle="text-align:right"
                 >
-                  <DocumentItem
-                    v-for="document in documents"
-                    :document="document"
-                    :key="document.document_id"
-                    @update:items="updateItems"
-                  />
-                </div>
-                <!-- cards view -->
-                <!-- table view -->
-                <div v-else class="w-full" key="table">
-                  <DataTable :value="documents" class="text-sm">
-                    <Column header="Documento">
-                      <template #body="slotProps">
-                        <span class="flex items-center">
-                          <FileType :type="slotProps.data.type" />
-                          <span class="text-sm ml-2">{{
-                            slotProps.data.name
-                          }}</span>
-                        </span>
+                  <template #body="slotProps">
+                    <Dropdown strategy="fixed">
+                      <template #reference="{ open }">
+                        <div
+                          class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer"
+                          @click.stop="open"
+                        >
+                          <IconDotsHorizontal class="text-slate-500" />
+                        </div>
                       </template>
-                    </Column>
-                    <Column header="Propietario">
-                      <template #body="slotProps">
-                        <span class="min-w-8 mr-1">
-                          <Avatar label="k" shape="circle" />
-                        </span>
-                        <span class="text-xs text-slate-400 truncate">{{
-                          slotProps.data.upload_user
-                            ? document.upload_user
-                            : "Kommun"
-                        }}</span>
-                      </template>
-                    </Column>
-                    <column field="upload_date" header="Fecha" />
-                    <Column
-                      :rowEditor="true"
-                      style="width: 10%; min-width: 8rem"
-                      bodyStyle="text-align:right"
-                    >
-                      <template #body="slotProps">
-                        <Dropdown strategy="fixed">
-                          <template #reference="{ open }">
-                            <div
-                              class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer"
-                              @click.stop="open"
-                            >
-                              <IconDotsHorizontal class="text-slate-500" />
-                            </div>
-                          </template>
 
-                          <template #content="{ close }">
-                            <div
-                              class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm"
-                            >
-                              <div
-                                class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
-                                @click="
-                                  downloadFile(slotProps.data.document_id)
-                                "
-                              >
-                                <IconDownload class="scale-75" />
-                                <span>Descargar</span>
-                              </div>
-                              <div
-                                class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
-                                @click="
-                                  deleteFolder(slotProps.data.document_id)
-                                "
-                              >
-                                <IconTrash class="scale-75" />
-                                <span>Eliminar</span>
-                              </div>
-                            </div>
-                          </template>
-                        </Dropdown>
+                      <template #content="{ close }">
+                        <div
+                          class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm"
+                        >
+                          <div
+                            class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
+                            @click="downloadFile(slotProps.data.document_id)"
+                          >
+                            <IconDownload class="scale-75" />
+                            <span>Descargar</span>
+                          </div>
+                          <div
+                            class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
+                            @click="deleteFolder(slotProps.data.document_id)"
+                          >
+                            <IconTrash class="scale-75" />
+                            <span>Eliminar</span>
+                          </div>
+                        </div>
                       </template>
-                    </Column>
-                  </DataTable>
-                </div>
-                <!-- table view -->
-              </transition>
+                    </Dropdown>
+                  </template>
+                </Column>
+              </DataTable>
             </div>
-          </template>
-        </div>
+          </div>
+        </template>
       </div>
     </div>
+    <!-- content -->
   </div>
 </template>
 <script setup>
@@ -257,39 +215,25 @@ defineOptions({
 });
 
 //variables
-const title = ref("Documentos");
 const folders = ref([]);
 const foldersLoading = ref(true);
 const selectedFolder = ref(null);
 const documents = ref([]);
 const path = ref([]);
-const toggleView = ref("card");
-const toggleViewOptions = ref(["card", "table"]);
 
-//instancia API
+
+//utils
 const http = useHttp();
-//user store
 const { user } = useUserStore();
-//use toast
 const toast = useToast();
 
-//guardar carpeta en localStorage
-watch(selectedFolder, (newValue) => {
-  //localStorage.setItem('currentFolder', toRaw(newValue));
-});
-
-// watch(toggleView, (newValue) => {
-//   console.log('toggle', newValue)
-// })
 
 onMounted(() => {
-  //selectedFolder.value = localStorage.getItem('currentFolder')
   updateItems();
 });
 
 // folders
 async function getFolders() {
-  //folders.value = [];
   if (selectedFolder?.value) {
     try {
       const response = await http.get(

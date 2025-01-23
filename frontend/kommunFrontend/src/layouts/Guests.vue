@@ -5,12 +5,13 @@
             enter-active-class="transitiona-all ease-in-out duration-150"
             move-class="transitiona-all bounce-transition duration-300"
             >
-        <header v-if="AppearMenu" class="absolute top-0 w-full text-slate-950 backdrop-blur bg-black/30 z-20 ">
-            <div class="container mx-auto flex items-center justify-between py-2 px-6">
+            <div class="w-full  px-3 md:px-24 absolute top-0 mt-6 z-50 flex justify-center">
+                <header v-if="AppearMenu" class="w-full max-w-[1280px] text-slate-950 backdrop-blur bg-white/30 rounded-2xl border border-slate-200">
+            <div class="container mx-auto flex items-center justify-between py-2 px-4">
                 <RouterLink to="/">
                     <span class="flex items-center">
-                        <img alt="Kommun logo" class="h-8" src="@/assets/lg_l.svg"  />
-                        <span class="text-white font-bold ml-2">Kommun</span>
+                        <img alt="Kommun logo" class="h-7" src="@/assets/logo_kommun.svg"  />
+                        
                     </span>
                 </RouterLink>
                 <!-- <div class="hidden md:flex items-center space-x-4">
@@ -30,7 +31,10 @@
                 </div> -->
                 <div class="hidden md:flex items-center space-x-4">
                     <router-link :to="{name:'login'}">
-                        <Button label="Login" severity="contrast" outlined size="small"/>
+                        <Button label="Login" severity="secondary" size="small">
+                            Login 
+                            <span class="w-5 h-5 text-slate-400 bg-slate-300 rounded text-xxs">L</span>
+                        </Button>
                     </router-link >
                     <router-link :to="{name:'register'}">
                         <Button 
@@ -50,6 +54,8 @@
                 </div>
             </div>
         </header>
+            </div>
+        
         </transition>
         <transition
             enter-active-class="transition-all transition-slow ease-out overflow-hidden"

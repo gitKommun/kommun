@@ -1,6 +1,6 @@
 <template>
   <div class="h-full w-full overflow-y-scroll">
-    <div class="">
+    <div class="pl-3">
       <router-link to="/communities">
         <Button severity="contrast" text size="small">
           <IconBack class="scale-75" /> Volver a comunidades
@@ -24,11 +24,7 @@
         <ConfirmDialog></ConfirmDialog>
         <!-- ELIMINAR COMUNIDAD -->
     </Content>
-    <!-- <div class="flex justify-center px-3 pb-6">
-      <div class="w-full max-w-4xl flex flex-col gap-y-3">
-        <CommonZones :community="community" />
-      </div>
-    </div> -->
+
   </div>
 </template>
 <script setup>

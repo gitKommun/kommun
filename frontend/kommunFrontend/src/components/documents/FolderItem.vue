@@ -1,5 +1,5 @@
 <template>
-    <div class="flex items-center border border-slate-200 p-2 rounded-2xl gap-x-3 mb-3 w-full max-w-72 bg-slate-100  hover:shadow-lg hover:bg-slate-50 relative group cursor-pointer transition-all duration-300">
+    <div class=" flex items-center border border-slate-200 p-2 rounded-2xl gap-x-3 mb-3 w-full  bg-slate-100  hover:shadow-lg hover:bg-slate-50 relative group cursor-pointer transition-all duration-300">
         <div class="h-12 w-12 flex flex- items-start  justify-center rounded-xl">
             <IconFolder class="text-slate-950"></IconFolder>
         </div>
