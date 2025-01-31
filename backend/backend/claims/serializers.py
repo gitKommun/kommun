@@ -10,9 +10,6 @@ class ClaimStatusRecordSerializer(serializers.ModelSerializer):
 
 class ClaimSerializer(serializers.ModelSerializer):
     status_records = ClaimStatusRecordSerializer(many=True, read_only=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False, allow_null=True)
-    updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False, allow_null=True)
-    incident_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False, allow_null=True)
     class Meta:
         model = Claim
         fields = [
@@ -25,7 +22,6 @@ class ClaimSerializer(serializers.ModelSerializer):
 
 class ClaimCommentSerializer(serializers.ModelSerializer):
     user_fullname = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     class Meta:
         model = ClaimComment
         fields = [ 'claim_comment_id',  'comment', 'created_at', 'user_fullname']
@@ -38,9 +34,6 @@ class ClaimCommentSerializer(serializers.ModelSerializer):
 class ClaimDetailSerializer(serializers.ModelSerializer):
     comments = ClaimCommentSerializer(many=True, read_only=True)
     status_records = ClaimStatusRecordSerializer(many=True, read_only=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    incident_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False, allow_null=True)
     user_fullname = serializers.SerializerMethodField()
 
     class Meta:

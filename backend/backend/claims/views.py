@@ -36,31 +36,6 @@ class ClaimListAPIView(generics.ListAPIView):
         community = get_object_or_404(Community, community_id=self.kwargs['IDcommunity'])
         return Claim.objects.filter(community=community)
 
-class CommunityClaimsListAPIView(APIView):
-    def get(self, request, IDcommunity):
-        # Filtrar votaciones por comunidad
-        claims = Claim.objects.filter(community__community_id=IDcommunity)
-
-        # Lista para almacenar la información de cada votación
-        claims_data = []
-
-        for claim in claims:
-            claims_data.append({
-                "claim_id": claim.claim_id,
-                "title": claim.title,
-                "description": claim.description,
-                "created_at": claim.created_at,
-                "updated_at": claim.updated_at,
-                "incident_date": claim.incident_date,
-                "problem_persists": claim.problem_persists,
-                "category": claim.category,
-                "priority": claim.priority,
-                "status": claim.status,
-
-            })
-
-        return Response(claims_data, status=status.HTTP_200_OK)   
-
 class ClaimCommentCreateAPIView(generics.CreateAPIView):
     serializer_class = ClaimCommentSerializer
 
