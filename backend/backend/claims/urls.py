@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import ClaimCreateAPIView, ClaimListAPIView, ClaimCommentCreateAPIView, ClaimUpdateAPIView, ClaimDetailAPIView, ClaimDeleteAPIView, ClaimCommentDeleteAPIView
+from .views import CommunityClaimsListAPIView
 
 urlpatterns = [
+    path('<str:IDcommunity>/test', CommunityClaimsListAPIView.as_view(), name='claims-lisT'),
     path('<str:IDcommunity>/', ClaimListAPIView.as_view(), name='claims-list'),
     path('<str:IDcommunity>/create/', ClaimCreateAPIView.as_view(), name='claim-create'),
     path('<str:IDcommunity>/<int:claim_id>/', ClaimDetailAPIView.as_view(), name='claim-detail'),
