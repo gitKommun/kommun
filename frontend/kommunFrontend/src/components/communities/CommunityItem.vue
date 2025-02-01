@@ -142,7 +142,7 @@ async function getInfo () {
 
 getInfo();
 const configCommunity = () => {
-    route.push({ name: 'settings', params: { id:props.community.community_id } })
+    route.push({ name: 'community_settings', params: { id:props.community.community_id } })
 }
 
 const hasInfo = computed(()=> {

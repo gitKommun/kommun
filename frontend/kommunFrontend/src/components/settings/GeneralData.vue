@@ -129,7 +129,7 @@ const updateCommunity = () => {
     });
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,
@@ -143,7 +143,7 @@ onMounted(async () => {
     provinces.value = response.data;
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,

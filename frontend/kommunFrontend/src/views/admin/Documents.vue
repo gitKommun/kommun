@@ -247,7 +247,7 @@ async function getFolders() {
       foldersLoading.value = false;
     } catch (error) {
       toast.add({
-        severity: "danger",
+        severity: "error",
         summary: "Upps!! algo ha fallado",
         detail: error,
         life: 3000,
@@ -266,7 +266,7 @@ async function getFolders() {
       foldersLoading.value = false;
     } catch (error) {
       toast.add({
-        severity: "danger",
+        severity: "error",
         summary: "Upps!! algo ha fallado",
         detail: error,
         life: 3000,
@@ -306,7 +306,7 @@ const downloadFile = (id) => {
     });
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,

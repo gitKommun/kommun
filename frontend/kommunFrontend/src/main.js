@@ -143,12 +143,26 @@ app.component('ProgressBar', ProgressBar)
 import SelectButton from 'primevue/selectbutton';
 app.component('SelectButton', SelectButton)
 
-
 import ConfirmDialog from 'primevue/confirmdialog';
 app.component('ConfirmDialog', ConfirmDialog)
 
 import MeterGroup from 'primevue/metergroup';
 app.component('MeterGroup', MeterGroup)
+
+
+import Tabs from "primevue/tabs";
+import TabList from "primevue/tablist";
+import Tab from "primevue/tab";
+import TabPanels from "primevue/tabpanels";
+import TabPanel from "primevue/tabpanel";
+app.component('Tabs', Tabs)
+app.component('TabList', TabList)
+app.component('Tab', Tab)
+app.component('TabPanels', TabPanels)
+app.component('TabPanel', TabPanel)
+
+import Rating from "primevue/rating";
+app.component('Rating', Rating)
 
 
 app.mount('#app');

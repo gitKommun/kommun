@@ -1,5 +1,5 @@
 <template>
-  <section class="relative w-full h-screen overflow-hidden px-6">
+  <section class="relative w-full py-32 overflow-hidden px-6">
     <div class="w-full text-center text-2xl font-bold">
       Impulsando la gestión de las mejores comunidades.
     </div>

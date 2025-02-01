@@ -28,7 +28,6 @@
             </CustomTag>
           </template>
         </Column>
-        <Column field="properties" header="Propiedades vinculadas"></Column>
         <Column
           :rowEditor="true"
           style="width: 10%; min-width: 8rem"
@@ -57,12 +56,13 @@
                   </div>
                   <div
                     class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
-                    @click="deleteOwner(slotProps.data)"
+                    @click="confirmDelete(slotProps.data.person_id)"
                   >
                     <IconTrash class="scale-75" />
                     <span>Eliminar</span>
                   </div>
                 </div>
+                
               </template>
             </Dropdown>
           </template>
@@ -97,7 +97,7 @@
           />
           <div class="mt-4">
             <Select
-              v-model="form.role"
+              v-model="form.roles[0]"
               :options="userTypes"
               optionLabel="label"
               optionValue="value"
@@ -118,10 +118,12 @@
             severity="contrast"
             @click="updateOwner"
             :loading="ownerUpdateLoading"
-            label="Crear"
+            label="Actualizar"
           />
         </div>
       </Dialog>
+      <ConfirmDialog></ConfirmDialog>
+      <Toast /> 
     </div>
   </div>
 </template>
@@ -139,6 +141,7 @@ import { useToast } from "primevue/usetoast";
 import CustomTag from "/src/components/CustomTag.vue";
 import CustomAvatar from "/src/components/CustomAvatar.vue";
 import { ROLES } from "/src/constants/colors.js";
+import { useConfirm } from "primevue/useconfirm";
 
 defineOptions({
   name: "members",
@@ -148,18 +151,19 @@ defineOptions({
 //variables
 const search = ref("");
 const owners = ref([]);
-const owner = ref({
+const form = ref({
   name: "",
   surname: "",
   email: "",
   password: "1234",
-  role: "",
+  roles: [],
 });
 const ownerUpdateLoading = ref(false);
 //utils
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
+const confirm = useConfirm();
 
 const rolesTagColor = (rol) => {
   return ROLES[rol];
@@ -176,8 +180,7 @@ const rolesTagLabel = (rol) => {
 const userTypes = ref([
   { label: "Administrador", value: "admin" },
   { label: "Propietario", value: "owner" },
-  { label: "Inquilino", value: "tenant" },
-  { label: "Temporal", value: "temp" },
+
 ]);
 const showUpdateOwner = ref(false);
 //get owners
@@ -190,7 +193,7 @@ const getOwners = async () => {
     owners.value = response.data;
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,
@@ -201,40 +204,64 @@ const getOwners = async () => {
 getOwners();
 
 //delete owner
-const deleteOwner = async () => {
-  try {
-    const response = await http.get(
-      `communities/${user?.current_community?.community_id}/users/`
-    );
-  } catch (error) {
-    toast.add({
+const confirmDelete = (id) => {
+  confirm.require({
+    message:
+      "Esta acción no se puede revertir, ¿ Estas seguro de borrar este usuario?",
+    header: "Confirmación",
+    rejectProps: {
+      label: "Cancel",
+      severity: "secondary",
+      outlined: true,
+    },
+    acceptProps: {
+      label: "Borrar",
       severity: "danger",
-      summary: "Upps!! algo ha fallado",
-      detail: error,
-      life: 3000,
-    });
-  }
+    },
+    accept: () => {
+      http.delete(
+      `communities/${user?.current_community?.community_id}/neighbors/${id}/delete/`
+    );
+    updateOwners()
+      toast.add({
+        severity: "success",
+        summary: "Ok",
+        detail: "El usuario se ha eliminado con exito",
+        life: 3000,
+      });
+    },
+    reject: () => {
+      toast.add({
+        severity: "error",
+        summary: "Upps!!",
+        detail: "No se ha podido eliminar el usuario",
+        life: 3000,
+      });
+    },
+  });
 };
 
 //update owner
 
 const openUpdateOwner = (item) => {
-  console.log(item);
+
   showUpdateOwner.value = true;
   //falta ajustar campos
-  // owner.value = item
+   form.value = item
 };
 const updateOwner = async () => {
   try {
-    //const response = await http.put(`communities/${user?.current_community?.community_id}/users/`);
+    await http.put(`communities/${user?.current_community?.community_id}/neighbors/${form.value.person_id}/update/`, form.value);
+    
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,
     });
   }
+  showUpdateOwner.value = false
 };
 
 function updateOwners() {

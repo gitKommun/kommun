@@ -74,14 +74,14 @@ export default function routes({ authGuard, guestGuard }) {
                 component: () => import('../views/admin/Providers.vue')
             }, 
             {
-                path: '/settings/:id',
-                name: 'settings',
-                component: () => import('../views/admin/Settings.vue')
+                path: '/community_settings/:id',
+                name: 'community_settings',
+                component: () => import('../views/admin/CommunitySettings.vue')
             }, 
             {
-                path: '/profile',
-                name: 'profile',
-                component: () => import('../views/admin/Profile.vue')
+                path: '/account',
+                name: 'account',
+                component: () => import('../views/admin/Account.vue')
             }, 
             {
                 path: '/onboarding',

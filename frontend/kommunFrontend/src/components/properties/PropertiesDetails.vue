@@ -62,7 +62,7 @@ const getProperties = async () => {
     properties.value = response.data;
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,

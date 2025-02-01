@@ -135,7 +135,7 @@ defineOptions({
   name: 'Communities',
   layout: Main
 })
-const title = ref('Comunidades')
+
 
 //utils
 const http = useHttp();

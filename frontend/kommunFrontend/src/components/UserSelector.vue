@@ -21,9 +21,6 @@ defineOptions({
     name: 'UserSelector',
 })
 const props = defineProps({
-        owners: {
-            type: Array
-        },
         owner: {
             type: Object
         },
@@ -34,7 +31,7 @@ const props = defineProps({
 
 //variables
     const selected = ref(null);
-
+    const owners = ref([]);
     // const props = defineProps({
     //     property: {
     //         type: Object,
@@ -45,26 +42,23 @@ const props = defineProps({
     watch(selected, (newValue) => {
         emit('update:selected', newValue);   
     })
-    watch(props.owner, (newValue) => {
-       selected.value = newValue
-       
-    })
+    
 
 
-    // const getOwners = async () => {
-    //     try {
+    const getOwners = async () => {
+        try {
 
-    //     const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
-    //         owners.value = response.data
+        const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
+            owners.value = response.data
         
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
-    // onMounted(() => {
-    //     getOwners()
-    // });
+    onMounted(() => {
+        getOwners()
+    });
 
 
 </script>

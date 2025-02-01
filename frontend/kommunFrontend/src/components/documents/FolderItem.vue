@@ -104,7 +104,7 @@ const { user } = useUserStore();
     // Delete Item
     function deleteFolder() {
         try {
-            const response =  http.delete(`documents/${user?.current_community?.community_id}/folders/${props.folder.folder_id}/delete`);
+            http.delete(`documents/${user?.current_community?.community_id}/folders/${props.folder.folder_id}/delete`);
             toast.add({ severity: 'success', summary: 'Ok', detail: 'La carpeta se ha eliminado con exito', life: 3000 });
              
         } catch (error) {

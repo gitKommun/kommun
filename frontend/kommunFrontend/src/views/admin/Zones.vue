@@ -51,7 +51,7 @@
                 <IconPlus />Nueva zona
               </Button>
             </div>
-            <DataTable :value="zones" tableStyle="min-width: 50rem">
+            <DataTable :value="zones" tableStyle="min-width: 50rem" class="text-sm">
               <Column field="name" header="Nombre"></Column>
               <Column header="Uso">
                 <template #body="slotProps">
@@ -293,7 +293,7 @@ const zonesNameValidation = ref(true);
 const zone = ref({
   name: "",
   reservable: false,
-  reservation_duration: "",
+  reservation_duration: 0,
   time_unit: "",
 });
 const timePeriods = ref([
@@ -311,7 +311,7 @@ const getZones = async () => {
     loading.value = false;
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,
@@ -339,7 +339,7 @@ const createZone = () => {
       updateItems();
     } catch (error) {
       toast.add({
-        severity: "danger",
+        severity: "error",
         summary: "Upps!! algo ha fallado",
         detail: error,
         life: 3000,
@@ -379,12 +379,12 @@ const updateZone = () => {
     zone.value = {
       name: "",
       reservable: false,
-      reservation_duration: "",
+      reservation_duration: 0,
       time_unit: "",
     };
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,
@@ -395,7 +395,7 @@ const updateZone = () => {
 
 //deleteZone
 const deleteZone = (id) => {
-  console.log("deleteeeee");
+
   try {
     http.delete(`common_areas/${user?.current_community?.community_id}/${id}/`);
     toast.add({
@@ -406,7 +406,7 @@ const deleteZone = (id) => {
     });
   } catch (error) {
     toast.add({
-      severity: "danger",
+      severity: "error",
       summary: "Upps!! algo ha fallado",
       detail: error,
       life: 3000,

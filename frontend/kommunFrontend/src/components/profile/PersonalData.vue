@@ -1,10 +1,10 @@
 <template>
     <Fieldset legend="Datos personales">
-        <div class="flex gap-x-3 py-4">
+        <div class="flex flex-col md:flex-row gap-x-3 py-2 md:py-4">
                 <InputText 
                     v-model="form.name" 
                     placeholder="Nombre" 
-                    class="w-full" 
+                    class="w-full mb-4 md:mb-0" 
                     variant="filled"/>
                 <InputText 
                     v-model="form.surname" 
@@ -12,11 +12,11 @@
                     class="w-full" 
                     variant="filled"/>
             </div>
-            <div class="flex gap-x-3 py-4">
+            <div class="flex flex-col md:flex-row gap-x-3 py-2 md:py-4">
                 <InputText 
                     v-model="form.email" 
                     placeholder="E-mail" 
-                    class="w-full" 
+                    class="w-full mb-4 md:mb-0" 
                     variant="filled"/>
                 <InputText 
                     v-model="form.phone" 

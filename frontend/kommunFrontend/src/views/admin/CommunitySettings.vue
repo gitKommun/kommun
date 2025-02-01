@@ -42,7 +42,7 @@ import IconBack from "/src/components/icons/IconBack.vue";
 import Content from "/src/components/Content.vue";
 
 defineOptions({
-  name: "Settings",
+  name: "CommunitySettings",
   layout: Main,
 });
 //utils
@@ -73,7 +73,7 @@ const getCommunity = async () => {
       community.value = response.data;
     } catch (erro) {
       toast.add({
-        severity: "danger",
+        severity: "error",
         summary: "Upps!! algo ha fallado",
         detail: error,
         life: 3000,
