@@ -1,6 +1,8 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
+
 from django.shortcuts import get_object_or_404
 from .models import Claim, Community, ClaimComment, ClaimStatusRecord
 from .serializers import ClaimCommentSerializer, ClaimSerializer, ClaimDetailSerializer
@@ -33,7 +35,6 @@ class ClaimListAPIView(generics.ListAPIView):
     def get_queryset(self):
         community = get_object_or_404(Community, community_id=self.kwargs['IDcommunity'])
         return Claim.objects.filter(community=community)
-    
 
 class ClaimCommentCreateAPIView(generics.CreateAPIView):
     serializer_class = ClaimCommentSerializer

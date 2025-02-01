@@ -102,6 +102,7 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
+    'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S',  # ISO 8601 sin milisegundos
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ]

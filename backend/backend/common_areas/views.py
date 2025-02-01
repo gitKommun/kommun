@@ -80,10 +80,19 @@ class CommonAreaListAPIView(APIView):
                     items=openapi.Schema(
                         type=openapi.TYPE_OBJECT,
                         properties={
-                            'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de la zona común"),
+                            'area_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de la zona común"),
                             'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre de la zona común"),
-                            'description': openapi.Schema(type=openapi.TYPE_STRING, description="Descripción de la zona común"),
-                            'community': openapi.Schema(type=openapi.TYPE_STRING, description="ID de la comunidad asociada")
+                            'type': openapi.Schema(type=openapi.TYPE_STRING, description="Tipo de la zona común"),  # Eliminar `required=False`
+                            'reservable': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Indica si la zona común es reservable"),
+                            'reservation_duration': openapi.Schema(
+                                type=openapi.TYPE_INTEGER, 
+                                description="Duración de la reserva (requerido si es reservable)"
+                            ),
+                            'time_unit': openapi.Schema(
+                                type=openapi.TYPE_STRING, 
+                                enum=['MIN', 'HOUR', 'DAY'], 
+                                description="Unidad de tiempo para la duración de la reserva"
+                            )
                         }
                     )
                 )
