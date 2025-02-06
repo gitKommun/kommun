@@ -30,7 +30,7 @@ class Claim(models.Model):
     claim_id = models.PositiveIntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='claims')
     title = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='information')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='reported')
