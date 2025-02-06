@@ -30,22 +30,62 @@ import AnimateOnScroll from 'primevue/animateonscroll';
 app.directive('animateonscroll', AnimateOnScroll);
 
 app.use(PrimeVue, {
-    ripple:true,
-    theme: {
-        preset: {
-            ...Aura,
-            semantic: {
-                ...Aura.semantic,
-                ...kommunTheme
-            }
-        },
-        options: {
-            prefix: 'p',
-            darkModeSelector: '',
-            cssLayer: false
-        }
-    }, 
-    
+  ripple: true,
+  theme: {
+    preset: {
+      ...Aura,
+      semantic: {
+        ...Aura.semantic,
+        ...kommunTheme,
+      },
+    },
+    options: {
+      prefix: "p",
+      darkModeSelector: "",
+      cssLayer: false,
+    },
+  },
+  locale: {
+    monthNames: [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ],
+    dayNames: [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+      "Domingo"
+    ],
+    monthNamesShort: [
+      "Ene",
+      "Feb",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dic",
+    ],
+    dayNamesShort: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+    dayNamesMin: ["L", "M", "X", "J", "V", "S", "D"],
+  },
 });
 app.use(ToastService);
 app.use(ConfirmationService);

@@ -16,7 +16,7 @@
       >
         <Loading />
       </div>
-      <div v-else class="w-full h-full">
+      <div v-else class="w-full h-full flex flex-col overflow-y-scroll">
         <div
           v-if="!zones.length"
           class="w-full h-full flex flex-col items-center justify-center py-16"
@@ -67,6 +67,9 @@
           <div class="text-lg font-semibold mb-3">Otras zonas comunes</div>
           <DataTable
             :value="nonReservableZones"
+            paginator
+            :rows="20"
+            :rowsPerPageOptions="[20, 40, 60, 100]"
             tableStyle="min-width: 50rem"
             class="text-sm"
           >
@@ -111,49 +114,71 @@
             </Column>
           </DataTable>
         </div>
-         <!-- detalle -->
-          <div
-            class="absolute top-0 right-0 h-full transition-all duration-300 bounce-transition"
-            :class="{ 'w-full md:w-96': openDetail, 'w-0 ': !openDetail }"
+        <!-- detalle -->
+        <div
+          class="absolute top-0 right-0 h-full transition-all duration-300 bounce-transition"
+          :class="{ 'w-full md:w-96': openDetail, 'w-0 ': !openDetail }"
+        >
+          <transition
+            enter-active-class="transition-all transition-slow ease-out overflow-hidden"
+            leave-active-class="transition-all transition-slow ease-in overflow-hidden"
+            enter-class="opacity-0 ml-2"
+            enter-to-class="opacity-100 ml-0"
+            leave-class="opacity-100 ml-0"
+            leave-to-class="opacity-0 ml-2"
           >
-            <transition
-              enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-              leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-              enter-class="opacity-0 ml-2"
-              enter-to-class="opacity-100 ml-0"
-              leave-class="opacity-100 ml-0"
-              leave-to-class="opacity-0 ml-2"
+            <div
+              v-if="openDetail"
+              class="w-full h-full bg-white rounded-xl shadow-2xl p-3 flex flex-col"
             >
-              <div
-                v-if="openDetail"
-                class="w-full h-full bg-white rounded-xl shadow-2xl p-3 flex flex-col"
-              >
-                <div class="w-full flex items-center">
-                  <span class="w-full text-sm text-slate-500 uppercase truncate"
-                    >Zona -
-                    <span class="text-indigo-500">{{
-                      selectedZone.area_id
-                    }}</span>
-                  </span>
-                  <div
-                    class="min-h-10 min-w-10 rounded-xl hover:bg-slate-50 flex items-center justify-center transition-all duration-300 group"
-                    @click="openDetail = false"
-                  >
-                    <IconClose
-                      class="group-hover:rotate-90 transition-all duration-300"
-                      @click="selectedZone = null"
-                    />
-                  </div>
+              <div class="w-full flex items-center">
+                <span class="w-full text-sm text-slate-500 uppercase truncate"
+                  >Zona -
+                  <span class="text-indigo-500">{{
+                    selectedZone.area_id
+                  }}</span>
+                </span>
+                <div
+                  class="min-h-10 min-w-10 rounded-xl hover:bg-slate-50 flex items-center justify-center transition-all duration-300 group"
+                  @click="openDetail = false"
+                >
+                  <IconClose
+                    class="group-hover:rotate-90 transition-all duration-300"
+                    @click="selectedZone = null"
+                  />
                 </div>
-                <div class="flex flex-col py-3">
-                  <div class="font-bold truncate text-lg mb-3">{{ selectedZone.name }}</div>
-                  <span class="text-slate-500 text-sm mb-2">Fecha de reserva:</span>
-                  <DatePicker v-model="bookDate" inputId="on_label" showIcon iconDisplay="input" variant="filled" class="w-full"/>
-                </div>
-
               </div>
-            </transition>
-          </div>
+              <div class="flex flex-col py-3">
+                <div class="font-bold truncate text-lg mb-3">
+                  {{ selectedZone.name }}
+                </div>
+                <span class="text-slate-500 text-sm mb-2"
+                  >Fecha de reserva:</span
+                >
+                <DatePicker
+                  v-model="bookDate"
+                  dateFormat="dd/mm/yy"
+                  inputId="on_label"
+                  showIcon
+                  iconDisplay="input"
+                  variant="filled"
+                  class="w-full"
+                />
+              </div>
+              <span class="text-slate-500 uppercase text-xs mb-2 py-2"
+                >Horarios</span
+              >
+              <div class="flex-1 min-h-0 overflow-y-scroll g">
+                <SlotZone
+                  v-for="(slot, i) in demoSlots"
+                  :key="i"
+                  :slot="slot"
+                  class="mb-2"
+                />
+              </div>
+            </div>
+          </transition>
+        </div>
 
         <Dialog
           v-model:visible="showCreateZoneModal"
@@ -310,6 +335,7 @@ import Dropdown from "/src/components/Dropdown.vue";
 import PresetZones from "/src/components/zones/PresetZones.vue";
 import BookingZone from "/src/components/zones/BookingZone.vue";
 import IconClose from "/src/components/icons/IconClose.vue";
+import SlotZone from "/src/components/zones/SlotZone.vue";
 
 defineOptions({
   name: "Zones",
@@ -343,6 +369,26 @@ const timePeriods = ref([
 ]);
 const selectedZone = ref(null);
 const bookDate = ref(new Date());
+
+const demoSlots = ref([
+  {
+    slot_start: "2025-10-01T10:00:00",
+    slot_end: "2025-10-01T11:30:00",
+    reservation: true,
+    user: "Jose Plaza",
+  },
+  {
+    slot_start: "2025-10-01T11:30:00",
+    slot_end: "2025-10-01T13:00:00",
+    reservation: false,
+  },
+  {
+    slot_start: "2025-10-01T13:00:00",
+    slot_end: "2025-10-01T14:30:00",
+    reservation: false,
+  },
+]);
+
 const getZones = async () => {
   try {
     const response = await http.get(

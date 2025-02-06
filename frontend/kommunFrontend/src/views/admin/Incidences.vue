@@ -35,7 +35,7 @@
             <AddNewIncidence @update:items="updateItems" class="h-auto" />
           </div>
         </div>
-        <div v-else class="min-h-0 flex-1">   
+        <div v-else class="min-h-0 flex-1">
           <!-- toolbar -->
           <div class="w-full p-4 flex justify-between">
             <InputText
@@ -69,6 +69,9 @@
             <DataTable
               v-model:selection="selectedIncidence"
               selectionMode="single"
+              paginator
+              :rows="20"
+              :rowsPerPageOptions="[20, 40, 60, 100]"
               :value="incidences"
               tableStyle="min-width: 50rem"
               class="text-sm"
