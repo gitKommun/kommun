@@ -156,7 +156,7 @@ const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
 
-const emit = defineEmits(["update:owners"]);
+const emit = defineEmits(["update:items"]);
 
 const createIncidence = async () => {
   incidenceCreateLoading.value = true;

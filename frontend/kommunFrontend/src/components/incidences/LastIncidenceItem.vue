@@ -10,7 +10,7 @@
         <div class="font-semibold mb-3 flex flex-col flex-1 min-h-0">
             
             {{ incidence.title }}
-            <span class="text-xs text-slate-500 font-medium">{{ dateFormat(incidence.create_at) }}</span>
+            <span class="text-xs text-slate-500 font-medium">{{ dateFormat(incidence.created_at) }}</span>
         </div>
         <div class="mt-auto flex border-t border-slate-200 py-1 gap-x-2">
             <div class="text-xs text-slate-500 flex">Ascensor,</div>

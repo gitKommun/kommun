@@ -49,6 +49,8 @@ export default {
         160: "40rem",
       },
       spacing: {
+        42: "10.5rem",
+        44: "11rem",
         100: "25rem",
         110: "27.5rem",
         112: "28rem",

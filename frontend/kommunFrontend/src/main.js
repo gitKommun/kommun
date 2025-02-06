@@ -164,5 +164,8 @@ app.component('TabPanel', TabPanel)
 import Rating from "primevue/rating";
 app.component('Rating', Rating)
 
+import Message from "primevue/message";
+app.component('Message', Message)
+
 
 app.mount('#app');

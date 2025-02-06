@@ -423,6 +423,7 @@ const isAdmin = computed(() => {
 
 const changeCommunity = (selected) => {
   const id = selected.community_id;
+
   setCurrent(id);
 };
 

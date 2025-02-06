@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full">
+  <div class="flex-1 min-h-0 relative">
     <transition
       enter-active-class="transition-all transition-slow ease-out overflow-hidden"
       leave-active-class="transition-all transition-slow ease-in overflow-hidden"
@@ -17,11 +17,12 @@
         <Loading />
       </div>
       <div v-else class="w-full h-full">
-        <template v-if="!zones.length">
-          <div
-            class="w-full h-full flex flex-col items-center justify-center py-16"
-          >
-            <EmptyTask class="scale-75" />
+        <div
+          v-if="!zones.length"
+          class="w-full h-full flex flex-col items-center justify-center py-16"
+        >
+          <PresetZones @update:items="getZones()" />
+          <!-- <EmptyTask class="scale-75" />
             <span
               class="text-2xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-sky-500 to-green-300"
             >
@@ -36,89 +37,124 @@
               class="flex"
             >
               Crear primer elemento
+            </Button> -->
+        </div>
+
+        <div v-else class="px-4">
+          <div class="w-full flex justify-end py-4">
+            <Button
+              severity="contrast"
+              @click="showCreateZoneModal = true"
+              class="flex"
+              raised
+            >
+              <IconPlus />Nueva zona
             </Button>
           </div>
-        </template>
-        <template v-else>
-          <div class="px-4">
-            <div class="w-full flex justify-end py-4">
-              <Button
-                severity="contrast"
-                @click="showCreateZoneModal = true"
-                class="flex"
-                raised
-              >
-                <IconPlus />Nueva zona
-              </Button>
+          <div class="mb-3">
+            <div class="text-lg font-semibold mb-3">Zonas reservables</div>
+            <div
+              class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 content-start gap-3 pb-4"
+            >
+              <BookingZone
+                v-for="zone in reservableZones"
+                :key="zone.area_id"
+                :zone="zone"
+                @update:item="selectedZone = zone"
+              />
             </div>
-            <DataTable :value="zones" tableStyle="min-width: 50rem" class="text-sm">
-              <Column field="name" header="Nombre"></Column>
-              <Column header="Uso">
-                <template #body="slotProps">
-                  <Tag
-                    :severity="slotProps.data.reservable ? 'info' : 'success'"
-                    :value="slotProps.data.reservable ? 'Reserva' : 'Libre'"
-                  />
-                </template>
-              </Column>
-              <Column header="Tiempo">
-                <template #body="slotProps">
-                  <span v-if="slotProps.data.reservable">
-                    {{ slotProps.data.reservation_duration }}
-                    {{ slotProps.data.time_unit }}
-                  </span>
-                  <span v-else>-</span>
-                </template>
-              </Column>
-              <Column :rowEditor="true" bodyStyle="text-align:right">
-                <template #body="slotProps">
-                  <span v-if="slotProps.data.reservable" class="text-indigo-500 hover:text-indigo-700 hover:underline cursor-pointer">
-                    Reservar
-                  </span>
-                </template>
-              </Column>
-
-              <Column
-                :rowEditor="true"
-                style="width: 10%; min-width: 8rem"
-                bodyStyle="text-align:right"
-              >
-                <template #body="slotProps">
-                  <Dropdown strategy="fixed">
-                    <template #reference="{ open }">
-                      <div
-                        class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer"
-                        @click="open"
-                      >
-                        <IconDotsHorizontal class="text-slate-500" />
-                      </div>
-                    </template>
-                    <template #content="{ close }">
-                      <div
-                        class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm"
-                      >
-                        <div
-                          class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
-                          @click="openUpdateZone(slotProps.data)"
-                        >
-                          <IconPencil class="scale-75" />
-                          <span>Editar</span>
-                        </div>
-                        <div
-                          class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
-                          @click="deleteZone(slotProps.data.area_id)"
-                        >
-                          <IconTrash class="scale-75" />
-                          <span>Eliminar</span>
-                        </div>
-                      </div>
-                    </template>
-                  </Dropdown>
-                </template>
-              </Column>
-            </DataTable>
           </div>
-        </template>
+          <div class="text-lg font-semibold mb-3">Otras zonas comunes</div>
+          <DataTable
+            :value="nonReservableZones"
+            tableStyle="min-width: 50rem"
+            class="text-sm"
+          >
+            <Column field="name" header="Nombre"></Column>
+            <Column
+              :rowEditor="true"
+              style="width: 10%; min-width: 8rem"
+              bodyStyle="text-align:right"
+            >
+              <template #body="slotProps">
+                <Dropdown strategy="fixed">
+                  <template #reference="{ open }">
+                    <div
+                      class="h-8 w-8 rounded-xl hover:bg-slate-100 justify-center items-center flex flex-none transition-all duration-300 cursor-pointer"
+                      @click="open"
+                    >
+                      <IconDotsHorizontal class="text-slate-500" />
+                    </div>
+                  </template>
+                  <template #content="{ close }">
+                    <div
+                      class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm"
+                    >
+                      <div
+                        class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
+                        @click="openUpdateZone(slotProps.data)"
+                      >
+                        <IconPencil class="scale-75" />
+                        <span>Editar</span>
+                      </div>
+                      <div
+                        class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
+                        @click="deleteZone(slotProps.data.area_id)"
+                      >
+                        <IconTrash class="scale-75" />
+                        <span>Eliminar</span>
+                      </div>
+                    </div>
+                  </template>
+                </Dropdown>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+         <!-- detalle -->
+          <div
+            class="absolute top-0 right-0 h-full transition-all duration-300 bounce-transition"
+            :class="{ 'w-full md:w-96': openDetail, 'w-0 ': !openDetail }"
+          >
+            <transition
+              enter-active-class="transition-all transition-slow ease-out overflow-hidden"
+              leave-active-class="transition-all transition-slow ease-in overflow-hidden"
+              enter-class="opacity-0 ml-2"
+              enter-to-class="opacity-100 ml-0"
+              leave-class="opacity-100 ml-0"
+              leave-to-class="opacity-0 ml-2"
+            >
+              <div
+                v-if="openDetail"
+                class="w-full h-full bg-white rounded-xl shadow-2xl p-3 flex flex-col"
+              >
+                <div class="w-full flex items-center">
+                  <span class="w-full text-sm text-slate-500 uppercase truncate"
+                    >Zona -
+                    <span class="text-indigo-500">{{
+                      selectedZone.area_id
+                    }}</span>
+                  </span>
+                  <div
+                    class="min-h-10 min-w-10 rounded-xl hover:bg-slate-50 flex items-center justify-center transition-all duration-300 group"
+                    @click="openDetail = false"
+                  >
+                    <IconClose
+                      class="group-hover:rotate-90 transition-all duration-300"
+                      @click="selectedZone = null"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col py-3">
+                  <div class="font-bold truncate text-lg mb-3">{{ selectedZone.name }}</div>
+                  <span class="text-slate-500 text-sm mb-2">Fecha de reserva:</span>
+                  <DatePicker v-model="bookDate" inputId="on_label" showIcon iconDisplay="input" variant="filled" class="w-full"/>
+                </div>
+
+              </div>
+            </transition>
+          </div>
+
         <Dialog
           v-model:visible="showCreateZoneModal"
           modal
@@ -257,7 +293,7 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import Main from "/src/layouts/Main.vue";
 import { useHttp } from "/src/composables/useHttp.js";
 import { useUserStore } from "/src/stores/useUserStore.js";
@@ -271,6 +307,9 @@ import IconDotsHorizontal from "/src/components/icons/IconDotsHorizontal.vue";
 import IconPencil from "/src/components/icons/IconPencil.vue";
 import IconTrash from "/src/components/icons/IconTrash.vue";
 import Dropdown from "/src/components/Dropdown.vue";
+import PresetZones from "/src/components/zones/PresetZones.vue";
+import BookingZone from "/src/components/zones/BookingZone.vue";
+import IconClose from "/src/components/icons/IconClose.vue";
 
 defineOptions({
   name: "Zones",
@@ -290,6 +329,7 @@ const zones = ref([]);
 const showCreateZoneModal = ref(false);
 const showUpdateZone = ref(false);
 const zonesNameValidation = ref(true);
+const openDetail = ref(false);
 const zone = ref({
   name: "",
   reservable: false,
@@ -301,7 +341,8 @@ const timePeriods = ref([
   { label: "Horas", value: "HOUR" },
   { label: "Día Completo", value: "DAY" },
 ]);
-
+const selectedZone = ref(null);
+const bookDate = ref(new Date());
 const getZones = async () => {
   try {
     const response = await http.get(
@@ -395,7 +436,6 @@ const updateZone = () => {
 
 //deleteZone
 const deleteZone = (id) => {
-
   try {
     http.delete(`common_areas/${user?.current_community?.community_id}/${id}/`);
     toast.add({
@@ -415,12 +455,36 @@ const deleteZone = (id) => {
   updateItems();
 };
 
+const reservableZones = computed(() => {
+  return zones.value.filter((zone) => zone.reservable);
+});
+
+const nonReservableZones = computed(() => {
+  return zones.value.filter((zone) => !zone.reservable);
+});
+
 //miscelanea
 function updateItems() {
   setTimeout(() => {
     getZones();
   }, 300);
 }
+
+watch(
+  selectedZone,
+  (newValue, oldValue) => {
+    if (!newValue) {
+      openDetail.value = false;
+    } else {
+      openDetail.value = true;
+      if (oldValue) {
+      }
+    }
+    openDetail.value = !!newValue;
+    console.log("ha cambiado");
+  },
+  { deep: true }
+);
 onMounted(() => {
   updateItems();
 });

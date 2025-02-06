@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full">
+  <div class="flex-1 min-h-0">
     <transition
       enter-active-class="transition-all transition-slow ease-out overflow-hidden"
       leave-active-class="transition-all transition-slow ease-in overflow-hidden"
@@ -41,7 +41,7 @@
             >
           </div>
         </div>
-        <div v-else class="px-4 min-h-0 flex-1 sticky top-0">
+        <div v-else class="px-4 min-h-0 flex-1 ">
           <!-- scrollHeight="700px" scrollable -->
           <div class="flex justify-between items-center mb-3">
             <InputText
@@ -82,12 +82,10 @@
           <DataTable
             :value="properties"
             paginator
-            scrollHeight="700px"
-            scrollable
             :rows="20"
             :rowsPerPageOptions="[20, 40, 60, 100]"
             tableStyle="min-width: 50rem"
-            class="text-xs"
+            class="text-xs "
           >
             <Column
               field="address_complete"
@@ -181,7 +179,6 @@ defineOptions({
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
-const route = useRouter();
 const confirm = useConfirm();
 
 //variables
