@@ -155,6 +155,109 @@ class CastVoteAPIView(APIView):
 
 class CommunityVotesListAPIView(APIView):
     @swagger_auto_schema(
+        operation_description="Obtiene el listado de todas las votaciones de una comunidad, con un resumen de votos por cada opción, estado de la votación para el usuario consultante, y listado de votantes y pendientes.",
+        responses={
+            200: openapi.Response(
+                description="Lista de votaciones de la comunidad",
+                examples={
+                    "application/json": [
+                        {
+                            "vote_id": 1,
+                            "title": "Presupuesto 2023",
+                            "description": "Aprobación del presupuesto",
+                            "start_date": "2023-10-01T10:00:00Z",
+                            "end_date": "2023-10-31T23:59:00Z",
+                            "status": "open",
+                            "vote_status_for_user": "pending",  # "voted", "pending", "delegated"
+                            "users_voted": [
+                                {"person_community_id": 5, "fullname": "Juan Pérez"},
+                                {"person_community_id": 8, "fullname": "Ana Gómez"}
+                            ],
+                            "pending_votes": 15,
+                            "users_pending": [
+                                {"person_community_id": 12, "fullname": "Pedro Ramírez", "delegated_to": "María López"},
+                                {"person_community_id": 20, "fullname": "Carlos Torres", "delegated_to": None}
+                            ]
+                        }
+                    ]
+                }
+            ),
+            404: "Comunidad no encontrada"
+        }
+    )
+    def get(self, request, IDcommunity):
+            user = request.user  # Usuario que hace la consulta
+            votes = Vote.objects.filter(community__community_id=IDcommunity)
+            votes_data = []
+            current_time = timezone.now()
+
+            for vote in votes:
+                # Determinar el estado general de la votación
+                if vote.start_date > current_time:
+                    vote_status = "not_started"
+                elif vote.end_date < current_time or vote.eligible_voters.count() == vote.vote_records.count():
+                    vote_status = "closed"
+                else:
+                    vote_status = "open"
+
+                # Verificar el estado del voto para el usuario consultante
+                user_vote_record = VoteRecord.objects.filter(vote=vote, neighbor__user=user).first()
+                if user_vote_record:
+                    vote_status_for_user = "voted"
+                elif VoteRecord.objects.filter(vote=vote, delegated_to__user=user).exists():
+                    vote_status_for_user = "delegated"
+                else:
+                    vote_status_for_user = "pending"
+
+                # Obtener usuarios que ya han votado
+                users_voted = [
+                    {
+                        "person_community_id": vote_record.neighbor.person_id,
+                        "fullname": f"{vote_record.neighbor.name} {vote_record.neighbor.surnames}"
+                    }
+                    for vote_record in VoteRecord.objects.filter(vote=vote)
+                ]
+
+                # Obtener usuarios pendientes de votar
+                users_pending = []
+                for neighbor in vote.eligible_voters.all():
+                    if not VoteRecord.objects.filter(vote=vote, neighbor=neighbor).exists():
+                        delegated_to = VoteRecord.objects.filter(vote=vote, delegated_to=neighbor).first()
+                        users_pending.append({
+                            "person_community_id": neighbor.person_id,
+                            "fullname": f"{neighbor.name} {neighbor.surnames}",
+                            "delegated_to": f"{delegated_to.neighbor.name} {delegated_to.neighbor.surnames}" if delegated_to else None
+                        })
+
+                # Resumen de votos por opción
+                options_summary = [
+                    {
+                        "option_id": option.option_id,
+                        "option_text": option.option_text,
+                        "vote_count": VoteRecord.objects.filter(vote=vote, options=option).count()
+                    }
+                    for option in vote.options.all()
+                ]
+
+                # Agregar datos al listado de votaciones
+                votes_data.append({
+                    "vote_id": vote.vote_id,
+                    "title": vote.title,
+                    "description": vote.description,
+                    "start_date": vote.start_date,
+                    "end_date": vote.end_date,
+                    "status": vote_status,
+                    "vote_status_for_user": vote_status_for_user,
+                    "options": options_summary,
+                    "users_voted": users_voted,
+                    "pending_votes": len(users_pending),
+                    "users_pending": users_pending
+                })
+
+            return Response(votes_data, status=status.HTTP_200_OK)
+
+class OLDCommunityVotesListAPIView(APIView):
+    @swagger_auto_schema(
         operation_description="Obtiene el listado de todas las votaciones de una comunidad, con un resumen de votos por cada opción y el estado de la votación.",
         responses={
             200: openapi.Response(
@@ -201,7 +304,6 @@ class CommunityVotesListAPIView(APIView):
         votes_data = []
         current_time = timezone.now()
 
-
         for vote in votes:
             # Determinar el estado de la votación
             if vote.start_date > current_time:
@@ -210,6 +312,17 @@ class CommunityVotesListAPIView(APIView):
                 vote_status = "closed"
             else:
                 vote_status = "open"
+
+            #Usuarios que ya han votado
+            users_voted = []
+            users_pending = []
+            
+            for vote_record in VoteRecord.objects.filter(vote=vote):
+                users_voted.append({
+                    "vote_owner": vote_record.neighbor,
+                    "vote_delegated_to": vote_record.delegated_to
+                    })
+
 
             # Resumen de votos por cada opción
             options_summary = []
@@ -223,6 +336,7 @@ class CommunityVotesListAPIView(APIView):
 
             # Calcular votos pendientes
             pending_votes = vote.eligible_voters.count() - vote.vote_records.count()
+            neighbors_pending_vote = vote.eligible_voters
 
             # Agregar datos de la votación al resultado final
             votes_data.append({
@@ -233,7 +347,8 @@ class CommunityVotesListAPIView(APIView):
                 "end_date": vote.end_date,
                 "status": vote_status,
                 "options": options_summary,
-                "pending_votes": pending_votes
+                "pending_votes": pending_votes,
+                "users_voted": users_voted
             })
 
         return Response(votes_data, status=status.HTTP_200_OK)

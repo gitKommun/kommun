@@ -43,7 +43,7 @@ class Option(models.Model):
     option_text = models.CharField(_('option_text'), max_length=255)
 
     def __str__(self):
-        return self.text
+        return self.option_text
     
     def save(self, *args, **kwargs):
         if not self.option_id:  # Si no se ha asignado un vote_id
