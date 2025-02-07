@@ -17,7 +17,7 @@
     >
       <Loading />
     </div>
-    <div v-else class="h-full w-full flex flex-col pt-3 overflow-y-scroll" key="content">
+    <div v-else class="h-full w-full flex flex-col overflow-y-scroll" key="content">
       <div class="w-full p-4 flex justify-between">
         <InputText
           v-model="search"

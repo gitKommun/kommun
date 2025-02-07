@@ -42,14 +42,7 @@
 
         <div v-else class="px-4">
           <div class="w-full flex justify-end py-4">
-            <Button
-              severity="contrast"
-              @click="showCreateZoneModal = true"
-              class="flex"
-              raised
-            >
-              <IconPlus />Nueva zona
-            </Button>
+            <AddNewZone @update:zones="updateItems"/>
           </div>
           <div class="mb-3">
             <div class="text-lg font-semibold mb-3">Zonas reservables</div>
@@ -61,6 +54,8 @@
                 :key="zone.area_id"
                 :zone="zone"
                 @update:item="selectedZone = zone"
+                @update:delete="deleteZone(zone.area_id)"
+                @update:edit="openUpdateZone(zone)"
               />
             </div>
           </div>
@@ -173,81 +168,14 @@
                   v-for="(slot, i) in demoSlots"
                   :key="i"
                   :slot="slot"
+                  :zone="selectedZone"
+                  @update:reserve="comfirmReserve(slot)"
                   class="mb-2"
                 />
               </div>
             </div>
           </transition>
         </div>
-
-        <Dialog
-          v-model:visible="showCreateZoneModal"
-          modal
-          header="Crear nueva zona"
-          class="w-96"
-        >
-          <div class="gap-y-2">
-            <InputText
-              v-model="zone.name"
-              placeholder="Nombre de la zona"
-              class="w-full"
-              variant="filled"
-            />
-            <div class="flex items-center mt-6">
-              <span class="min-w-10">
-                <ToggleSwitch v-model="zone.reservable" />
-              </span>
-              <span class="ml-3">
-                La zona que puede ser reservada por los propitarios
-              </span>
-            </div>
-            <transition
-              enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-              leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-              enter-class="opacity-0"
-              enter-to-class="opacity-100"
-              leave-class="opacity-100"
-              leave-to-class="opacity-0"
-            >
-              <div class="mt-3 rounded-xl p-3">
-                <span class="text-slate-500 text-sm"
-                  >Define la franja de tiempo para el uso de la zona:</span
-                >
-                <div class="flex gap-x-3 py-3">
-                  <InputGroup>
-                    <InputNumber
-                      v-model="zone.reservation_duration"
-                      placeholder="Tiempo"
-                      variant="filled"
-                      inputClass="w-12 mr-1"
-                      :disabled="!zone.reservable"
-                    />
-                    <Select
-                      v-model="zone.time_unit"
-                      :options="timePeriods"
-                      optionLabel="label"
-                      optionValue="value"
-                      variant="filled"
-                      placeholder="Selecciona..."
-                      :disabled="!zone.reservable"
-                    />
-                  </InputGroup>
-                </div>
-              </div>
-            </transition>
-          </div>
-
-          <div class="flex justify-end gap-x-4 pt-4">
-            <Button
-              text
-              severity="secondary"
-              @click="showCreateZoneModal = !showCreateZoneModal"
-            >
-              Cancelar
-            </Button>
-            <Button severity="contrast" @click="createZone"> Crear </Button>
-          </div>
-        </Dialog>
         <Dialog
           v-model:visible="showUpdateZone"
           modal
@@ -313,12 +241,14 @@
             </Button>
           </div>
         </Dialog>
+        <ConfirmDialog></ConfirmDialog>
+        <Toast />
       </div>
     </transition>
   </div>
 </template>
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, toRaw } from "vue";
 import Main from "/src/layouts/Main.vue";
 import { useHttp } from "/src/composables/useHttp.js";
 import { useUserStore } from "/src/stores/useUserStore.js";
@@ -336,6 +266,7 @@ import PresetZones from "/src/components/zones/PresetZones.vue";
 import BookingZone from "/src/components/zones/BookingZone.vue";
 import IconClose from "/src/components/icons/IconClose.vue";
 import SlotZone from "/src/components/zones/SlotZone.vue";
+import AddNewZone from "@/components/zones/AddNewZone.vue";
 
 defineOptions({
   name: "Zones",
@@ -346,15 +277,12 @@ defineOptions({
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
-const route = useRouter();
 const confirm = useConfirm();
 
 //variables
 const loading = ref(true);
 const zones = ref([]);
-const showCreateZoneModal = ref(false);
 const showUpdateZone = ref(false);
-const zonesNameValidation = ref(true);
 const openDetail = ref(false);
 const zone = ref({
   name: "",
@@ -407,42 +335,6 @@ const getZones = async () => {
 };
 getZones();
 
-//createZone
-const createZone = () => {
-  if (zone.name != "") {
-    zonesNameValidation.value = true;
-    try {
-      http.post(
-        `common_areas/${user?.current_community?.community_id}/create/`,
-        zone.value
-      );
-
-      toast.add({
-        severity: "success",
-        summary: "Ok",
-        detail: "Zona creada con exito",
-        life: 3000,
-      });
-      updateItems();
-    } catch (error) {
-      toast.add({
-        severity: "error",
-        summary: "Upps!! algo ha fallado",
-        detail: error,
-        life: 3000,
-      });
-    }
-    zone.value = {
-      name: "",
-      reservable: false,
-      reservation_duration: "",
-      time_unit: "",
-    };
-    showCreateZoneModal.value = false;
-  } else {
-    zonesNameValidation.value = false;
-  }
-};
 
 //editZone
 const openUpdateZone = (item) => {
@@ -501,6 +393,42 @@ const deleteZone = (id) => {
   updateItems();
 };
 
+//reservar slot
+const comfirmReserve = (slot) => {
+  confirm.require({
+    message: "Reservar de "+formatTime(slot.slot_start)+" a "+formatTime(slot.slot_end)+" el día "+dateFormat(slot.slot_start)+"¿ Quieres confirmar la reserva?",
+    header: "Reservar "+selectedZone.value.name,
+    rejectProps: {
+      label: "Cancelar",
+      severity: "secondary",
+      outlined: true,
+    },
+    acceptProps: {
+      label: "Confirmar reserva",
+      severity: "contrast",
+    },
+    accept: () => {
+    //   http.delete(
+    //     `common_areas/${props.zone.community_id}/${props.zone.area_id}/slots/${props.slot.slot_id}/`
+    //   );
+      toast.add({
+        severity: "success",
+        summary: "Ok",
+        detail: selectedZone.value.name+ " se reservado con exito",
+        life: 3000,
+      });
+    },
+    reject: () => {
+      toast.add({
+        severity: "error",
+        summary: "Upps!!",
+        detail: "No se han podido reservar "+selectedZone.value.name,
+        life: 3000,
+      });
+    },
+  });
+};
+
 const reservableZones = computed(() => {
   return zones.value.filter((zone) => zone.reservable);
 });
@@ -534,4 +462,32 @@ watch(
 onMounted(() => {
   updateItems();
 });
+
+//miscelanea
+const formatTime = (time) => {
+  const date = new Date(time);
+  return date.toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+};
+
+function dateFormat(dateString) {
+  // Intenta crear un objeto Date directamente desde el string ISO
+  const date = new Date(dateString);
+  console.log(date);
+  // Verifica si la fecha es válida
+  if (isNaN(date.getTime())) {
+    console.error("Fecha no válida:", dateString);
+    return "Fecha no válida";
+  }
+
+  // Formatea la fecha como DD/MM/YYYY
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript son 0-indexados
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
 </script>

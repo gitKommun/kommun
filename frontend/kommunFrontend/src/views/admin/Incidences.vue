@@ -18,7 +18,7 @@
       </div>
       <div
         v-else
-        class="h-full w-full flex flex-col pt-3 overflow-y-scroll"
+        class="h-full w-full flex flex-col overflow-y-scroll"
         key="content"
       >
         <div class="px-4 min-h-0 flex-1" v-if="!incidences.length">
@@ -575,7 +575,6 @@ watch(
 function dateFormat(dateString) {
   // Intenta crear un objeto Date directamente desde el string ISO
   const date = new Date(dateString);
-  console.log(date);
   // Verifica si la fecha es válida
   if (isNaN(date.getTime())) {
     console.error("Fecha no válida:", dateString);

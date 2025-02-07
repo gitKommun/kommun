@@ -1,121 +1,168 @@
 <template>
-  <div class="h-full w-full px-4">
-    <div class="border border-slate-200 rounded-2xl p-3 mb-3">
-      <div class="w-full flex gap-x-2 flex-col md:flex-row overflow-x-scroll">
-        <div class="flex w-full flex-col gap-y-1 mb-4 bg-slate-100 rounded-xl p-3" v-if="getTopRatedProviders.length">
-          <span class="uppercase text-xs md:mb-2">Valoraciones</span>
-          <div v-for="(rate , i) in getRatingDistribution" :key="i"  class="flex items-center gap-x-2">
-              <div class="w-44 flex justify-end">
-                <IconStarFill class="scale-50 text-slate-900" v-for="star in rate.rating" :key="rate.rating"/>
-              </div>
-              <div class="w-full h-2 bg-slate-200 relative rounded-sm overflow-hidden">
-                <div class="absolute h-2 bg-slate-500 rounded-sm" :style="{width: rate.value + '%'}"></div>
-              </div>
-              <div class="w-8 text-xs text-slate-500">{{ rate.value }}%</div>
-          </div>
-        </div>
-        <div class="flex w-full flex-col gap-y-3 mb-4 bg-slate-100 rounded-xl p-3">
-          <span class="uppercase text-xs md:mb-2">Mejor valorados</span>
-          <div
-            v-for="(provider, i) in getTopRatedProviders"
-            :key="i"
-            class="w-full flex items-center rounded-xl"
-          >
-            <span class="flex items-center gap-x-2">
-              <span
-                :class="`size-8 min-w-8 rounded-lg flex items-center justify-center bg-${
-                  PROVIDER_COLOR[provider.type]
-                }-100`"
-              >
-                <component
-                  :is="PROVIDER_ICONS[provider.type]"
-                  :class="`scale-75 text-${PROVIDER_COLOR[provider.type]}-500`"
-                />
-              </span>
-              <span class="truncate">{{ provider.company_name }}</span>
-            </span>
-          </div>
-        </div>
-        <div class="flex w-full flex-col gap-y-3 mb-4 bg-slate-100 rounded-xl p-3">
-          <span class="uppercase text-xs md:mb-2">Peor valorados</span>
-          <div
-            v-for="(provider, i) in getWorstRatedProviders"
-            :key="i"
-            class="w-full flex items-center rounded-xl"
-          >
-            <span class="flex items-center gap-x-2">
-              <span
-                :class="`size-8 min-w-8 rounded-lg flex items-center justify-center bg-${
-                  PROVIDER_COLOR[provider.type]
-                }-100`"
-              >
-                <component
-                  :is="PROVIDER_ICONS[provider.type]"
-                  :class="`scale-75 text-${PROVIDER_COLOR[provider.type]}-500`"
-                />
-              </span>
-              <span class="truncate">{{ provider.company_name }}</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="w-full py-2 text-sm mb-4">
-        <span class="text-xs text-slate-400 mb-2"
-          >Distribución de proveedores</span
-        >
-        <MeterGroup :value="providerStats" class="text-sm" />
-      </div>
-    </div>
-    <DataTable
-      :value="providers"
-      paginator
-      scrollHeight="700px"
-      scrollable
-      :rows="20"
-      :rowsPerPageOptions="[20, 40, 60, 100]"
-      tableStyle="min-width: 50rem"
-      class="text-xs"
+  <div class="flex-1 min-h-0 px-4">
+    <transition
+      enter-active-class="transition-all transition-slow ease-out overflow-hidden"
+      leave-active-class="transition-all transition-slow ease-in overflow-hidden"
+      enter-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-class="opacity-100"
+      leave-to-class="opacity-0"
+      mode="out-in"
     >
-      <Column field="company_name" header="Empresa">
-        <template #body="slotProps">
-          <span class="flex items-center gap-x-2">
-            <span
-              :class="`size-8 min-w-8 rounded-lg flex items-center justify-center bg-${
-                PROVIDER_COLOR[slotProps.data.type]
-              }-100`"
+      <div
+        v-if="loading"
+        class="h-full w-full flex justify-center items-center"
+        key="loading"
+      >
+        <Loading />
+      </div>
+      <div
+        v-else
+        class="h-full w-full flex flex-col pt-3 overflow-y-scroll"
+        key="content"
+      >
+        <div class="border border-slate-200 rounded-2xl p-3 mb-3">
+          <div
+            class="w-full flex gap-x-2 flex-col md:flex-row overflow-x-scroll"
+          >
+            <div
+              class="flex w-full flex-col gap-y-1 mb-4 bg-slate-100 rounded-xl p-3"
+              v-if="getTopRatedProviders.length"
             >
-              <component
-                :is="PROVIDER_ICONS[slotProps.data.type]"
-                :class="`scale-75 text-${
-                  PROVIDER_COLOR[slotProps.data.type]
-                }-500`"
-              />
-            </span>
-            <span class="">{{ slotProps.data.company_name }}</span>
-          </span>
-        </template>
-      </Column>
-      <Column field="phone" header="Teléfono"></Column>
-      <Column field="email" header="Correo electrónico"></Column>
-      <Column field="address" header="Dirección"></Column>
-      <Column field="rating" header="Valoración" sortable>
-        <template #body="slotProps">
-          <span class="flex items-center gap-x-2">
-            <Rating
-              :modelValue="slotProps.data.rating"
-              :readonly="true"
-              :cancel="false"
-              :cancelTooltip="false"
-            />
-            <span class="text-xs text-slate-400">
-              ({{ slotProps.data.reviews }})
-            </span>
-          </span>
-        </template>
-      </Column>
-      <Column field="contact_person" header="Contacto"></Column>
-    </DataTable>
+              <span class="uppercase text-xs md:mb-2">Valoraciones</span>
+              <div
+                v-for="(rate, i) in getRatingDistribution"
+                :key="i"
+                class="flex items-center gap-x-2"
+              >
+                <div class="w-44 flex justify-end">
+                  <IconStarFill
+                    class="scale-50 text-slate-900"
+                    v-for="star in rate.rating"
+                    :key="rate.rating"
+                  />
+                </div>
+                <div
+                  class="w-full h-2 bg-slate-200 relative rounded-sm overflow-hidden"
+                >
+                  <div
+                    class="absolute h-2 bg-slate-500 rounded-sm"
+                    :style="{ width: rate.value + '%' }"
+                  ></div>
+                </div>
+                <div class="w-8 text-xs text-slate-500">{{ rate.value }}%</div>
+              </div>
+            </div>
+            <div
+              class="flex w-full flex-col gap-y-3 mb-4 bg-slate-100 rounded-xl p-3"
+            >
+              <span class="uppercase text-xs md:mb-2">Mejor valorados</span>
+              <div
+                v-for="(provider, i) in getTopRatedProviders"
+                :key="i"
+                class="w-full flex items-center rounded-xl"
+              >
+                <span class="flex items-center gap-x-2">
+                  <span
+                    :class="`size-8 min-w-8 rounded-lg flex items-center justify-center bg-${
+                      PROVIDER_COLOR[provider.type]
+                    }-100`"
+                  >
+                    <component
+                      :is="PROVIDER_ICONS[provider.type]"
+                      :class="`scale-75 text-${
+                        PROVIDER_COLOR[provider.type]
+                      }-500`"
+                    />
+                  </span>
+                  <span class="truncate">{{ provider.company_name }}</span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="flex w-full flex-col gap-y-3 mb-4 bg-slate-100 rounded-xl p-3"
+            >
+              <span class="uppercase text-xs md:mb-2">Peor valorados</span>
+              <div
+                v-for="(provider, i) in getWorstRatedProviders"
+                :key="i"
+                class="w-full flex items-center rounded-xl"
+              >
+                <span class="flex items-center gap-x-2">
+                  <span
+                    :class="`size-8 min-w-8 rounded-lg flex items-center justify-center bg-${
+                      PROVIDER_COLOR[provider.type]
+                    }-100`"
+                  >
+                    <component
+                      :is="PROVIDER_ICONS[provider.type]"
+                      :class="`scale-75 text-${
+                        PROVIDER_COLOR[provider.type]
+                      }-500`"
+                    />
+                  </span>
+                  <span class="truncate">{{ provider.company_name }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full py-2 text-sm mb-4">
+            <span class="text-xs text-slate-400 mb-2"
+              >Distribución de proveedores</span
+            >
+            <MeterGroup :value="providerStats" class="text-sm" />
+          </div>
+        </div>
+        <DataTable
+          :value="providers"
+          paginator
+          :rows="20"
+          :rowsPerPageOptions="[20, 40, 60, 100]"
+          tableStyle="min-width: 50rem"
+          class="text-xs"
+        >
+          <Column field="company_name" header="Empresa">
+            <template #body="slotProps">
+              <span class="flex items-center gap-x-2">
+                <span
+                  :class="`size-8 min-w-8 rounded-lg flex items-center justify-center bg-${
+                    PROVIDER_COLOR[slotProps.data.type]
+                  }-100`"
+                >
+                  <component
+                    :is="PROVIDER_ICONS[slotProps.data.type]"
+                    :class="`scale-75 text-${
+                      PROVIDER_COLOR[slotProps.data.type]
+                    }-500`"
+                  />
+                </span>
+                <span class="">{{ slotProps.data.company_name }}</span>
+              </span>
+            </template>
+          </Column>
+          <Column field="phone" header="Teléfono"></Column>
+          <Column field="email" header="Correo electrónico"></Column>
+          <Column field="address" header="Dirección"></Column>
+          <Column field="rating" header="Valoración" sortable>
+            <template #body="slotProps">
+              <span class="flex items-center gap-x-2">
+                <Rating
+                  :modelValue="slotProps.data.rating"
+                  :readonly="true"
+                  :cancel="false"
+                  :cancelTooltip="false"
+                />
+                <span class="text-xs text-slate-400">
+                  ({{ slotProps.data.reviews }})
+                </span>
+              </span>
+            </template>
+          </Column>
+          <Column field="contact_person" header="Contacto"></Column>
+        </DataTable>
+      </div>
+    </transition>
   </div>
 </template>
 <script setup>
@@ -160,6 +207,9 @@ const PROVIDER_ICONS = {
   lawyers: IconScale,
   others: IconApiApp,
 };
+
+const loading = ref(false);
+
 const providers = ref([
   {
     company_name: "LockGuard Solutions",
@@ -503,13 +553,12 @@ const getRatingDistribution = computed(() => {
     distribution[provider.rating]++;
   });
 
-  const items = Object.keys(distribution).map(key => ({
+  const items = Object.keys(distribution).map((key) => ({
     rating: parseInt(key),
-    value: ((distribution[key] / total) * 100).toFixed(0)
+    value: ((distribution[key] / total) * 100).toFixed(0),
   }));
 
-  return items.reverse()
-
+  return items.reverse();
 });
 
 const providerStats = computed(() => {

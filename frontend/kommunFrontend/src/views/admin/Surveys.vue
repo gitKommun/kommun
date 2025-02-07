@@ -1,6 +1,6 @@
 <template>
   <div class="h-full w-full relative">
-    <div class="flex justify-between items-center mb-3 px-3">
+    <div class="flex justify-between items-center mb-3 py-4 px-3">
       <InputText
         v-model="search"
         placeholder="Buscar"

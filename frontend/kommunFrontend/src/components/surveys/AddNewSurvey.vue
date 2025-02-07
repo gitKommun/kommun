@@ -218,7 +218,7 @@ const createSurvey = async () => {
       eligible_voters:
         form.value.eligible_voters.length > 0
           ? form.value.eligible_voters.map((owner) => owner.person_id)
-          : 0,
+          : [],
     });
     toast.add({
       severity: "success",
