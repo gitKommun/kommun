@@ -134,6 +134,7 @@ def get_user_data(request):
             user_current_community_data = {
                 'community_id': user.current_community.community_id,
                 'community_name': user.current_community.name,
+                'community_person_id': person_community.person_id if person_community else None,
                 'community_user_status': person_community.user_status,
                 'community_roles': roles_names  # Devolver los nombres de los roles
                 
