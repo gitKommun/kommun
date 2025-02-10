@@ -1,15 +1,31 @@
 <template>
-  <div class="h-full w-full relative">
-    <div class="flex justify-between items-center mb-3 py-4 px-3">
+  <div class="h-full w-full relative px-4">
+    <div class="flex justify-between items-center py-4">
       <InputText
         v-model="search"
         placeholder="Buscar"
         size="small"
         variant="filled"
       />
-      <AddNewSurvey @update:items="updateItems" class="h-auto" />
+      <AddNewSurvey @update:surveys="updateItems" class="h-auto" />
     </div>
-    <div class="px-4">
+    <div class="mb-3">
+      <div class="text-lg font-semibold mb-3">Votaciones en curso</div>
+      <div
+        class="w-full  gap-3 pb-4"
+      >
+      <ActiveSurvey :survey="survey" v-for="survey in getMyOpenSurveys" :key="survey.vote_id"/>
+        <!-- <BookingZone
+                v-for="zone in reservableZones"
+                :key="zone.area_id"
+                :zone="zone"
+                @update:item="selectedZone = zone"
+                @update:delete="deleteZone(zone.area_id)"
+                @update:edit="openUpdateZone(zone)"
+              /> -->
+      </div>
+    </div>
+    <div class="mt-2">
       <DataTable
         v-model:selection="selectedSurvey"
         selectionMode="single"
@@ -31,8 +47,26 @@
             {{ dateFormat(slotProps.data.end_date) }}
           </template>
         </Column>
-        <Column header="Audiencia"></Column>
-        <Column header="Progreso"></Column>
+        <Column header="Audiencia">
+          <template #body="slotProps">
+            {{ slotProps.data.users.length }}
+          </template>
+        </Column>
+        <Column header="Progreso">
+          <template #body="slotProps">
+            <div class="flex items-center gap-x-2">
+              <div
+                class="h-2 w-20 bg-slate-200 relative rounded-[3px] overflow-hidden"
+              >
+                <div
+                  class="h-full bg-green-500 absolute top-0 left-0 transition-all duration-300 group-hover:w-full"
+                  :style="{ width: `${getProcess(slotProps.data.users)}` }"
+                ></div>
+              </div>
+              <span>{{ getProcess(slotProps.data.users) }}%</span>
+            </div>
+          </template>
+        </Column>
       </DataTable>
     </div>
     <div
@@ -71,21 +105,23 @@
             <p class="font-bold text-lg mb-3">
               {{ selectedSurvey?.title }}
             </p>
-            <div class=" bg-red-100 h-56 flex justify-center items-center">
+            <div class="bg-red-100 h-56 flex justify-center items-center">
               <HighChart :options="demoData" />
             </div>
           </div>
           <!-- ansewers -->
-           <div class="text-slate-500 text-xs my-3">
-                    <span class="uppercase text-xs mr-1">Respuestas</span>
-                  </div>
-           <div class="flex-1 min-h-0 overflow-y-scroll py-3">
-            
-           <div v-for="(e,i) in 20" :key="i" class="px-3 py-2 border-l-4 border-blue-500 mb-[4px] text-sm">
-            Nombre de vecino
-           </div>
-           </div>
-           
+          <div class="text-slate-500 text-xs my-3">
+            <span class="uppercase text-xs mr-1">Respuestas</span>
+          </div>
+          <div class="flex-1 min-h-0 overflow-y-scroll py-3">
+            <div
+              v-for="(e, i) in 20"
+              :key="i"
+              class="px-3 py-2 border-l-4 border-blue-500 mb-[4px] text-sm"
+            >
+              Nombre de vecino
+            </div>
+          </div>
         </div>
       </transition>
     </div>
@@ -93,7 +129,7 @@
   </div>
 </template>
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useUserStore } from "/src/stores/useUserStore.js";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
@@ -103,8 +139,8 @@ import Main from "/src/layouts/Main.vue";
 import AddNewSurvey from "/src/components/surveys/AddNewSurvey.vue";
 import IconClose from "/src/components/icons/IconClose.vue";
 import HighChart from "@/components/HighChart.vue";
-import { color } from "highcharts";
-import { data } from "autoprefixer";
+import ActiveSurvey from "/src/components/surveys/ActiveSurvey.vue";
+
 
 defineOptions({
   name: "surveys",
@@ -125,7 +161,7 @@ const openDetail = ref(false);
 const getSurveys = async () => {
   try {
     const response = await http.get(
-      `votes/${user?.current_community?.community_id}/polls/`
+      `votes/${user?.current_community?.community_id}/`
     );
     surveys.value = response.data;
   } catch (error) {
@@ -161,12 +197,12 @@ const demoData = {
   },
   plotOptions: {
     bar: {
-            borderRadius: '20%',
-            dataLabels: {
-                enabled: true
-            },
-            groupPadding: 0.1
-        }
+      borderRadius: "20%",
+      dataLabels: {
+        enabled: true,
+      },
+      groupPadding: 0.1,
+    },
   },
   xAxis: {
     labels: {
@@ -175,19 +211,45 @@ const demoData = {
   },
   series: [
     {
-          name: "Si",
-          data: [34],
-        },
-        {
-          name: "No",
-          data: [20],
-        },
-        {
-          name: "Abstención",
-          data: [12],
-        },
+      name: "Si",
+      data: [34],
+    },
+    {
+      name: "No",
+      data: [20],
+    },
+    {
+      name: "Abstención",
+      data: [12],
+    },
   ],
 };
+
+// funcion computada para devolver las surveys que están abiertas y en las cuales estoy como user o como delegado
+
+const getMyOpenSurveys = computed(() => {
+  return surveys.value.filter(
+    survey =>
+      survey.status === "open" //&&
+    //survey.users.some(userObj => userObj.person_community_id === me.id) //si soy el asignado
+    // survey.users.some(userObj => userObj.delegate_to.user_id === me.id) //si me lo han delegado
+  );
+});
+
+const getProcess = (users) => {
+  const total = users.length;
+
+  const answers = users.filter((user) => user.answer !== null).length;
+
+  return (answers * 100) / total;
+};
+
+
+function updateItems() {
+  setTimeout(() => {
+    getSurveys();
+  }, 300);
+}
 
 const dateFormat = (itemDate) => {
   const date = new Date(itemDate);

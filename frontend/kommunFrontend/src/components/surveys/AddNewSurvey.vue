@@ -186,6 +186,7 @@ const form = ref({
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
+const emit = defineEmits(["update:surveys"]);
 
 const enableAllAudience = ref(true);
 
@@ -226,6 +227,7 @@ const createSurvey = async () => {
       detail: "Votacion creada con exito",
       life: 3000,
     });
+    emit("update:surveys", true);
   } catch (error) {
     toast.add({
       severity: "error",
