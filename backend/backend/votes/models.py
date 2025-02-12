@@ -18,6 +18,7 @@ class Vote(models.Model):
     end_date = models.DateTimeField(_('end date'))
     vote_type = models.CharField(_('vote type'), max_length=20, choices=VoteType.choices)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_votes')
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='votes')
     eligible_voters = models.ManyToManyField(PersonCommunity, related_name='eligible_votes')
 
@@ -59,11 +60,12 @@ class VoteRecord(models.Model):
 
     vote = models.ForeignKey(Vote, on_delete=models.CASCADE, related_name='vote_records')
     neighbor = models.ForeignKey(PersonCommunity, on_delete=models.CASCADE, related_name='vote_records') #Owner of the vote
-    delegated_to = models.ForeignKey(PersonCommunity, on_delete=models.CASCADE, null=True, blank=True, related_name='delegated_votes')
     options = models.ManyToManyField(Option, related_name='vote_records_multiple', blank=True)
+
     timestamp = models.DateTimeField(_('timestamp'), auto_now_add=True)
     recorded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recorded_votes')
 
+    delegated_to = models.ForeignKey(PersonCommunity, on_delete=models.CASCADE, null=True, blank=True, related_name='delegated_votes')    
     class Meta:
         unique_together = ('vote', 'neighbor')
 
