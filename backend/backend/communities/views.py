@@ -86,11 +86,42 @@ def community_detail(request, IDcommunity):
 @swagger_auto_schema(
     method='put',
     operation_description="Actualiza los detalles de una comunidad específica por ID.",
-    request_body=CommunitySerializer,
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "name": openapi.Schema(type=openapi.TYPE_STRING, description="Nombre de la comunidad."),
+            "address": openapi.Schema(type=openapi.TYPE_STRING, description="Dirección de la comunidad."),
+            "city": openapi.Schema(type=openapi.TYPE_STRING, description="Ciudad de la comunidad."),
+            "postal_code": openapi.Schema(type=openapi.TYPE_STRING, description="Código postal."),
+            "cif": openapi.Schema(type=openapi.TYPE_STRING, description="CIF de la comunidad."),
+            "catastral_ref": openapi.Schema(type=openapi.TYPE_STRING, description="Referencia catastral de la comunidad."),
+            "configuration_is_completed": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Indica si la configuración de la comunidad está completa."),
+            "province": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de la provincia (relación con Province)."),
+            "main_contact_user": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_UUID, description="UUID del usuario de contacto principal.")
+        }
+    ),
     responses={
-        200: CommunitySerializer,
-        400: openapi.Response('Datos inválidos'),
-        404: openapi.Response('Comunidad no encontrada')
+        200: openapi.Response(
+            description="Comunidad actualizada correctamente.",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "community_id": openapi.Schema(type=openapi.TYPE_STRING, description="ID de la comunidad."),
+                    "province_name": openapi.Schema(type=openapi.TYPE_STRING, description="Nombre de la provincia."),
+                    "city_name": openapi.Schema(type=openapi.TYPE_STRING, description="Nombre de la ciudad."),
+                    "name": openapi.Schema(type=openapi.TYPE_STRING, description="Nombre de la comunidad."),
+                    "address": openapi.Schema(type=openapi.TYPE_STRING, description="Dirección."),
+                    "postal_code": openapi.Schema(type=openapi.TYPE_STRING, description="Código postal."),
+                    "cif": openapi.Schema(type=openapi.TYPE_STRING, description="CIF."),
+                    "catastral_ref": openapi.Schema(type=openapi.TYPE_STRING, description="Referencia catastral."),
+                    "configuration_is_completed": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Estado de configuración."),
+                    "province": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de la provincia."),
+                    "main_contact_user": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_UUID, description="UUID del usuario de contacto principal."),
+                }
+            )
+        ),
+        400: openapi.Response(description="Datos inválidos."),
+        404: openapi.Response(description="Comunidad no encontrada.")
     }
 )
 @api_view(['PUT'])

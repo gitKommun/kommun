@@ -14,10 +14,11 @@ from .serializers import VoteSerializer, OptionSerializer
 from communities.models import Community, PersonCommunity
 from .models import Vote, Option, VoteRecord
 
+from communities.models import Role
 
 class CreateVoteAPIView(APIView):
     @swagger_auto_schema(
-        operation_description="Crear una votación y asignar votantes elegibles mediante el ID relativo de la comunidad.",
+        operation_description="Crear una votación y asignar votantes elegibles mediante el ID relativo de la comunidad. Si no se envía una lista de votantes, se asignarán automáticamente los propietarios ('owners').",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -29,12 +30,12 @@ class CreateVoteAPIView(APIView):
                 'eligible_voters': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
                     items=openapi.Schema(type=openapi.TYPE_INTEGER),
-                    description="Lista de person_id relativos (vecinos que pueden votar)"
+                    description="Lista de person_id relativos (vecinos que pueden votar). Si es null, se asignarán los propietarios ('owners')."
                 ),
                 'options': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
                     items=openapi.Schema(type=openapi.TYPE_STRING),
-                    description="Lista de opciones de votación"
+                    description="Lista de opciones de votación."
                 )
             }
         ),
@@ -50,7 +51,7 @@ class CreateVoteAPIView(APIView):
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
         vote_type = request.data.get('vote_type')
-        eligible_voters_ids = request.data.get('eligible_voters', [])
+        eligible_voters_ids = request.data.get('eligible_voters', None)  # Puede ser una lista o None
         options_data = request.data.get('options', [])
 
         # Crear el objeto Vote
@@ -64,14 +65,24 @@ class CreateVoteAPIView(APIView):
             community=community
         )
 
-        # Asignar los votantes elegibles usando person_id relativo dentro de la comunidad
-        valid_voters = []
-        for person_id in eligible_voters_ids:
-            try:
-                voter = PersonCommunity.objects.get(community=community, person_id=person_id)
-                valid_voters.append(voter)
-            except PersonCommunity.DoesNotExist:
-                return Response({'error': f'El vecino con person_id {person_id} no existe en esta comunidad.'}, status=status.HTTP_400_BAD_REQUEST)
+        owner_role = Role.objects.get(name="owner")
+
+        # 📌 Si no se pasa una lista de votantes, incluir automáticamente a todos los 'owners'
+        if eligible_voters_ids is None:
+            valid_voters = list(
+                PersonCommunity.objects.filter(
+                    community=community,
+                    roles=owner_role
+                ).distinct()
+            )
+        else:
+            valid_voters = []
+            for person_id in eligible_voters_ids:
+                try:
+                    voter = PersonCommunity.objects.get(community=community, person_id=person_id)
+                    valid_voters.append(voter)
+                except PersonCommunity.DoesNotExist:
+                    return Response({'error': f'El vecino con person_id {person_id} no existe en esta comunidad.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Asignar los votantes válidos a la votación
         if valid_voters:
@@ -83,9 +94,104 @@ class CreateVoteAPIView(APIView):
         for option_text in options_data:
             Option.objects.create(vote=vote, option_text=option_text)
 
+        # 📌 **Generar automáticamente un VoteRecord para cada votante elegible**
+        for voter in valid_voters:
+            VoteRecord.objects.create(vote=vote, neighbor=voter, recorded_by=request.user)
+
         return Response({"message": "Votación creada exitosamente", "vote_id": vote.vote_id}, status=status.HTTP_201_CREATED)
 
 class CastVoteAPIView(APIView):
+    @swagger_auto_schema(
+        operation_description="Registrar un voto en una votación específica. Se puede votar directamente, delegar el voto o registrar un voto delegado.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['person_id'],
+            properties={
+                'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del vecino en la comunidad (propietario del voto)."),
+                'option_ids': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_INTEGER),
+                    description="Lista de IDs relativos de las opciones seleccionadas (opcional si se delega el voto)."
+                ),
+                'delegated_to': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del vecino al que se delega el voto (opcional).")
+            },
+        ),
+        responses={
+            201: openapi.Response(description="Voto registrado con éxito."),
+            400: openapi.Response(description="Error al registrar el voto."),
+            403: openapi.Response(description="El usuario no tiene permiso para votar."),
+        },
+        manual_parameters=[
+            openapi.Parameter('IDcommunity', openapi.IN_PATH, description="ID de la comunidad", type=openapi.TYPE_STRING),
+            openapi.Parameter('vote_id', openapi.IN_PATH, description="ID de la votación dentro de la comunidad", type=openapi.TYPE_INTEGER),
+        ]
+    )
+
+    def post(self, request, IDcommunity, vote_id):
+        # Obtener la comunidad y la votación
+        community = get_object_or_404(Community, community_id=IDcommunity)
+        vote = get_object_or_404(Vote, community=community, vote_id=vote_id)
+
+        # Extraer datos del request
+        person_id = request.data.get('person_id')  # 🔹 ID del propietario del voto
+        option_ids = request.data.get('option_ids', [])
+        delegated_to_id = request.data.get('delegated_to')
+
+        # Obtener el perfil del propietario del voto (PersonCommunity)
+        owner_neighbor = get_object_or_404(PersonCommunity, community=community, person_id=person_id)
+
+        # Obtener el perfil del usuario autenticado
+        user_neighbor = get_object_or_404(PersonCommunity, user=request.user, community=community)
+        user_is_admin = user_neighbor.roles.filter(name='admin').exists()
+
+        # 🔹 **Verificar permisos**
+        if not user_is_admin and user_neighbor != owner_neighbor and \
+           not VoteRecord.objects.filter(vote=vote, delegated_to=user_neighbor).exists():
+            return Response({'error': 'No tienes permiso para votar en esta votación.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # 📌 **Caso 1: Delegación del voto**
+        if delegated_to_id:
+            delegated_to = get_object_or_404(PersonCommunity, community=community, person_id=delegated_to_id)
+
+            # Obtener o crear el registro del voto del propietario
+            vote_record, created = VoteRecord.objects.get_or_create(vote=vote, neighbor=owner_neighbor)
+            vote_record.delegated_to = delegated_to
+            vote_record.timestamp = timezone.now()
+            vote_record.recorded_by = request.user
+            vote_record.save()
+
+            return Response({'message': f'Voto de {owner_neighbor.name} {owner_neighbor.surnames} delegado correctamente a {delegated_to.name} {delegated_to.surnames}.'}, status=status.HTTP_201_CREATED)
+
+        # 📌 **Caso 2: Registro de un voto (directo o delegado)**
+        if not option_ids:
+            return Response({'error': 'Debes seleccionar al menos una opción o delegar el voto.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 🔹 **Validar el tipo de votación**
+        if vote.vote_type == Vote.VoteType.SIMPLE and len(option_ids) > 1:
+            return Response({'error': 'Esta votación permite seleccionar solo una opción.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 🔹 **Verificar que las opciones seleccionadas sean válidas**
+        valid_option_ids = list(vote.options.values_list('option_id', flat=True))
+        if not all(option_id in valid_option_ids for option_id in option_ids):
+            return Response({'error': 'Una o más opciones seleccionadas no son válidas.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 🔹 **Obtener o crear el registro del voto**
+        vote_record, created = VoteRecord.objects.get_or_create(vote=vote, neighbor=owner_neighbor)
+
+        # Si ya había un voto delegado y ahora el propietario vota, eliminar la delegación
+        if vote_record.delegated_to:
+            vote_record.delegated_to = None
+
+        # Asignar opciones al voto
+        vote_record.options.set(Option.objects.filter(vote=vote, option_id__in=option_ids))
+        vote_record.timestamp = timezone.now()
+        vote_record.recorded_by = request.user
+        vote_record.save()
+
+        return Response({'message': f'Voto registrado correctamente para {owner_neighbor.name} {owner_neighbor.surnames}.'}, status=status.HTTP_201_CREATED)
+
+
+class OLDCastVoteAPIView(APIView):
     @swagger_auto_schema(
         operation_description="Registrar un voto para una votación específica.",
         request_body=openapi.Schema(
@@ -118,13 +224,14 @@ class CastVoteAPIView(APIView):
 
         # Obtener el perfil del vecino (PersonCommunity) del usuario
         person_community = get_object_or_404(PersonCommunity, user=request.user, community=community)
+        person_community_is_admin = person_community.roles.filter(name='admin').exists()
+        # Verificar si el usuario es elegible para votar o se le ha delegado el voto y no es administrador
 
-        # Verificar si el usuario es elegible para votar
-        if person_community not in vote.eligible_voters.all():
+        if person_community not in vote.eligible_voters.all() and person_community not in vote.vote_records.filter(delegated_to=person_community) and not person_community_is_admin:
             raise PermissionDenied("No tienes permiso para votar en esta votación.")
 
-        # Verificar si el usuario ya ha votado
-        if VoteRecord.objects.filter(vote=vote, neighbor=person_community).exists():
+        # Verificar si el usuario ya ha votado usando ese vecino, asignando una opcion
+        if VoteRecord.objects.filter(vote=vote, neighbor=request.data.get('person_id')).first().options.exists():
             return Response({'error': 'Ya has votado en esta votación.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Obtener las opciones seleccionadas
@@ -195,7 +302,7 @@ class CommunityVotesListAPIView(APIView):
     )
     def get(self, request, IDcommunity):
         user = request.user  # Usuario autenticado que consulta
-        votes = Vote.objects.filter(community__community_id=IDcommunity).order_by('-start_date')  # Orden más reciente a más antigua
+        votes = Vote.objects.filter(community__community_id=IDcommunity).order_by('-created_at')  # Orden más reciente a más antigua
         votes_data = []
         current_time = timezone.now()
 
@@ -217,10 +324,10 @@ class CommunityVotesListAPIView(APIView):
                 # Determinar el delegado (si existe)
                 delegated_record = VoteRecord.objects.filter(vote=vote, delegated_to=neighbor).first()
                 delegate_to = None
-                if delegated_record:
+                if vote_record.delegated_to:
                     delegate_to = {
-                        "person_community_id": delegated_record.neighbor.person_id,
-                        "fullName": f"{delegated_record.neighbor.name} {delegated_record.neighbor.surnames}"
+                        "person_community_id": vote_record.delegated_to.person_id,
+                        "fullName": f"{vote_record.delegated_to.name} {vote_record.delegated_to.surnames}"
                     }
 
                 # Obtener las opciones seleccionadas (si votó)
