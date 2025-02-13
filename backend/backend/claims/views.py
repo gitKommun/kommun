@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from .models import Claim, Community, ClaimComment, ClaimStatusRecord
 from .serializers import ClaimCommentSerializer, ClaimSerializer, ClaimDetailSerializer
 
-from subscriptions.permissions import HasSubscriptionPermission
+#from subscriptions.permissions import HasSubscriptionPermission
 
 
 class ClaimCreateAPIView(generics.CreateAPIView):
