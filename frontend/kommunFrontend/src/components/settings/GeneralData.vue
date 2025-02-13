@@ -103,6 +103,9 @@ watch(
     form.value.address = props.community.address || "";
     form.value.city = props.community.city || "";
     form.value.postal_code = props.community.postal_code || "";
+    form.value.catastral_ref = props.community.catastral_ref || "";
+    form.value.cif = props.community.cif || "";
+    form.value.province = props.community.province || null;
     // Puedes inicializar otros campos según sea necesario
   },
   { immediate: true } // Ejecutar el watcher inmediatamente
@@ -119,6 +122,9 @@ const updateCommunity = () => {
         address: form.value.address,
         city: form.value.city,
         postal_code: form.value.postal_code,
+        catastral_ref: form.value.catastral_ref,
+        cif: form.value.cif,
+        province: form.value.province,
       }
     );
     toast.add({
