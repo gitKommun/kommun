@@ -4,8 +4,12 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
+
 from .models import Claim, Community, ClaimComment, ClaimStatusRecord
 from .serializers import ClaimCommentSerializer, ClaimSerializer, ClaimDetailSerializer
+
+#from subscriptions.permissions import HasSubscriptionPermission
+
 
 class ClaimCreateAPIView(generics.CreateAPIView):
     serializer_class = ClaimSerializer
@@ -31,10 +35,11 @@ class ClaimDetailAPIView(generics.RetrieveAPIView):
 
 class ClaimListAPIView(generics.ListAPIView):
     serializer_class = ClaimSerializer
+    #permission_classes = [HasSubscriptionPermission]  # Verifica la suscripción
 
     def get_queryset(self):
         community = get_object_or_404(Community, community_id=self.kwargs['IDcommunity'])
-        return Claim.objects.filter(community=community)
+        return Claim.objects.filter(community=community).order_by('-created_at')
 
 class ClaimCommentCreateAPIView(generics.CreateAPIView):
     serializer_class = ClaimCommentSerializer
