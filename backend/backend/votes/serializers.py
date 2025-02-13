@@ -9,9 +9,9 @@ class VoteSerializer(serializers.ModelSerializer):
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        exclude = ['vote']
+        exclude = ['vote', 'id']
 
 class VoteRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = VoteRecord
-        exclude = ['vote', 'recorded_by']
+        exclude = ['vote']

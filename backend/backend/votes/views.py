@@ -354,6 +354,7 @@ class CommunityVotesListAPIView(APIView):
                 "start_date": vote.start_date,
                 "end_date": vote.end_date,
                 "status": vote_status,
+                "options": OptionSerializer(vote.options.all(), many=True).data,
                 "users": users_list
             })
 
