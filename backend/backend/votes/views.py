@@ -310,7 +310,7 @@ class CommunityVotesListAPIView(APIView):
             # 📌 Determinar el estado de la votación
             if vote.start_date > current_time:
                 vote_status = "not_started"
-            elif vote.end_date < current_time or vote.eligible_voters.count() == vote.vote_records.count():
+            elif vote.end_date < current_time:
                 vote_status = "closed"
             else:
                 vote_status = "open"
