@@ -84,78 +84,49 @@ const uploadDocument = async () => {
   uploadLoading.value = true;
 
   if (files.value.length) {
-    if (props.selected?.folder_id) {
-      try {
-        const response = await http.post(
-          `documents/${user?.current_community?.community_id}/f/${props.selected.folder_id}/upload/`,
-          {
-            files: toRaw(files.value),
-            //name:
-          },
-          {
-            headers: {
-              "Content-Type": "application/json", // Asegúrate de que este encabezado esté presente
-            },
-          }
-        );
-        uploadLoading.value = false;
-        showUploadFile.value = false;
-        files.value = [];
-        emit("update:document", true);
-        toast.add({
-          severity: "success",
-          summary: "Ok",
-          detail: "Documentos cargados con exito",
-          life: 3000,
-        });
-      } catch (error) {
-        toast.add({
-          severity: "danger",
-          summary: "Upps!! algo ha fallado",
-          detail: error,
-          life: 3000,
-        });
-      }
-    } else {
-      try {
-        const response = await http.post(
-          `documents/${user?.current_community?.community_id}/f/0/upload/`,
-          {
-            files: toRaw(files.value),
-          },
-          {
-            headers: {
-              "Content-Type": "application/json", // Asegúrate de que este encabezado esté presente
-            },
-          }
-        );
-        uploadLoading.value = false;
-        showUploadFile.value = false;
-        files.value = [];
-        emit("update:document", true);
-        toast.add({
-          severity: "success",
-          summary: "Ok",
-          detail: "Documentos cargados con exito",
-          life: 3000,
-        });
-      } catch (error) {
-        toast.add({
-          severity: "danger",
-          summary: "Upps!! algo ha fallado",
-          detail: error,
-          life: 3000,
-        });
-      }
+    // Crear FormData para enviar archivos
+    const formData = new FormData();
+    files.value.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    try {
+      const url = `documents/${user?.current_community?.community_id}/f/${props.selected?.folder_id || '0'}/upload/`;
+      const response = await http.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Header correcto para envío de archivos
+        },
+      });
+
+      uploadLoading.value = false;
+      showUploadFile.value = false;
+      files.value = [];
+      emit("update:document", true);
+      
+      toast.add({
+        severity: "success",
+        summary: "Ok",
+        detail: "Documentos cargados con éxito",
+        life: 3000,
+      });
+    } catch (error) {
+      console.error('Error al subir:', error);
+      toast.add({
+        severity: "error", // Cambiado de 'danger' a 'error'
+        summary: "¡Ups! Algo ha fallado",
+        detail: error.message || "Error al cargar los archivos",
+        life: 3000,
+      });
     }
   } else {
     toast.add({
-      severity: "danger",
-      summary: "Upps!! algo ha fallado",
-      detail: "No has añadido ningun archivo",
+      severity: "warning", // Cambiado de 'danger' a 'warning'
+      summary: "¡Ups! Algo ha fallado",
+      detail: "No has añadido ningún archivo",
       life: 3000,
     });
   }
+  
   uploadLoading.value = false;
   showUploadFile.value = false;
 };

@@ -158,7 +158,7 @@
                         >
                           <div
                             class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
-                            @click="downloadFile(slotProps.data.document_id)"
+                            @click="downloadFile(slotProps.data)"
                           >
                             <IconDownload class="scale-75" />
                             <span>Descargar</span>
@@ -189,7 +189,6 @@ import { ref, watch, onMounted, shallowRef } from "vue";
 
 import AddContent from "/src/components/documents/AddContent.vue";
 import FolderItem from "/src/components/documents/FolderItem.vue";
-import DocumentItem from "/src/components/documents/DocumentItem.vue";
 import EmptyFolder from "/src/components/emptys/EmptyFolder.vue";
 import Loading from "/src/components/Loading.vue";
 import Main from "/src/layouts/Main.vue";
@@ -220,6 +219,7 @@ const foldersLoading = ref(true);
 const selectedFolder = ref(null);
 const documents = ref([]);
 const path = ref([]);
+const search = ref('')
 
 
 //utils
@@ -293,11 +293,25 @@ const resetPath = () => {
 };
 
 //Descarga doc
-const downloadFile = (id) => {
+const downloadFile = async ({ document_id, name }) => {
   try {
-    const response = http.get(
-      `documents/${user?.current_community?.community_id}/d/${id}/download/`
-    );
+    const response = await http.get(
+      `documents/${user?.current_community?.community_id}/d/${document_id}/download/`, {
+
+    });
+      
+    console.log('response', response);
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
     toast.add({
       severity: "success",
       summary: "Ok",
@@ -305,6 +319,7 @@ const downloadFile = (id) => {
       life: 3000,
     });
   } catch (error) {
+    console.log('error', error);
     toast.add({
       severity: "error",
       summary: "Upps!! algo ha fallado",

@@ -17,8 +17,8 @@
           <span>te ha delegado su voto</span>
         </template>
         <!-- me han delegado -->
-         <template v-if="iAmDelegated">
-            <span class="mr-1">Voto delegado a</span>
+        <template v-if="iAmDelegated">
+          <span class="mr-1">Voto delegado a</span>
           <CustomAvatar :name="'juan Palomo'" size="small" />
           <span class="text-sm text-slate-500"> Juan Palomo </span>
         </template>
@@ -27,9 +27,29 @@
         <Button v-if="!isDelegated" severity="secondary" size="small"
           >Delegar</Button
         >
-        <Button severity="contrast" size="small">Votar</Button>
+        <Button @click="showSurvey = true" severity="contrast" size="small">Votar</Button>
       </div>
     </div>
+    <Dialog 
+      v-model:visible="showSurvey" 
+      modal 
+      
+      header="Votación" 
+      class="w-128">
+      <div>
+        <div class="text-lg font-bold">
+          {{ survey.title }}
+        </div>
+        <div class="text-sm text-slate-500">
+          {{ survey.description }}
+        </div>
+        <div class="py-3 flex flex-col gap-2">
+          <div v-for="(el,index) in 4" :key="index" class="border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg p-3 w-full transition-all duration-300">
+            option {{ index + 1 }}
+          </div>
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
 <script setup>
@@ -46,8 +66,9 @@ const props = defineProps({
   },
 });
 
-const isDelegated = ref(true);
+const isDelegated = ref(false);
 const iAmDelegated = ref(false);
+const showSurvey = ref(false);
 
 const dateFormat = (itemDate) => {
   const date = new Date(itemDate);

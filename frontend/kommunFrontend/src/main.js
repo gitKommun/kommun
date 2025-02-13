@@ -109,6 +109,9 @@ app.component('Toast', Toast);
 import Checkbox from 'primevue/checkbox';
 app.component('Checkbox', Checkbox)
 
+import RadioButton from "primevue/radiobutton";
+app.component("RadioButton", RadioButton);
+
 import InputNumber from 'primevue/inputnumber';
 app.component('InputNumber', InputNumber)
 

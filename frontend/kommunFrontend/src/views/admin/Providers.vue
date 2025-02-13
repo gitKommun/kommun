@@ -572,10 +572,43 @@ const providerStats = computed(() => {
   });
 
   // Convertir a array con porcentajes
-  return Object.entries(typeCounts).map(([type, count]) => ({
+  const stats = Object.entries(typeCounts).map(([type, count]) => ({
     label: PROVIDER_LABEL[type],
-    color: PROVIDER_HEX[type] || "#000000",
-    value: Math.round((count / total) * 100),
+    color: PROVIDER_HEX[type] || "#000000", 
+    value: (count / total) * 100
   }));
+
+  // Ajustar porcentajes para que sumen 100%
+  const sum = stats.reduce((acc, curr) => acc + curr.value, 0);
+  const adjustmentFactor = 100 / sum;
+
+  // Calcular valores ajustados pero sin redondear
+  const adjustedStats = stats.map(stat => ({
+    ...stat,
+    value: stat.value * adjustmentFactor
+  }));
+
+  // Redondear hacia abajo y guardar los decimales restantes
+  let remaining = 100;
+  const finalStats = adjustedStats.map(stat => {
+    const floorValue = Math.floor(stat.value);
+    remaining -= floorValue;
+    return {
+      ...stat,
+      value: floorValue,
+      decimal: stat.value - floorValue
+    };
+  });
+
+  // Distribuir el restante a los valores con mayores decimales
+  while (remaining > 0) {
+    const maxDecimalStat = finalStats.reduce((max, curr) => 
+      curr.decimal > max.decimal ? curr : max, finalStats[0]);
+    maxDecimalStat.value += 1;
+    maxDecimalStat.decimal = 0;
+    remaining -= 1;
+  }
+
+  return finalStats.map(({decimal, ...stat}) => stat);
 });
 </script>

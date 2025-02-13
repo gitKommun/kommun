@@ -12,7 +12,7 @@
           v-model:visible="showCreateZoneModal"
           modal
           header="Crear nueva zona"
-          class="w-96"
+          class="w-110"
         >
           <div class="gap-y-2">
             <InputText
@@ -26,7 +26,7 @@
                 <ToggleSwitch v-model="zone.reservable" />
               </span>
               <span class="ml-3">
-                La zona que puede ser reservada por los propitarios
+                Zona  reservable por los propitarios
               </span>
             </div>
             <transition
@@ -37,18 +37,40 @@
               leave-class="opacity-100"
               leave-to-class="opacity-0"
             >
-              <div class="mt-3 rounded-xl p-3">
+            <div class="mt-3">
+              <div class=" rounded-xl py-2">
+                <span class="flex flex-col text-slate-500 text-sm">
+                  <span>Define el horario la zona</span>
+                   <small>(Fuera de este horarion no se podrá reservar)</small>
+                </span
+                >
+                <div class="flex gap-x-3 py-1">
+                  <DatePicker 
+                    id="datepicker-timeonly" 
+                    variant="filled"
+                    placeholder="Inicio"
+                    v-model="usage_start" 
+                    timeOnly 
+                    fluid />
+                  <DatePicker 
+                    id="datepicker-timeonly" 
+                    variant="filled"
+                    placeholder="Fin"
+                    v-model="usage_end" 
+                    timeOnly 
+                    fluid />
+                </div>
+              </div>
+              <div class=" rounded-xl py-1">
                 <span class="text-slate-500 text-sm"
-                  >Define la franja de tiempo para el uso de la zona:</span
+                  >Define tiempo de uso por reserva:</span
                 >
                 <div class="flex gap-x-3 py-3">
-                  <InputGroup>
-                    <InputNumber
+                  <InputNumber
                       v-model="zone.reservation_duration"
                       placeholder="Tiempo"
                       variant="filled"
-                      inputClass="w-12 mr-1"
-                      :disabled="!zone.reservable"
+                      inputClass="w-16 mr-1"
                     />
                     <Select
                       v-model="zone.time_unit"
@@ -56,12 +78,13 @@
                       optionLabel="label"
                       optionValue="value"
                       variant="filled"
+                      class="w-full"
                       placeholder="Selecciona..."
-                      :disabled="!zone.reservable"
                     />
-                  </InputGroup>
                 </div>
               </div>
+            </div>
+              
             </transition>
           </div>
 
@@ -104,6 +127,8 @@ const zone = ref({
     reservation_duration: '',
     time_unit: '',
     area_id: null,
+    usage_start: null,
+    usage_end: null,
 })
 const timePeriods = ref([
     { label: 'Minutos', value: 'MIN' },
@@ -139,6 +164,8 @@ const createZone = () => {
       reservable: false,
       reservation_duration: "",
       time_unit: "",
+      usage_start: null,
+      usage_end: null,
     };
     showCreateZoneModal.value = false;
   } else {

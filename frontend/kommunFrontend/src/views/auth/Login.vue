@@ -1,8 +1,8 @@
 <template>
-    <div class="h-screen w-screen flex justify-center items-center">
+    <div class="h-screen w-screen flex justify-center items-center relative">
         
         <div 
-            class="bg-white w-96 rounded-2xl shadow-2xl p-4"
+            class="bg-white w-96 rounded-2xl shadow-2xl p-4 border border-slate-200"
         >
             <div class="">
                 <RouterLink to="/">

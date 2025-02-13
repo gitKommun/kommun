@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full relative px-4">
+  <div class="flex-1 min-h-0 overflow-y-scroll relative px-4">
     <div class="flex justify-between items-center py-4">
       <InputText
         v-model="search"
@@ -14,7 +14,10 @@
       <div
         class="w-full  gap-3 pb-4"
       >
-      <ActiveSurvey :survey="survey" v-for="survey in getMyOpenSurveys" :key="survey.vote_id"/>
+      <ActiveSurvey 
+        :survey="survey" 
+        v-for="survey in getMyOpenSurveys" 
+        :key="survey.vote_id"/>
         <!-- <BookingZone
                 v-for="zone in reservableZones"
                 :key="zone.area_id"
@@ -126,6 +129,7 @@
       </transition>
     </div>
     <Toast />
+
   </div>
 </template>
 <script setup>
@@ -230,9 +234,9 @@ const demoData = {
 const getMyOpenSurveys = computed(() => {
   return surveys.value.filter(
     survey =>
-      survey.status === "open" //&&
-    //survey.users.some(userObj => userObj.person_community_id === me.id) //si soy el asignado
-    // survey.users.some(userObj => userObj.delegate_to.user_id === me.id) //si me lo han delegado
+      survey.status === "open" &&
+      survey.users.some(userObj => userObj.person_community_id === user?.current_community?.community_person_id) //si soy el asignado
+    // survey.users.some(userObj => userObj.delegate_to.user_id === user?.current_community?.community_person_id) //si me lo han delegado
   );
 });
 
