@@ -162,6 +162,7 @@
                   >
                     Nombre de vecino
                   </div>
+                  
                 </div>
               </div>
             </transition>
@@ -303,12 +304,12 @@ function updateItems() {
     getSurveys();
   }, 300);
 }
-
 const dateFormat = (itemDate) => {
   const date = new Date(itemDate);
-  const day = String(date.getDate()).padStart(2, "0"); // Día con dos dígitos
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Mes con dos dígitos
-  const year = date.getFullYear(); // Año completo
-  return `${day}/${month}/${year}`;
+  return date.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit', 
+    year: 'numeric'
+  }).replace(/\//g, '/');
 };
 </script>
