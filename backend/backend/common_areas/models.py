@@ -19,7 +19,7 @@ class CommonArea(models.Model):
     time_unit = models.CharField(_('time unit'), max_length=4, choices=TIME_UNIT_CHOICES, null=True, blank=True)
 
     class Meta:
-        #unique_together = (('community', 'area_id'),)
+        unique_together = (('community', 'area_id'),)
         #ordering = ['community', 'area_id']
         verbose_name = _("Common Area")
         verbose_name_plural = _("Common Areas")
@@ -36,7 +36,6 @@ class CommonArea(models.Model):
 
     def __str__(self):
         return f"Common Area {self.area_id} - {self.name})"
-    
 
 
 class Reservation(models.Model):
