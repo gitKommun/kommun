@@ -9,18 +9,30 @@ from .serializers import SupplierSerializer
 # 📌 Vista para LISTAR proveedores
 class SupplierListAPIView(generics.ListAPIView):
     """
-    Obtiene un listado de proveedores con opción de filtrar por nombre, CIF/NIF, tipo o rating.
+    supplier_list
+
+    Obtiene el listado de proveedores con opción de filtrar por diferentes criterios.
+
+    **Filtros disponibles:**
+    - `company_name` → Filtra por nombre de empresa (búsqueda parcial).
+    - `cif_nif` → Filtra por CIF/NIF exacto.
+    - `type` → Filtra por el tipo de proveedor (ejemplo: electricidad, limpieza, etc.).
+    - `rating` → Filtra por calificación mínima (ejemplo: `4` para proveedores con rating 4 o más).
+
+    **Ejemplo de consulta:**  
+    `/suppliers/?company_name=Lock&type=electricidad&rating=4`
     """
+
     serializer_class = SupplierSerializer
     queryset = Supplier.objects.all()
 
     @swagger_auto_schema(
-        operation_description="Lista todos los proveedores con opción de filtrar por nombre, CIF/NIF, tipo o rating.",
+        operation_description="Obtiene el listado de proveedores con opción de filtrar por nombre, CIF/NIF, tipo o rating.",
         manual_parameters=[
-            openapi.Parameter('company_name', openapi.IN_QUERY, description="Filtrar por nombre de la empresa (búsqueda parcial)", type=openapi.TYPE_STRING),
-            openapi.Parameter('cif_nif', openapi.IN_QUERY, description="Filtrar por CIF/NIF (búsqueda exacta)", type=openapi.TYPE_STRING),
-            openapi.Parameter('type', openapi.IN_QUERY, description="Filtrar por tipo de proveedor (ej. electricidad, limpieza, etc.)", type=openapi.TYPE_STRING),
-            openapi.Parameter('rating', openapi.IN_QUERY, description="Filtrar por calificación mínima (ej. 4 para proveedores con rating 4 o más)", type=openapi.TYPE_INTEGER),
+            openapi.Parameter("company_name", openapi.IN_QUERY, description="Filtra por nombre de empresa (parcial)", type=openapi.TYPE_STRING),
+            openapi.Parameter("cif_nif", openapi.IN_QUERY, description="Filtra por CIF/NIF exacto", type=openapi.TYPE_STRING),
+            openapi.Parameter("type", openapi.IN_QUERY, description="Filtra por tipo de proveedor (ejemplo: electricidad, limpieza, etc.)", type=openapi.TYPE_STRING),
+            openapi.Parameter("rating", openapi.IN_QUERY, description="Filtra por calificación mínima (ejemplo: 4 para proveedores con rating 4 o más)", type=openapi.TYPE_INTEGER),
         ],
         responses={200: SupplierSerializer(many=True)}
     )
