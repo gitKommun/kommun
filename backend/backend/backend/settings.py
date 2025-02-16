@@ -99,6 +99,9 @@ INSTALLED_APPS = [
     'members',
     'properties',
     'votes',
+    'suppliers',
+    #'subscriptions',
+    #'payments'
 ]
 
 REST_FRAMEWORK = {
