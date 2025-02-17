@@ -1,3 +1,4 @@
+import mimetypes
 import os
 
 from django.shortcuts import get_object_or_404
@@ -169,7 +170,7 @@ class DocumentMultiUploadAPIView(APIView):
 
         return Response(response_data, status=status.HTTP_201_CREATED)
     
-class DocumentUploadAPIView(APIView):
+class OLDDocumentUploadAPIView(APIView):
     def post(self, request, IDcommunity, IDfolder):
         data = request.data.copy()
         data['community'] = IDcommunity
@@ -183,7 +184,41 @@ class DocumentUploadAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
+
+class DocumentUploadAPIView(APIView):
+    def post(self, request, IDcommunity, IDfolder):
+        data = request.data.copy()
+        data['community'] = IDcommunity
+        print(request.FILES) 
+
+        if IDfolder == '0':
+            data['folder_id'] = None
+        else:
+            data['folder_id'] = IDfolder
+
+        # Crear una lista para almacenar los documentos subidos
+        uploaded_files = request.FILES.getlist('files')  # Obtiene todos los archivos enviados
+
+        # Validar que hay archivos
+        if not uploaded_files:
+            return Response({'error': 'No se han subido archivos'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Guardar cada archivo
+        documents = []
+        for file in uploaded_files:
+            document_data = data.copy()
+            document_data['file'] = file
+            serializer = DocumentUploadSerializer(data=request.data, files=request.FILES)
+            if serializer.is_valid():
+                document = serializer.save()
+                documents.append(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": "Documentos cargados exitosamente", "documents": documents}, status=status.HTTP_201_CREATED)
+     
 class DocumentDetailAPIView(APIView):
     def get(self, request, IDcommunity, IDdocument):
         document = get_object_or_404(Document, document_id=IDdocument, community_id=IDcommunity)
@@ -199,11 +234,19 @@ class DocumentDeleteAPIView(APIView):
 class DocumentDownloadAPIView(APIView):
     def get(self, request, IDcommunity, IDdocument):
         document = get_object_or_404(Document, document_id=IDdocument, community_id=IDcommunity)
-        file_handle = document.file.open()
-        filename = os.path.basename(document.file.name)
-        response = FileResponse(file_handle, content_type='application/octet-stream')
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-        response.close = file_handle.close
+        # Obtener el archivo y su nombre
+        file_handle = document.file.open('rb')
+        filename = os.path.basename(document.file.name)
+
+        # Detectar el tipo MIME
+        content_type, _ = mimetypes.guess_type(filename)
+        if not content_type:
+            content_type = 'application/octet-stream'  # Tipo de archivo genérico si no se detecta el MIME
+
+        # Crear la respuesta con el archivo adjunto
+        response = FileResponse(file_handle, content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Content-Length'] = document.file.size  # Asegurar la longitud del archivo
 
         return response
