@@ -61,8 +61,10 @@ class CommonAreaCreateAPIView(APIView):
     )
 
     def post(self, request, IDcommunity):
+        community = get_object_or_404(Community, community_id=IDcommunity)
+
         data = request.data.copy()
-        data['community'] = IDcommunity
+        data['community'] = community.community_id 
         serializer = CommonAreaSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -104,7 +106,6 @@ class CommonAreaListAPIView(APIView):
         common_areas = CommonArea.objects.filter(community_id=IDcommunity)
         serializer = CommonAreaSerializer(common_areas, many=True)
         return Response(serializer.data)
-
 
 class CommonAreaDetailAPIView(APIView):
     def get(self, request, IDcommunity, area_id):
@@ -222,7 +223,6 @@ class ReservationCreateAPIView(CreateAPIView):
             common_area_id=common_area_id,
             user=user
         )
-
 
 class DeleteReservationAPIView(APIView):
 

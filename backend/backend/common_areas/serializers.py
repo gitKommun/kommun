@@ -4,7 +4,8 @@ from .models import CommonArea, Reservation
 class CommonAreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommonArea
-        fields = '__all__'
+        exclude = ['id']
+        read_only_fields = ['area_id', 'user'] 
         
 class ReservationSerializer(serializers.ModelSerializer):
     reservation_id = serializers.IntegerField(read_only=True)  # Solo lectura ya que se autogenera
