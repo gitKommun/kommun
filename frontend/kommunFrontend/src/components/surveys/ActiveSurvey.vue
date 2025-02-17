@@ -44,9 +44,18 @@
           {{ survey.description }}
         </div>
         <div class="py-3 flex flex-col gap-2">
-          <div v-for="(el,index) in 4" :key="index" class="border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg p-3 w-full transition-all duration-300">
-            option {{ index + 1 }}
+          <div 
+            v-for="(el,index) in survey.options" 
+            :key="index" 
+            @click="selectOption(el)"
+            class="border  hover:bg-slate-100 rounded-lg p-3 w-full transition-all duration-300"
+            :class="selectedOption?.option_id === el.option_id?'border-green-500 bg-green-50 text-green-500 font-semibold':'border-slate-200 ' "
+            >
+            {{ el.option_text }}
           </div>
+        </div>
+        <div class="flex justify-end">
+          <Button @click="vote" severity="contrast" class="w-full">Votar</Button>
         </div>
       </div>
     </Dialog>
@@ -69,6 +78,7 @@ const props = defineProps({
 const isDelegated = ref(false);
 const iAmDelegated = ref(false);
 const showSurvey = ref(false);
+const selectedOption = ref(null);
 
 const dateFormat = (itemDate) => {
   const date = new Date(itemDate);
@@ -76,5 +86,13 @@ const dateFormat = (itemDate) => {
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Mes con dos dígitos
   const year = date.getFullYear(); // Año completo
   return `${day}/${month}/${year}`;
+};
+
+const selectOption = (option) => {
+  selectedOption.value = option;
+};
+
+const vote = () => {
+  console.log(selectedOption.value);
 };
 </script>
