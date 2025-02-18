@@ -84,7 +84,7 @@ const form = ref({
   surname: "",
   email: "",
   password: "1234",
-  roles: [],
+  roles: ["owner"],
 });
 const userTypes = ref([
   { label: "Administrador", value: "admin" },
@@ -131,7 +131,7 @@ const createOwner = async () => {
       surname: "",
       email: "",
       password: "1234",
-      roles: [],
+      roles: ["owner"],
     };
     emit("update:owners", true);
   }
