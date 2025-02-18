@@ -18,6 +18,8 @@ class CommonArea(models.Model):
     reservable = models.BooleanField(_('reservable'), default=False)
     reservation_duration = models.PositiveIntegerField(_('reservation duration'), null=True, blank=True)
     time_unit = models.CharField(_('time unit'), max_length=4, choices=TIME_UNIT_CHOICES, null=True, blank=True)
+    usage_start = models.TimeField(_('usage start'), null=True, blank=True)
+    usage_end = models.TimeField(_('usage end'), null=True, blank=True)
 
     class Meta:
         unique_together = (('community', 'area_id'),)
