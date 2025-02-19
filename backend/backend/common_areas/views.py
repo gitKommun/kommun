@@ -17,23 +17,34 @@ from .serializers import CommonAreaSerializer, ReservationSerializer
 
 class CommonAreaCreateAPIView(APIView):
     @swagger_auto_schema(
-        operation_description="Crear una nueva zona común en una comunidad específica. El `area_id` se asigna automáticamente. Si es reservable, se deben indicar la unidad de tiempo y la duración de la reserva.",
+        operation_description="Crear una nueva zona común en una comunidad específica. "
+                              "El `area_id` se asigna automáticamente. Si es reservable, "
+                              "se deben indicar la unidad de tiempo y la duración de la reserva. "
+                              "Se pueden definir horarios de uso con `usage_start` y `usage_end`.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['name', 'reservable'],  # Solo se especifican aquí los campos realmente requeridos
+            required=['name', 'reservable'],
             properties={
                 'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre de la zona común"),
-                'type': openapi.Schema(type=openapi.TYPE_STRING, description="Tipo de la zona común"),  # Eliminar `required=False`
+                'type': openapi.Schema(type=openapi.TYPE_STRING, description="Tipo de la zona común"),
                 'reservable': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Indica si la zona común es reservable"),
                 'reservation_duration': openapi.Schema(
-                    type=openapi.TYPE_INTEGER, 
+                    type=openapi.TYPE_INTEGER,
                     description="Duración de la reserva (requerido si es reservable)"
                 ),
                 'time_unit': openapi.Schema(
-                    type=openapi.TYPE_STRING, 
-                    enum=['MIN', 'HOUR', 'DAY'], 
+                    type=openapi.TYPE_STRING,
+                    enum=['MIN', 'HOUR', 'DAY'],
                     description="Unidad de tiempo para la duración de la reserva"
-                )
+                ),
+                'usage_start': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Hora de inicio del uso permitido en formato HH:MM:SS (ej. '08:00:00')"
+                ),
+                'usage_end': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Hora de finalización del uso permitido en formato HH:MM:SS (ej. '22:00:00')"
+                ),
             }
         ),
         responses={
@@ -48,18 +59,25 @@ class CommonAreaCreateAPIView(APIView):
                         'reservable': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Indica si la zona común es reservable"),
                         'reservation_duration': openapi.Schema(type=openapi.TYPE_INTEGER, description="Duración de la reserva"),
                         'time_unit': openapi.Schema(
-                            type=openapi.TYPE_STRING, 
-                            enum=['MIN', 'HOUR', 'DAY'], 
+                            type=openapi.TYPE_STRING,
+                            enum=['MIN', 'HOUR', 'DAY'],
                             description="Unidad de tiempo para la duración de la reserva"
                         ),
-                        'community': openapi.Schema(type=openapi.TYPE_STRING, description="ID de la comunidad asociada")
+                        'usage_start': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Hora de inicio del uso permitido en formato HH:MM:SS"
+                        ),
+                        'usage_end': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Hora de finalización del uso permitido en formato HH:MM:SS"
+                        ),
+                        'community': openapi.Schema(type=openapi.TYPE_STRING, description="ID de la comunidad asociada"),
                     }
                 )
             ),
             400: openapi.Response(description="Error al crear la zona común.")
         }
     )
-
     def post(self, request, IDcommunity):
         community = get_object_or_404(Community, community_id=IDcommunity)
 

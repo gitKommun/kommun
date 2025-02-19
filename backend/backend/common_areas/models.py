@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from communities.models import Community, PersonCommunity
 from members.models import User
+from django.db import transaction
 
 class CommonArea(models.Model):
     TIME_UNIT_CHOICES = [
@@ -17,6 +18,8 @@ class CommonArea(models.Model):
     reservable = models.BooleanField(_('reservable'), default=False)
     reservation_duration = models.PositiveIntegerField(_('reservation duration'), null=True, blank=True)
     time_unit = models.CharField(_('time unit'), max_length=4, choices=TIME_UNIT_CHOICES, null=True, blank=True)
+    usage_start = models.TimeField(_('usage start'), null=True, blank=True)
+    usage_end = models.TimeField(_('usage end'), null=True, blank=True)
 
     class Meta:
         unique_together = (('community', 'area_id'),)
@@ -26,12 +29,13 @@ class CommonArea(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Calcular el siguiente area_id para la comunidad
-            last_area = CommonArea.objects.filter(community=self.community).order_by('area_id').last()
-            if last_area:
-                self.area_id = last_area.area_id + 1
-            else:
-                self.area_id = 1
+            with transaction.atomic():  
+                last_area = CommonArea.objects.filter(
+                    community=self.community
+                ).select_for_update(nowait=True).order_by('area_id').last()  # ⬅ Bloqueo sin espera indefinida
+                
+                self.area_id = (last_area.area_id + 1) if last_area else 1
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -68,6 +72,7 @@ class Reservation(models.Model):
                 community=self.community,
                 common_area=self.common_area
             ).order_by('reservation_id').last()
+            
 
             # Asignar reservation_id
             if last_reservation and last_reservation.reservation_id:
