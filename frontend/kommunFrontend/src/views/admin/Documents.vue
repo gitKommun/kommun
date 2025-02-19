@@ -112,36 +112,40 @@
             </div>
 
             <div class="w-full" key="table">
-              <DataTable :value="documents" class="text-sm">
-                <Column header="Documento">
-                  <template #body="slotProps">
+              <DataTable 
+                :value="documents"
+                :loading="isUpdating"
+                dataKey="document_id"
+                :paginator="false"
+                :rows="100"
+                class="text-sm"
+              >
+                <Column field="name" header="Documento">
+                  <template #body="{ data }">
                     <span class="flex items-center">
-                      <FileType :type="slotProps.data.type" />
-                      <span class="text-sm ml-2">{{
-                        slotProps.data.name
-                      }}</span>
+                      <FileType :type="data.type" />
+                      <span class="text-sm ml-2">{{ data.name }}</span>
                     </span>
                   </template>
                 </Column>
-                <Column header="Propietario">
-                  <template #body="slotProps">
-                    <span class="min-w-8 mr-1">
-                      <Avatar label="k" shape="circle" />
+                
+                <Column field="upload_user" header="Propietario">
+                  <template #body="{ data }">
+                    <span class="flex items-center">
+                      <span class="min-w-8 mr-1">
+                        <Avatar label="k" shape="circle" />
+                      </span>
+                      <span class="text-xs text-slate-400 truncate">
+                        {{ data.upload_user?.Fullname || "Kommun" }}
+                      </span>
                     </span>
-                    <span class="text-xs text-slate-400 truncate">{{
-                      slotProps.data.upload_user
-                        ? document.upload_user
-                        : "Kommun"
-                    }}</span>
                   </template>
                 </Column>
-                <column field="upload_date" header="Fecha" />
-                <Column
-                  :rowEditor="true"
-                  style="width: 10%; min-width: 8rem"
-                  bodyStyle="text-align:right"
-                >
-                  <template #body="slotProps">
+                
+                <Column field="upload_date" header="Fecha" />
+                
+                <Column header="Acciones" :exportable="false" style="min-width:8rem">
+                  <template #body="{ data }">
                     <Dropdown strategy="fixed">
                       <template #reference="{ open }">
                         <div
@@ -153,19 +157,17 @@
                       </template>
 
                       <template #content="{ close }">
-                        <div
-                          class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm"
-                        >
+                        <div class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
                           <div
                             class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
-                            @click="downloadFile(slotProps.data)"
+                            @click="downloadFile(data)"
                           >
                             <IconDownload class="scale-75" />
                             <span>Descargar</span>
                           </div>
                           <div
                             class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
-                            @click="deleteFolder(slotProps.data.document_id)"
+                            @click="deleteFolder(data.document_id)"
                           >
                             <IconTrash class="scale-75" />
                             <span>Eliminar</span>
@@ -185,7 +187,9 @@
   </div>
 </template>
 <script setup>
-import { ref, watch, onMounted, shallowRef } from "vue";
+import { ref, watch, onMounted, shallowRef, nextTick, computed, onUnmounted } from "vue";
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 import AddContent from "/src/components/documents/AddContent.vue";
 import FolderItem from "/src/components/documents/FolderItem.vue";
@@ -213,96 +217,100 @@ defineOptions({
   layout: Main,
 });
 
-//variables
+// variables
 const folders = ref([]);
+const documents = ref([]);
 const foldersLoading = ref(true);
 const selectedFolder = ref(null);
-const documents = ref([]);
 const path = ref([]);
-const search = ref('')
-
+const search = ref('');
+const isUpdating = ref(false);
 
 //utils
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
 
-
 onMounted(() => {
-  updateItems();
+  getFolders();
 });
 
-// folders
 async function getFolders() {
-  if (selectedFolder?.value) {
-    try {
-      const response = await http.get(
-        `documents/${user?.current_community?.community_id}/folders/${selectedFolder?.value.folder_id}`
-      );
+  if (isUpdating.value) return;
+  
+  isUpdating.value = true;
+  foldersLoading.value = true;
+  
+  try {
+    const response = await http.get(
+      `documents/${user?.current_community?.community_id}/folders/${selectedFolder?.value?.folder_id || 0}/`
+    );
 
-      folders.value = response.data.folders;
-      path.value = response.data.path;
-      documents.value = response.data.documents;
+    // Actualizar los datos en un solo nextTick para evitar múltiples renders
+    await nextTick(() => {
+      folders.value = response.data.folders || [];
+      documents.value = response.data.documents || [];
+      path.value = response.data.path || [];
+    });
 
-      foldersLoading.value = false;
-    } catch (error) {
-      toast.add({
-        severity: "error",
-        summary: "Upps!! algo ha fallado",
-        detail: error,
-        life: 3000,
-      });
-    }
-  } else {
-    try {
-      const response = await http.get(
-        `documents/${user?.current_community?.community_id}/folders/0/`
-      );
-
-      folders.value = response.data.folders;
-      documents.value = response.data.documents;
-      path.value = response.data.path;
-
-      foldersLoading.value = false;
-    } catch (error) {
-      toast.add({
-        severity: "error",
-        summary: "Upps!! algo ha fallado",
-        detail: error,
-        life: 3000,
-      });
-    }
+  } catch (error) {
+    toast.add({
+      severity: "error",
+      summary: "Upps!! algo ha fallado",
+      detail: error,
+      life: 3000,
+    });
+  } finally {
+    foldersLoading.value = false;
+    isUpdating.value = false;
   }
 }
-getFolders();
 
 function updateItems() {
-  setTimeout(() => {
+  if (!isUpdating.value) {
     getFolders();
-  }, 300);
+  }
 }
 
 const selectFolder = (folder) => {
-  selectedFolder.value = folder;
-  updateItems();
+  if (!isUpdating.value) {
+    selectedFolder.value = folder;
+    getFolders();
+  }
 };
 
 const resetPath = () => {
-  selectedFolder.value = null;
-  updateItems();
+  if (!isUpdating.value) {
+    selectedFolder.value = null;
+    getFolders();
+  }
 };
+
+// Limpiar los datos cuando el componente se desmonta
+onUnmounted(() => {
+  folders.value = [];
+  documents.value = [];
+  path.value = [];
+});
 
 //Descarga doc
 const downloadFile = async ({ document_id, name }) => {
   try {
     const response = await http.get(
-      `documents/${user?.current_community?.community_id}/d/${document_id}/download/`, {
-
+      `documents/${user?.current_community?.community_id}/d/${document_id}/download/`,
+      {
+        responseType: 'blob',
+        headers: {
+          'Accept': '*/*',
+        }
+      }
+    );
+    
+    const blob = new Blob([response.data], {
+      type: response.headers['content-type'] || 'application/octet-stream'
     });
-      
-    console.log('response', response);
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = name;
@@ -315,17 +323,23 @@ const downloadFile = async ({ document_id, name }) => {
     toast.add({
       severity: "success",
       summary: "Ok",
-      detail: "El documento se ha descargado con exito",
+      detail: "El documento se ha descargado con éxito",
       life: 3000,
     });
   } catch (error) {
-    console.log('error', error);
+    console.error('Error al descargar:', error);
     toast.add({
       severity: "error",
       summary: "Upps!! algo ha fallado",
-      detail: error,
+      detail: "No se pudo descargar el archivo",
       life: 3000,
     });
   }
 };
+
+// Opcional: watch para debugging
+watch(documents, (newVal) => {
+  console.log('Documents updated:', newVal.length);
+}, { deep: true });
+
 </script>

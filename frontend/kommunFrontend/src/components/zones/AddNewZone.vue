@@ -49,14 +49,14 @@
                     id="datepicker-timeonly" 
                     variant="filled"
                     placeholder="Inicio"
-                    v-model="usage_start" 
+                    v-model="zone.usage_start" 
                     timeOnly 
                     fluid />
                   <DatePicker 
                     id="datepicker-timeonly" 
                     variant="filled"
                     placeholder="Fin"
-                    v-model="usage_end" 
+                    v-model="zone.usage_end" 
                     timeOnly 
                     fluid />
                 </div>
@@ -121,15 +121,29 @@ const emit = defineEmits(['update:zones']);
 
 //variables
 const showCreateZoneModal = ref(false);
+
+const defaultStartTime = () => {
+    const date = new Date();
+    date.setHours(9, 0, 0, 0);
+    return date; // Retorna el objeto Date directamente
+};
+
+const defaultEndTime = () => {
+    const date = new Date();
+    date.setHours(22, 0, 0, 0);
+    return date;
+};
+
 const zone = ref({
     name: '',
     reservable: false,
     reservation_duration: '',
     time_unit: '',
     area_id: null,
-    usage_start: null,
-    usage_end: null,
+    usage_start: defaultStartTime(), // Ahora es un objeto Date
+    usage_end: defaultEndTime(), // También inicializamos el final
 })
+
 const timePeriods = ref([
     { label: 'Minutos', value: 'MIN' },
     { label: 'Horas', value: 'HOUR' },
@@ -159,14 +173,7 @@ const createZone = () => {
         life: 3000,
       });
     }
-    zone.value = {
-      name: "",
-      reservable: false,
-      reservation_duration: "",
-      time_unit: "",
-      usage_start: null,
-      usage_end: null,
-    };
+    resetZone();
     showCreateZoneModal.value = false;
   } else {
     toast.add({
@@ -176,5 +183,16 @@ const createZone = () => {
         life: 3000,
       });
   }
+};
+
+const resetZone = () => {
+    zone.value = {
+        name: "",
+        reservable: false,
+        reservation_duration: "",
+        time_unit: "",
+        usage_start: defaultStartTime(),
+        usage_end: defaultEndTime(),
+    };
 };
 </script>

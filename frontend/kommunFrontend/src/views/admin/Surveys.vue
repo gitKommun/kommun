@@ -21,15 +21,15 @@
         class="h-full w-full flex flex-col pt-3 overflow-y-scroll relative"
         key="content"
       >
-      <div class="flex justify-between items-center py-4">
-            <InputText
-              v-model="search"
-              placeholder="Buscar"
-              size="small"
-              variant="filled"
-            />
-            <AddNewSurvey @update:surveys="updateItems" class="h-auto" />
-          </div>
+        <div class="flex justify-between items-center py-4">
+          <InputText
+            v-model="search"
+            placeholder="Buscar"
+            size="small"
+            variant="filled"
+          />
+          <AddNewSurvey @update:surveys="updateItems" class="h-auto" />
+        </div>
         <div class="px-4 min-h-0 flex-1" v-if="!surveys.length">
           <div class="w-full flex flex-col items-center justify-center py-24">
             <EmptyTask class="scale-75" />
@@ -46,7 +46,7 @@
         </div>
         <div v-else class="px-4 min-h-0 flex-1">
           <!-- content -->
-          
+
           <div class="mb-3">
             <div class="text-lg font-semibold mb-3">Votaciones en curso</div>
             <div class="w-full gap-3 pb-4">
@@ -162,7 +162,6 @@
                   >
                     Nombre de vecino
                   </div>
-                  
                 </div>
               </div>
             </transition>
@@ -306,10 +305,12 @@ function updateItems() {
 }
 const dateFormat = (itemDate) => {
   const date = new Date(itemDate);
-  return date.toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit', 
-    year: 'numeric'
-  }).replace(/\//g, '/');
+  return date
+    .toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replace(/\//g, "/");
 };
 </script>

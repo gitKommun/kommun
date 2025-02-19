@@ -16,17 +16,17 @@
       en cada detalle.
     </p>
 
-    <div class="w-full flex flex-col md:flex-row justify-center pb-16 gap-3 ">
-      <div class="w-full border border-200 rounded-2xl">
-        <div class="h-44 bg-slate-100">img</div>
+    <div class="w-full flex flex-col md:flex-row justify-center pb-16 gap-6 ">
+      <div class="w-full border border-200 rounded-2xl overflow-hidden">
+        <div class="h-72 bg-slate-100">img</div>
         <div class="p-3 font-bold text-slate-900">Creado específicamente para la gestión de comunidades.</div>
       </div>
-      <div class="w-full border border-200 rounded-2xl">
-        <div class="h-44 bg-slate-100">img</div>
+      <div class="w-full border border-200 rounded-2xl overflow-hidden">
+        <div class="h-72 bg-slate-100">img</div>
         <div class="p-3 font-bold text-slate-900">Diseñado para agilizar procesos.</div>
       </div>
-      <div class="w-full border border-200 rounded-2xl">
-        <div class="h-44 bg-slate-100">img</div>
+      <div class="w-full border border-200 rounded-2xl overflow-hidden">
+        <div class="h-72 bg-slate-100">img</div>
         <div class="p-3 font-bold text-slate-900">Perfeccionado para ofrecer la mejor experiencia.</div>
       </div>
     </div>

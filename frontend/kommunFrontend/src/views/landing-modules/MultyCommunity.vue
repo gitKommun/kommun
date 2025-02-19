@@ -1,5 +1,5 @@
 <template>
-  <section class="relative w-full py-32 overflow-hidden px-6">
+  <section class="relative w-full  overflow-hidden px-6">
     <div class="w-full flex justify-center mb-12">
      <DotAnimation class="w-56"/>
     </div>

@@ -159,10 +159,10 @@ const uploadDocument = async () => {
       
       toast.add({ severity: 'success', summary: 'Ok', detail: 'Documentos cargados con éxito', life: 3000 });
     } catch (error) {
-      toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
+      toast.add({ severity: 'error', summary: 'Upps!! algo ha fallado', detail: error, life: 3000 });
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Upps!! algo ha fallado', detail: 'No has añadido ningún archivo', life: 3000 });
+    toast.add({ severity: 'error', summary: 'Upps!! algo ha fallado', detail: 'No has añadido ningún archivo', life: 3000 });
   }
 
   uploadLoading.value = false;

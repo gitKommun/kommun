@@ -35,6 +35,7 @@
                 :key="i"
                 class="flex items-center gap-x-2"
               >
+              <template v-if="rate.rating >= 1">
                 <div class="w-44 flex justify-end">
                   <IconStarFill
                     class="scale-50 text-slate-900"
@@ -51,6 +52,8 @@
                   ></div>
                 </div>
                 <div class="w-8 text-xs text-slate-500">{{ rate.value }}%</div>
+              </template>
+                
               </div>
             </div>
             <div
@@ -114,6 +117,15 @@
             <MeterGroup :value="providerStats" class="text-sm" />
           </div>
         </div>
+        <div class="flex justify-between items-center py-4">
+          <InputText
+            v-model="search"
+            placeholder="Buscar"
+            size="small"
+            variant="filled"
+          />
+          <AddNewProvider @update:providers="updateItems" class="h-auto" />
+        </div>
         <DataTable
           :value="providers"
           paginator
@@ -167,9 +179,15 @@
 </template>
 <script setup>
 import { ref, computed, shallowRef } from "vue";
+import { useHttp } from "/src/composables/useHttp.js";
+import { useToast } from "primevue/usetoast";
+import { useUserStore } from "/src/stores/useUserStore.js";
+import Loading from "@/components/Loading.vue";
 import Main from "/src/layouts/Main.vue";
 import { PROVIDER_COLOR, PROVIDER_HEX } from "/src/constants/colors.js";
 import { PROVIDER_LABEL } from "/src/constants/labels.js";
+import AddNewProvider from "@/components/properties/AddNewProvider.vue";
+
 import IconBolt from "@/components/icons/IconBolt.vue";
 import IconDroplet from "@/components/icons/IconDroplet.vue";
 import IconLockSquareRounded from "@/components/icons/IconLockSquareRounded.vue";
@@ -210,321 +228,39 @@ const PROVIDER_ICONS = {
 
 const loading = ref(false);
 
-const providers = ref([
-  {
-    company_name: "LockGuard Solutions",
-    phone: "(321) 654-9870",
-    email: "info@lockguard.com",
-    address: "123 Maple St, Miami, FL",
-    type: "electricity",
-    rating: 4,
-    reviews: 7,
-    contact_person: "Carlos Jiménez",
-    contact_person_email: "carlos@lockguard.com",
-    contact_person_phone: "(321) 654-9871",
-  },
-  {
-    company_name: "Green Plumbing Experts",
-    phone: "(415) 789-6543",
-    email: "contact@greenplumbers.com",
-    address: "456 Oak St, San Francisco, CA",
-    type: "plumbing",
-    rating: 3,
-    reviews: 12,
-    contact_person: "Lucía Gómez",
-    contact_person_email: "lucia@greenplumbers.com",
-    contact_person_phone: "(415) 789-6544",
-  },
-  {
-    company_name: "Bright Painters Inc.",
-    phone: "(212) 555-9012",
-    email: "info@brightpainters.com",
-    address: "789 Elm St, New York, NY",
-    type: "painters",
-    rating: 1,
-    reviews: 1,
-    contact_person: "Miguel Torres",
-    contact_person_email: "miguel@brightpainters.com",
-    contact_person_phone: "(212) 555-9013",
-  },
-  {
-    company_name: "Skyline Antenna Services",
-    phone: "(305) 876-4321",
-    email: "support@skylineantenna.com",
-    address: "102 Cedar St, Miami, FL",
-    type: "antenna_technicians",
-    rating: 5,
-    reviews: 12,
-    contact_person: "Ana López",
-    contact_person_email: "ana@skylineantenna.com",
-    contact_person_phone: "(305) 876-4322",
-  },
-  {
-    company_name: "BrickMaster Constructions",
-    phone: "(702) 345-6789",
-    email: "contact@brickmaster.com",
-    address: "231 Pine St, Las Vegas, NV",
-    type: "bricklayers",
-    rating: 4,
-    reviews: 20,
-    contact_person: "Ricardo Fernández",
-    contact_person_email: "ricardo@brickmaster.com",
-    contact_person_phone: "(702) 345-6790",
-  },
-  {
-    company_name: "HighRise Elevators",
-    phone: "(818) 222-3333",
-    email: "info@highriseelevators.com",
-    address: "456 Birch St, Los Angeles, CA",
-    type: "elevators",
-    rating: 2,
-    reviews: 23,
-    contact_person: "Sofía Morales",
-    contact_person_email: "sofia@highriseelevators.com",
-    contact_person_phone: "(818) 222-3334",
-  },
-  {
-    company_name: "Crystal Clear Windows",
-    phone: "(303) 555-8765",
-    email: "hello@crystalclear.com",
-    address: "678 Aspen St, Denver, CO",
-    type: "electricity",
-    rating: 3,
-    reviews: 34,
-    contact_person: "Tomás Herrera",
-    contact_person_email: "tomas@crystalclear.com",
-    contact_person_phone: "(303) 555-8766",
-  },
-  {
-    company_name: "Shiny Cleaners",
-    phone: "(212) 111-2222",
-    email: "service@shinycleaners.com",
-    address: "987 Palm St, New York, NY",
-    type: "cleaning",
-    rating: 4,
-    reviews: 67,
-    contact_person: "Isabel Ramírez",
-    contact_person_email: "isabel@shinycleaners.com",
-    contact_person_phone: "(212) 111-2223",
-  },
-  {
-    company_name: "EcoGardens Landscaping",
-    phone: "(619) 444-5678",
-    email: "support@ecogardens.com",
-    address: "321 Spruce St, San Diego, CA",
-    type: "gardening",
-    rating: 5,
-    reviews: 12,
-    contact_person: "Daniel Pérez",
-    contact_person_email: "daniel@ecogardens.com",
-    contact_person_phone: "(619) 444-5679",
-  },
-  {
-    company_name: "SecureWatch Security",
-    phone: "(512) 999-8888",
-    email: "info@securewatch.com",
-    address: "555 Redwood St, Austin, TX",
-    type: "security",
-    rating: 1,
-    reviews: 87,
-    contact_person: "Paula Ortega",
-    contact_person_email: "paula@securewatch.com",
-    contact_person_phone: "(512) 999-8889",
-  },
-  {
-    company_name: "SafeHome Insurance",
-    phone: "(305) 777-7777",
-    email: "contact@safehome.com",
-    address: "678 Sequoia St, Miami, FL",
-    type: "insurance",
-    rating: 4,
-    reviews: 49,
-    contact_person: "Alberto Núñez",
-    contact_person_email: "alberto@safehome.com",
-    contact_person_phone: "(305) 777-7778",
-  },
-  {
-    company_name: "LexTrust Legal Services",
-    phone: "(650) 888-1234",
-    email: "support@lextrust.com",
-    address: "890 Walnut St, San Jose, CA",
-    type: "lawyers",
-    rating: 2,
-    reviews: 13,
-    contact_person: "Elena Sánchez",
-    contact_person_email: "elena@lextrust.com",
-    contact_person_phone: "(650) 888-1235",
-  },
-  {
-    company_name: "FixIt All Services",
-    phone: "(818) 555-9090",
-    email: "service@fixitall.com",
-    address: "432 Main St, Los Angeles, CA",
-    type: "others",
-    rating: 3,
-    reviews: 34,
-    contact_person: "Jorge Ruiz",
-    contact_person_email: "jorge@fixitall.com",
-    contact_person_phone: "(818) 555-9091",
-  },
-  {
-    company_name: "LockGuard Solutions",
-    phone: "(321) 654-9870",
-    email: "info@lockguard.com",
-    address: "123 Maple St, Miami, FL",
-    type: "locksmiths",
-    rating: 2,
-    reviews: 12,
-    contact_person: "Carlos Jiménez",
-    contact_person_email: "carlos@lockguard.com",
-    contact_person_phone: "(321) 654-9871",
-  },
-  {
-    company_name: "SecureKey Masters",
-    phone: "(555) 123-4567",
-    email: "contact@securekey.com",
-    address: "987 Oak St, Los Angeles, CA",
-    type: "locksmiths",
-    rating: 4,
-    reviews: 34,
-    contact_person: "Fernando López",
-    contact_person_email: "fernando@securekey.com",
-    contact_person_phone: "(555) 123-4568",
-  },
-  {
-    company_name: "Green Plumbing Experts",
-    phone: "(415) 789-6543",
-    email: "contact@greenplumbers.com",
-    address: "456 Oak St, San Francisco, CA",
-    type: "plumbing",
-    rating: 5,
-    reviews: 10,
-    contact_person: "Lucía Gómez",
-    contact_person_email: "lucia@greenplumbers.com",
-    contact_person_phone: "(415) 789-6544",
-  },
-  {
-    company_name: "AquaFlow Plumbing",
-    phone: "(222) 555-9876",
-    email: "info@aquaflow.com",
-    address: "742 River St, Seattle, WA",
-    type: "plumbing",
-    rating: 4,
-    reviews: 29,
-    contact_person: "Javier Pérez",
-    contact_person_email: "javier@aquaflow.com",
-    contact_person_phone: "(222) 555-9877",
-  },
-  {
-    company_name: "Bright Painters Inc.",
-    phone: "(212) 555-9012",
-    email: "info@brightpainters.com",
-    address: "789 Elm St, New York, NY",
-    type: "painters",
-    rating: 2,
-    reviews: 38,
-    contact_person: "Miguel Torres",
-    contact_person_email: "miguel@brightpainters.com",
-    contact_person_phone: "(212) 555-9013",
-  },
-  {
-    company_name: "Elite Home Painters",
-    phone: "(606) 987-6543",
-    email: "contact@elitepainters.com",
-    address: "123 Brush St, Austin, TX",
-    type: "painters",
-    rating: 4,
-    reviews: 24,
-    contact_person: "Esteban Morales",
-    contact_person_email: "esteban@elitepainters.com",
-    contact_person_phone: "(606) 987-6544",
-  },
-  {
-    company_name: "Skyline Antenna Services",
-    phone: "(305) 876-4321",
-    email: "support@skylineantenna.com",
-    address: "102 Cedar St, Miami, FL",
-    type: "antenna_technicians",
-    rating: 3,
-    reviews: 15,
-    contact_person: "Ana López",
-    contact_person_email: "ana@skylineantenna.com",
-    contact_person_phone: "(305) 876-4322",
-  },
-  {
-    company_name: "SignalBoost Antennas",
-    phone: "(808) 654-3210",
-    email: "info@signalboost.com",
-    address: "567 Satellite St, Denver, CO",
-    type: "antenna_technicians",
-    rating: 5,
-    reviews: 8,
-    contact_person: "Pedro Hernández",
-    contact_person_email: "pedro@signalboost.com",
-    contact_person_phone: "(808) 654-3211",
-  },
-  {
-    company_name: "BrickMaster Constructions",
-    phone: "(702) 345-6789",
-    email: "contact@brickmaster.com",
-    address: "231 Pine St, Las Vegas, NV",
-    type: "bricklayers",
-    rating: 4,
-    reviews: 27,
-    contact_person: "Ricardo Fernández",
-    contact_person_email: "ricardo@brickmaster.com",
-    contact_person_phone: "(702) 345-6790",
-  },
-  {
-    company_name: "SolidBuild Bricklayers",
-    phone: "(999) 123-4567",
-    email: "info@solidbuild.com",
-    address: "345 Mason St, Chicago, IL",
-    type: "bricklayers",
-    rating: 1,
-    reviews: 38,
-    contact_person: "Luis Ortega",
-    contact_person_email: "luis@solidbuild.com",
-    contact_person_phone: "(999) 123-4568",
-  },
-  {
-    company_name: "HighRise Elevators",
-    phone: "(818) 222-3333",
-    email: "info@highriseelevators.com",
-    address: "456 Birch St, Los Angeles, CA",
-    type: "elevators",
-    rating: 3,
-    reviews: 11,
-    contact_person: "Sofía Morales",
-    contact_person_email: "sofia@highriseelevators.com",
-    contact_person_phone: "(818) 222-3334",
-  },
-  {
-    company_name: "Ascend Elevator Services",
-    phone: "(707) 654-3212",
-    email: "contact@ascendelevators.com",
-    address: "789 Lift St, Houston, TX",
-    type: "elevators",
-    rating: 4,
-    reviews: 41,
-    contact_person: "Daniela Castro",
-    contact_person_email: "daniela@ascendelevators.com",
-    contact_person_phone: "(707) 654-3213",
-  },
-  {
-    company_name: "Crystal Clear Windows",
-    phone: "(303) 555-8765",
-    email: "hello@crystalclear.com",
-    address: "678 Aspen St, Denver, CO",
-    type: "glaziers",
-    rating: 2,
-    reviews: 18,
-    contact_person: "Tomás Herrera",
-    contact_person_email: "tomas@crystalclear.com",
-    contact_person_phone: "(303) 555-8766",
-  },
-]);
+// utils
+const http = useHttp();
+const toast = useToast();
+const user = useUserStore();
 
+// variables
+const search = ref("");
+const providers = ref([]);
+const providersLoading = ref(false);
+
+const getProviders = async () => {
+  providersLoading.value = true;
+  try {
+    const response = await http.get(`/suppliers/`);
+    providers.value = response.data;
+  } catch (error) {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: error,
+      life: 3000,
+    });
+  }
+  providersLoading.value = false;
+};
+
+getProviders();
+
+function updateItems() {
+  setTimeout(() => {
+    getProviders();
+  }, 300);
+}
 const getTopRatedProviders = computed(() => {
   return providers.value
     .map((provider) => ({
@@ -574,8 +310,8 @@ const providerStats = computed(() => {
   // Convertir a array con porcentajes
   const stats = Object.entries(typeCounts).map(([type, count]) => ({
     label: PROVIDER_LABEL[type],
-    color: PROVIDER_HEX[type] || "#000000", 
-    value: (count / total) * 100
+    color: PROVIDER_HEX[type] || "#000000",
+    value: (count / total) * 100,
   }));
 
   // Ajustar porcentajes para que sumen 100%
@@ -583,32 +319,34 @@ const providerStats = computed(() => {
   const adjustmentFactor = 100 / sum;
 
   // Calcular valores ajustados pero sin redondear
-  const adjustedStats = stats.map(stat => ({
+  const adjustedStats = stats.map((stat) => ({
     ...stat,
-    value: stat.value * adjustmentFactor
+    value: stat.value * adjustmentFactor,
   }));
 
   // Redondear hacia abajo y guardar los decimales restantes
   let remaining = 100;
-  const finalStats = adjustedStats.map(stat => {
+  const finalStats = adjustedStats.map((stat) => {
     const floorValue = Math.floor(stat.value);
     remaining -= floorValue;
     return {
       ...stat,
       value: floorValue,
-      decimal: stat.value - floorValue
+      decimal: stat.value - floorValue,
     };
   });
 
   // Distribuir el restante a los valores con mayores decimales
   while (remaining > 0) {
-    const maxDecimalStat = finalStats.reduce((max, curr) => 
-      curr.decimal > max.decimal ? curr : max, finalStats[0]);
+    const maxDecimalStat = finalStats.reduce(
+      (max, curr) => (curr.decimal > max.decimal ? curr : max),
+      finalStats[0]
+    );
     maxDecimalStat.value += 1;
     maxDecimalStat.decimal = 0;
     remaining -= 1;
   }
 
-  return finalStats.map(({decimal, ...stat}) => stat);
+  return finalStats.map(({ decimal, ...stat }) => stat);
 });
 </script>
