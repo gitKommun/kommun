@@ -1,5 +1,7 @@
 
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import make_aware
+from datetime import datetime, timedelta
 
 from rest_framework import serializers
 from rest_framework.views import APIView
@@ -180,6 +182,132 @@ class ReservationListAPIView(generics.ListAPIView):
         IDcommunity = self.kwargs['IDcommunity']
         common_area_id = self.kwargs['common_area_id']
         return Reservation.objects.filter(community=IDcommunity, common_area=common_area_id)
+
+
+
+class CommonAreaAvailableSlotsAPIView(APIView):
+    @swagger_auto_schema(
+        operation_description=(
+            "Obtiene los slots disponibles en un área común para una fecha específica. \n\n"
+            "- Se debe pasar el parámetro `date` en formato `YYYY-MM-DD` en la URL.\n"
+            "- Si el área común no es reservable, devolverá un error.\n"
+            "- Se devuelve una lista de slots indicando si están reservados (`reserved: true/false`).\n"
+            "- Si el slot está reservado, se incluirá `reservation_id` y los datos del `neighbor` (persona que usará la reserva). \n\n"
+            "**Ejemplo de solicitud:**\n"
+            "```http\n"
+            "GET /common_areas/{IDcommunity}/{area_id}/available_slots/?date=2025-02-20\n"
+            "```"
+        ),
+        manual_parameters=[
+            openapi.Parameter('IDcommunity', openapi.IN_PATH, description="ID de la comunidad", type=openapi.TYPE_STRING),
+            openapi.Parameter('area_id', openapi.IN_PATH, description="ID del área común relativo a la comunidad", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('date', openapi.IN_QUERY, description="Fecha en formato YYYY-MM-DD", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Lista de slots disponibles y ocupados para el área en la fecha especificada.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'slot_start': openapi.Schema(type=openapi.TYPE_STRING, description="Hora de inicio del slot"),
+                            'slot_end': openapi.Schema(type=openapi.TYPE_STRING, description="Hora de fin del slot"),
+                            'reserved': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Indica si el slot está reservado"),
+                            'reservation_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de la reserva", nullable=True),
+                            'neighbor': openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID del vecino para quien se hizo la reserva"),
+                                    'fullName': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre completo del vecino que usará la reserva")
+                                },
+                                description="Vecino que usará la reserva (null si no está reservado)",
+                                nullable=True
+                            )
+                        }
+                    )
+                )
+            ),
+            400: openapi.Response(description="Error en los parámetros de entrada."),
+            404: openapi.Response(description="Área común no encontrada o no reservable."),
+        }
+    )
+    def get(self, request, IDcommunity, area_id):
+        # ✅ Validar que la fecha se ha recibido y tiene el formato correcto
+        date_str = request.GET.get('date')
+        if not date_str:
+            return Response({'error': 'Se requiere un parámetro `date` en formato YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return Response({'error': 'Formato de fecha inválido. Use YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ✅ Obtener el área común
+        common_area = CommonArea.objects.filter(community__community_id=IDcommunity, area_id=area_id).first()
+        if not common_area:
+            return Response({'error': 'Área común no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if not common_area.reservable:
+            return Response({'error': 'Esta área común no es reservable.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not common_area.reservation_duration or not common_area.time_unit:
+            return Response({'error': 'El área común no tiene configurada la duración de reserva.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ✅ Convertir la unidad de tiempo en minutos
+        time_unit_map = {'MIN': 1, 'HOUR': 60, 'DAY': 1440}
+        slot_duration_minutes = common_area.reservation_duration * time_unit_map[common_area.time_unit]
+
+        # ✅ Definir la franja horaria de la zona común
+        if not common_area.usage_start or not common_area.usage_end:
+            return Response({'error': 'El área común no tiene configurados los horarios de uso.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        usage_start = make_aware(datetime.combine(selected_date, common_area.usage_start))
+        usage_end = make_aware(datetime.combine(selected_date, common_area.usage_end))
+
+        # ✅ Obtener reservas existentes para ese día
+        existing_reservations = Reservation.objects.filter(
+            common_area=common_area,
+            start_time__date=selected_date
+        ).order_by('start_time')
+
+        # ✅ Generar los slots según la configuración
+        available_slots = []
+        current_time = usage_start
+
+        while current_time + timedelta(minutes=slot_duration_minutes) <= usage_end:
+            slot_end = current_time + timedelta(minutes=slot_duration_minutes)
+
+            # Verificar si este slot está reservado
+            reserved = None
+            for reservation in existing_reservations:
+                if reservation.start_time < slot_end and reservation.end_time > current_time:
+                    reserved = reservation
+                    break
+
+            if reserved:
+                available_slots.append({
+                    'slot_start': current_time.strftime("%H:%M"),
+                    'slot_end': slot_end.strftime("%H:%M"),
+                    'reserved': True,
+                    'reservation_id': reserved.reservation_id,
+                    'neighbor': {
+                        'person_id': reserved.neighbor.person_id if reserved.neighbor else None,
+                        'fullName': f"{reserved.neighbor.name} {reserved.neighbor.surnames}" if reserved.neighbor else None
+                    } if reserved.neighbor else None
+                })
+            else:
+                available_slots.append({
+                    'slot_start': current_time.strftime("%H:%M"),
+                    'slot_end': slot_end.strftime("%H:%M"),
+                    'reserved': False,
+                    'reservation_id': None,
+                    'neighbor': None
+                })
+
+            current_time += timedelta(minutes=slot_duration_minutes)
+
+        return Response(available_slots, status=status.HTTP_200_OK)
 
 class ReservationCreateAPIView(CreateAPIView):
     serializer_class = ReservationSerializer
