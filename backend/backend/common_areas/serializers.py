@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import CommonArea, Reservation
 
 class CommonAreaSerializer(serializers.ModelSerializer):
+    usage_start = serializers.TimeField(format="%H:%M", required=False, allow_null=True)
+    usage_end = serializers.TimeField(format="%H:%M", required=False, allow_null=True)
     class Meta:
         model = CommonArea
         exclude = ['id']
