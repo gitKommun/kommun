@@ -19,8 +19,6 @@ class ReservationSerializer(serializers.ModelSerializer):
             'user',
             'neighbor',
             'start_time',
-            'end_time',
-            'duration',
-            'time_unit'
+            'end_time'
         ]
         read_only_fields = ['reservation_id','community', 'common_area', 'user']  # Estos campos se llenan automáticamente
