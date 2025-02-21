@@ -257,7 +257,15 @@ class CommonAreaAvailableSlotsAPIView(APIView):
 
         # Convertir la unidad de tiempo en minutos
         time_unit_map = {'MIN': 1, 'HOUR': 60, 'DAY': 1440}
-        slot_duration_minutes = common_area.reservation_duration * time_unit_map[common_area.time_unit]
+        slot_duration_minutes = common_area.reservation_duration * time_unit_map[common_area.time_unit] 
+
+        if common_area.time_unit == 'DAY':
+            # Si la unidad de tiempo es 'DÍA', se considera que la duracion es la diferencia en minutos entre el usage_start y el usage_end
+            usage_start_time = datetime.combine(datetime.min, common_area.usage_start)
+            usage_end_time = datetime.combine(datetime.min, common_area.usage_end)
+            slot_duration_minutes = (usage_end_time - usage_start_time).seconds // 60
+
+        print(f"{common_area.time_unit} Duración del slot: {slot_duration_minutes} minutos")
 
         # Definir la franja horaria de la zona común
         if not common_area.usage_start or not common_area.usage_end:
@@ -265,6 +273,8 @@ class CommonAreaAvailableSlotsAPIView(APIView):
 
         usage_start = make_aware(datetime.combine(selected_date, common_area.usage_start))
         usage_end = make_aware(datetime.combine(selected_date, common_area.usage_end))
+        if common_area.usage_end == datetime.min.time():
+            usage_end += timedelta(days=1)
 
         # Obtener reservas existentes para ese día
         existing_reservations = Reservation.objects.filter(
@@ -275,6 +285,7 @@ class CommonAreaAvailableSlotsAPIView(APIView):
         # Generar los slots según la configuración
         available_slots = []
         current_time = usage_start
+
 
         while current_time + timedelta(minutes=slot_duration_minutes) <= usage_end:
             slot_end = current_time + timedelta(minutes=slot_duration_minutes)
