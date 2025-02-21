@@ -56,8 +56,8 @@ class Reservation(models.Model):
     neighbor = models.ForeignKey(PersonCommunity, on_delete=models.CASCADE, related_name='neighbor_reservations', null=True, blank=True)  # Vecino que hará uso de la reserva
     start_time = models.DateTimeField(_('start time'))
     end_time = models.DateTimeField(_('end time'))
-    duration = models.PositiveIntegerField(_('duration'))
-    time_unit = models.CharField(_('time unit'), max_length=4, choices=TIME_UNIT_CHOICES)
+    duration = models.PositiveIntegerField(_('duration'), null=True, blank=True)
+    time_unit = models.CharField(_('time unit'), null=True, blank=True, max_length=4, choices=TIME_UNIT_CHOICES)
 
     class Meta:
         ordering = ['start_time']

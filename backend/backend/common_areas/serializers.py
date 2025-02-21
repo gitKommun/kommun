@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import CommonArea, Reservation
 
 class CommonAreaSerializer(serializers.ModelSerializer):
+    usage_start = serializers.TimeField(format="%H:%M", required=False, allow_null=True)
+    usage_end = serializers.TimeField(format="%H:%M", required=False, allow_null=True)
     class Meta:
         model = CommonArea
         exclude = ['id']
@@ -19,8 +21,6 @@ class ReservationSerializer(serializers.ModelSerializer):
             'user',
             'neighbor',
             'start_time',
-            'end_time',
-            'duration',
-            'time_unit'
+            'end_time'
         ]
         read_only_fields = ['reservation_id','community', 'common_area', 'user']  # Estos campos se llenan automáticamente
