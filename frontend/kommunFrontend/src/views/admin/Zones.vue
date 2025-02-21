@@ -113,10 +113,7 @@
             >
               <div class="w-full flex items-center">
                 <span class="w-full text-sm text-slate-500 uppercase truncate"
-                  >Zona -
-                  <span class="text-indigo-500">{{
-                    selectedZone.area_id
-                  }}</span>
+                  >Disponibilidad de zona 
                 </span>
                 <div
                   class="min-h-10 min-w-10 rounded-xl hover:bg-slate-50 flex items-center justify-center transition-all duration-300 group"
@@ -153,7 +150,7 @@
               >
               <div class="flex-1 min-h-0 overflow-y-scroll g">
                 <SlotZone
-                  v-for="(slot, i) in demoSlots"
+                  v-for="(slot, i) in slots"
                   :key="i"
                   :slot="slot"
                   :zone="selectedZone"
@@ -244,6 +241,7 @@ import { useUserStore } from "/src/stores/useUserStore.js";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { useConfirm } from "primevue/useconfirm";
+import { formatDate } from "@/utils/dateUtils";
 import Loading from "/src/components/Loading.vue";
 import EmptyTask from "/src/components/emptys/EmptyTask.vue";
 import IconPlus from "/src/components/icons/IconPlus.vue";
@@ -286,25 +284,8 @@ const timePeriods = ref([
 ]);
 const selectedZone = ref(null);
 const bookDate = ref(new Date());
+const slots = ref([]);
 
-const demoSlots = ref([
-  {
-    slot_start: "2025-10-01T10:00:00",
-    slot_end: "2025-10-01T11:30:00",
-    reservation: true,
-    user: "Jose Plaza",
-  },
-  {
-    slot_start: "2025-10-01T11:30:00",
-    slot_end: "2025-10-01T13:00:00",
-    reservation: false,
-  },
-  {
-    slot_start: "2025-10-01T13:00:00",
-    slot_end: "2025-10-01T14:30:00",
-    reservation: false,
-  },
-]);
 
 const getZones = async () => {
   try {
@@ -384,8 +365,17 @@ const deleteZone = (id) => {
 
 //reservar slot
 const comfirmReserve = (slot) => {
+  const startDate = new Date(bookDate.value);
+  const endDate = new Date(bookDate.value);
+  
+  const [startHours, startMinutes] = slot.slot_start.split(':');
+  const [endHours, endMinutes] = slot.slot_end.split(':');
+  
+  startDate.setHours(parseInt(startHours), parseInt(startMinutes), 0, 0);
+  endDate.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
+
   confirm.require({
-    message: "Reservar de "+formatTime(slot.slot_start)+" a "+formatTime(slot.slot_end)+" el día "+dateFormat(slot.slot_start)+"¿ Quieres confirmar la reserva?",
+    message: "Reservar de "+slot.slot_start+" a "+slot.slot_end+" el día "+formatDate(bookDate.value)+"¿ Quieres confirmar la reserva?",
     header: "Reservar "+selectedZone.value.name,
     rejectProps: {
       label: "Cancelar",
@@ -397,9 +387,11 @@ const comfirmReserve = (slot) => {
       severity: "contrast",
     },
     accept: () => {
-    //   http.delete(
-    //     `common_areas/${props.zone.community_id}/${props.zone.area_id}/slots/${props.slot.slot_id}/`
-    //   );
+     http.post(`common_areas/${user?.current_community?.community_id}/${selectedZone.value.area_id}/reservations/create/`,{
+       neighbor: user?.current_community?.community_person_id,
+       start_time: startDate.toISOString().split('.')[0]+'Z',
+       end_time: endDate.toISOString().split('.')[0]+'Z',
+     });
       toast.add({
         severity: "success",
         summary: "Ok",
@@ -433,6 +425,29 @@ function updateItems() {
   }, 300);
 }
 
+//obtener slots
+const getSlots = async () => {
+  // Crear un objeto con la fecha formateada
+  const dateOption = {
+    date: dateFormat(bookDate.value)
+  };
+  
+  try {
+    const response = await http.get(
+      `common_areas/${user?.current_community?.community_id}/${selectedZone.value.area_id}/available_slots/`,
+      { params: dateOption }
+    );
+    slots.value = response.data;
+  } catch (error) {
+    toast.add({
+      severity: "error",
+      summary: "Upps!! algo ha fallado",
+      detail: error,
+      life: 3000,
+    });
+  }
+};
+
 watch(
   selectedZone,
   (newValue, oldValue) => {
@@ -440,14 +455,22 @@ watch(
       openDetail.value = false;
     } else {
       openDetail.value = true;
-      if (oldValue) {
-      }
+      getSlots();
     }
     openDetail.value = !!newValue;
     console.log("ha cambiado");
   },
   { deep: true }
 );
+
+watch(
+  bookDate,
+  (newValue, oldValue) => {
+    getSlots();
+  },
+  { deep: true }
+);
+
 onMounted(() => {
   updateItems();
 });
@@ -463,20 +486,18 @@ const formatTime = (time) => {
 };
 
 function dateFormat(dateString) {
-  // Intenta crear un objeto Date directamente desde el string ISO
   const date = new Date(dateString);
-  console.log(date);
-  // Verifica si la fecha es válida
+  
   if (isNaN(date.getTime())) {
     console.error("Fecha no válida:", dateString);
     return "Fecha no válida";
   }
 
-  // Formatea la fecha como DD/MM/YYYY
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript son 0-indexados
+  // Formatea la fecha como YYYY-MM-DD
   const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
-  return `${day}/${month}/${year}`;
+  return `${year}-${month}-${day}`;
 }
 </script>

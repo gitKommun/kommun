@@ -205,12 +205,7 @@
                           <div
                             class="w-56 rounded-2xl bg-white p-3 shadow-2xl text-sm flex flex-col"
                           >
-                            <div
-                              class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
-                            >
-                              <IconWorker class="scale-75" />
-                              <span>Asignar proveedor</span>
-                            </div>
+                            <ProviderAsign :incidence="selectedIncidence" />
                             <div
                               @click="confirmDelete"
                               class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-red-500"
@@ -340,6 +335,7 @@ import IncidenceTimelineMessage from "/src/components/incidences/IncidenceTimeli
 import IncidenceTimelineStatus from "/src/components/incidences/IncidenceTimelineStatus.vue";
 import Loading from "@/components/Loading.vue";
 import EmptyTask from "/src/components/emptys/EmptyTask.vue";
+import ProviderAsign from "@/components/incidences/ProviderAsign.vue";
 
 import {
   PRIORITY_COLOR,

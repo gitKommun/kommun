@@ -25,7 +25,14 @@
           size="small"
           variant="filled"
         />
-        <AddNewOwner @update:owners="updateOwners" class="h-auto" />
+        <div class="flex items-center gap-x-2">
+          <Button severity="contrast"  outlined>
+            <IconUpload />
+            <span>importar</span>
+          </Button>
+          <AddNewOwner @update:owners="updateOwners" class="h-auto" />
+        </div>
+        
       </div>
       <div class="px-4">
         <DataTable
@@ -161,6 +168,7 @@ import { useUserStore } from "/src/stores/useUserStore.js";
 import IconDotsHorizontal from "/src/components/icons/IconDotsHorizontal.vue";
 import IconTrash from "/src/components/icons/IconTrash.vue";
 import IconPencil from "/src/components/icons/IconPencil.vue";
+import IconUpload from "/src/components/icons/IconUpload.vue";
 import Dropdown from "/src/components/Dropdown.vue";
 import { useToast } from "primevue/usetoast";
 import CustomTag from "/src/components/CustomTag.vue";

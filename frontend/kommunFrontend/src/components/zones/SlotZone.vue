@@ -10,8 +10,8 @@
       <span
         class="test-slate-500"
         :class="{ 'line-through text-red-500': slot.reservation }"
-        >{{ formatTime(slot.slot_start) }} -
-        {{ formatTime(slot.slot_end) }}</span
+        >{{ slot.slot_start }} -
+        {{ slot.slot_end }}</span
       >
       <CustomTag :color="color">{{
         slot.reservation ? "Reservado" : "Libre"

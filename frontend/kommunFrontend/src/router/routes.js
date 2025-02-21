@@ -17,6 +17,11 @@ export default function routes({ authGuard, guestGuard }) {
           component: () => import("../views/Contact.vue"),
         },
         {
+          path: "/blog",
+          name: "blog",
+          component: () => import("../views/Blog.vue"),
+        },
+        {
           path: "/login",
           name: "login",
           component: () => import("../views/auth/Login.vue"),

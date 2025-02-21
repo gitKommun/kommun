@@ -25,11 +25,20 @@
               </span>
             </RouterLink>
             <div class="hidden md:flex items-center space-x-4">
-              <RouterLink to="/contact">
-                <Button label="Contact" severity="contrast" text size="small" />
+              <RouterLink to="/blog">
+                <Button
+                  label="Blog"
+                  severity="contrast"
+                  text
+                  size="small"
+                  class="w-full"
+                />
               </RouterLink>
               <RouterLink to="/pricing">
                 <Button label="Pricing" severity="contrast" text size="small" />
+              </RouterLink>
+              <RouterLink to="/contact">
+                <Button label="Contact" severity="contrast" text size="small" />
               </RouterLink>
             </div>
             <div class="hidden md:flex items-center space-x-4">
@@ -77,17 +86,49 @@
         <div
           class="flex flex-col mt-4 font-medium w-full lg:flex-row lg:space-x-8 lg:mt-0 p-4 gap-y-3"
         >
-          <RouterLink to="/contact">
-            <Button label="Contact" severity="contrast" text size="small" class="w-full"/>
+          <RouterLink to="/blog">
+            <Button
+              label="Blog"
+              severity="contrast"
+              text
+              size="small"
+              class="w-full"
+            />
           </RouterLink>
           <RouterLink to="/pricing">
-            <Button label="Pricing" severity="contrast" text size="small" class="w-full"/>
+            <Button
+              label="Pricing"
+              severity="contrast"
+              text
+              size="small"
+              class="w-full"
+            />
+          </RouterLink>
+          <RouterLink to="/contact">
+            <Button
+              label="Contact"
+              severity="contrast"
+              text
+              size="small"
+              class="w-full"
+            />
           </RouterLink>
           <router-link :to="{ name: 'login' }">
-            <Button label="Login" severity="secondary" size="small" class="w-full"/>
+            <Button
+              label="Login"
+              severity="secondary"
+              size="small"
+              class="w-full"
+            />
           </router-link>
           <router-link :to="{ name: 'register' }">
-            <Button label="Registro" severity="contrast" raised size="small" class="w-full"/>
+            <Button
+              label="Registro"
+              severity="contrast"
+              raised
+              size="small"
+              class="w-full"
+            />
           </router-link>
         </div>
       </div>
