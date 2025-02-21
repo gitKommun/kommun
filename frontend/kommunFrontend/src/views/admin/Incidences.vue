@@ -72,7 +72,7 @@
               paginator
               :rows="20"
               :rowsPerPageOptions="[20, 40, 60, 100]"
-              :value="incidences"
+              :value="filteredIncidences"
               tableStyle="min-width: 50rem"
               class="text-sm"
             >
@@ -90,7 +90,7 @@
               </Column>
               <column header="Fecha">
                 <template #body="slotProps">
-                  <span>{{ dateFormat(slotProps.data.created_at) }}</span>
+                  <span>{{ formatDate(slotProps.data.created_at) }}</span>
                 </template>
               </column>
               <column header="Estado">
@@ -142,7 +142,7 @@
                 <div class="border border-slate-200 p-3 rounded-2xl relative">
                   <div class="flex justify-between items-center">
                     <span class="text-slate-500 text-sm">{{
-                      dateFormat(selectedIncidence?.created_at)
+                      formatDate(selectedIncidence?.created_at)
                     }}</span>
                     <div class="flex gap-x-2">
                       <Dropdown strategy="fixed">
@@ -318,12 +318,12 @@
   </div>
 </template>
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useHttp } from "/src/composables/useHttp.js";
 import { useUserStore } from "/src/stores/useUserStore.js";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
-
+import { formatDate } from "@/utils/dateUtils";
 import Main from "/src/layouts/Main.vue";
 import IconClose from "/src/components/icons/IconClose.vue";
 import AddNewIncidence from "/src/components/incidences/AddNewIncidence.vue";
@@ -358,6 +358,7 @@ defineOptions({
 
 //variables
 const incidences = ref([]);
+const search = ref("");
 const openDetail = ref(false);
 const selectedIncidence = ref(null);
 const incidenceStatusOptions = ref([
@@ -570,22 +571,10 @@ watch(
   { deep: true }
 );
 
-//miscelanea
-
-function dateFormat(dateString) {
-  // Intenta crear un objeto Date directamente desde el string ISO
-  const date = new Date(dateString);
-  // Verifica si la fecha es válida
-  if (isNaN(date.getTime())) {
-    console.error("Fecha no válida:", dateString);
-    return "Fecha no válida";
-  }
-
-  // Formatea la fecha como DD/MM/YYYY
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript son 0-indexados
-  const year = date.getFullYear();
-
-  return `${day}/${month}/${year}`;
-}
+//funcion computada para buscar incidencias
+const filteredIncidences = computed(() => {
+  return incidences.value.filter((incidence) => {
+    return incidence.title.toLowerCase().includes(search.value.toLowerCase());
+  });
+});
 </script>

@@ -5,10 +5,6 @@
         <DesignedFor/>
         <IncidencesManagement/>
         <OnlineSurveys/>
-        <!-- <FeaturesContent/> -->
-        <!-- <Cover/>
-        <Features/> -->
-        <Pricing/>
     </div>   
 </template>
 <script setup >

@@ -184,34 +184,54 @@ const sendRequest = async () => {
     if (selectedZones.value.length === 0) {
         toast.add({
             severity: 'error',
-            summary: 'Upps!! algo ha fallado',
+            summary: 'Error',
             detail: 'Debes seleccionar al menos una zona',
             life: 3000
         });
         return;
     }
-    try { 
-        const response = await Promise.allSettled(
-            selectedZones.value.map((zone) => {
-                http.post(`common_areas/${user?.current_community?.community_id}/create/`, zone);
-            })
-        )
-         responses.forEach((response, index) => {
-      if (response.status === "fulfilled") {
-        console.log(`✅ Éxito en zona ${selectedZones.value[index].name}:`, response.value.data);
-      } else {
-        console.error(`❌ Error en zona ${selectedZones.value[index].name}:`, response.reason);
-      }
-         });
-    emit("update:items", true);
-    }
-    catch (error) {
+    
+    try {
+        let successCount = 0;
+        let failedCount = 0;
+        
+        // Creación secuencial
+        for (const zone of selectedZones.value) {
+            try {
+                await http.post(`common_areas/${user?.current_community?.community_id}/create/`, zone);
+                successCount++;
+            } catch (error) {
+                console.error(`❌ Error en zona ${zone.name}:`, error);
+                failedCount++;
+            }
+        }
+
+        if (successCount > 0) {
+            toast.add({
+                severity: 'success',
+                summary: 'Zonas creadas',
+                detail: `Se han creado ${successCount} zonas correctamente${failedCount > 0 ? ` (${failedCount} fallidas)` : ''}`,
+                life: 3000
+            });
+            emit("update:items", true);
+        }
+
+        if (failedCount > 0) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Algunas zonas no se pudieron crear',
+                detail: `${failedCount} zonas no se pudieron crear`,
+                life: 3000
+            });
+        }
+    } catch (error) {
         toast.add({
             severity: 'error',
-            summary: 'Upps!! algo ha fallado',
-            detail: error,
+            summary: 'Error inesperado',
+            detail: 'Ha ocurrido un error al crear las zonas',
             life: 3000
         });
+        console.error('Error:', error);
     }
- }
+}
 </script>

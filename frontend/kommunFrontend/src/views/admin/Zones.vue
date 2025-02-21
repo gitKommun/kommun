@@ -22,22 +22,7 @@
           class="w-full h-full flex flex-col items-center justify-center py-16"
         >
           <PresetZones @update:items="getZones()" />
-          <!-- <EmptyTask class="scale-75" />
-            <span
-              class="text-2xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-sky-500 to-green-300"
-            >
-              Actualmente no hay áreas comunes
-            </span>
-            <span class="text-sm text-slate-500 max-w-80 text-center mb-3"
-              >Aun no hay registrado ningún elemento como zona comun</span
-            >
-            <Button
-              severity="contrast"
-              @click="showCreateZoneModal = true"
-              class="flex"
-            >
-              Crear primer elemento
-            </Button> -->
+
         </div>
 
         <div v-else class="px-4">
@@ -45,7 +30,7 @@
             <AddNewZone @update:zones="updateItems"/>
           </div>
           <div class="mb-3">
-            <div class="text-lg font-semibold mb-3">Zonas reservables</div>
+            <div v-if="reservableZones.length" class="text-lg font-semibold mb-3">Zonas reservables</div>
             <div
               class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 content-start gap-3 pb-4"
             >
@@ -146,6 +131,9 @@
               <div class="flex flex-col py-3">
                 <div class="font-bold truncate text-lg mb-3">
                   {{ selectedZone.name }}
+                </div>
+                 <div v-if="selectedZone.usage_start && selectedZone.usage_end" class="text-slate-500 truncate  mb-3">
+                  <span>Horario: {{ selectedZone.usage_start }} - {{ selectedZone.usage_end }}</span>
                 </div>
                 <span class="text-slate-500 text-sm mb-2"
                   >Fecha de reserva:</span
@@ -249,6 +237,7 @@
 </template>
 <script setup>
 import { ref, onMounted, computed, watch, toRaw } from "vue";
+
 import Main from "/src/layouts/Main.vue";
 import { useHttp } from "/src/composables/useHttp.js";
 import { useUserStore } from "/src/stores/useUserStore.js";

@@ -11,12 +11,12 @@
         class="h-6"
         src="@/assets/logo_kommun.svg"
       />
-      
+
       <div class="w-full h-full flex flex-col items-center justify-center">
         <div
           class="w-full flex-1 min-h-0 gap-y-1 flex flex-col items-center pt-8 overflow-y-scroll"
         >
-        <router-link
+          <router-link
             v-for="(section, index) in accountFeatures"
             :key="'#' + index"
             :to="section.to"
@@ -46,8 +46,16 @@
             </span>
           </router-link>
           <div class="w-full border-t border-slate-200 my-5"></div>
-          <div class="w-full text-slate-400 text-xs uppercase mb-2 text-left pl-2">Comunidad</div>
-          <CommunitySelector class="mb-2" @update:selected="changeCommunity" :community="selectedCommunity" />
+          <div
+            class="w-full text-slate-400 text-xs uppercase mb-2 text-left pl-2"
+          >
+            Comunidad
+          </div>
+          <CommunitySelector
+            class="mb-2"
+            @update:selected="changeCommunity"
+            :community="selectedCommunity"
+          />
           <router-link
             v-for="(section, index) in CommunityFeatures"
             :key="'#' + index"
@@ -97,7 +105,6 @@
       </div>
       <div class="flex items-center justify-center flex-1 min-h-0">
         <div class="w-full flex flex-col items-start px-12 gap-y-2 -mt-16">
-          
           <router-link
             v-for="(section, index) in accountFeatures"
             :key="'#' + index"
@@ -119,8 +126,16 @@
             <span class="text-sm">{{ section.title }} </span>
           </router-link>
           <div class="w-full border-t border-slate-200 my-3"></div>
-          <div class="w-full text-slate-400 text-xs uppercase mb-2 text-left pl-2">Comunidad</div>
-          <CommunitySelector class="mb-2" @update:selected="changeCommunity" :community="selectedCommunity" />
+          <div
+            class="w-full text-slate-400 text-xs uppercase mb-2 text-left pl-2"
+          >
+            Comunidad
+          </div>
+          <CommunitySelector
+            class="mb-2"
+            @update:selected="changeCommunity"
+            :community="selectedCommunity"
+          />
           <router-link
             v-for="(section, index) in CommunityFeatures"
             :key="'#' + index"
@@ -200,12 +215,12 @@
                       user?.name + " " + user?.surnames
                     }}</span>
                   </div>
-                  <router-link to="/account">
+                  <router-link to="/profile">
                     <div
                       class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
                     >
                       <IconUserAccount class="scale-75" />
-                      <span>Mi cuenta</span>
+                      <span>Mi Perfil</span>
                     </div>
                   </router-link>
 
@@ -244,6 +259,7 @@ import IconInbox from "/src/components/icons/IconInbox.vue";
 import IconClose from "/src/components/icons/IconClose.vue";
 import IconZones from "/src/components/icons/IconZones.vue";
 import IconChevronRight from "/src/components/icons/IconChevronRight.vue";
+import IconAdmin from "/src/components/icons/IconAdmin.vue";
 import IconKey from "/src/components/icons/IconKey.vue";
 import IconLogout from "/src/components/icons/IconLogout.vue";
 import IconWorker from "/src/components/icons/IconWorker.vue";
@@ -331,7 +347,8 @@ const routeName = {
   zones: "Zonas comunes",
   providers: "Proveedores",
   community_settings: "Datos de la comunidad",
-  account: "Mi cuenta",
+  account: "Administración",
+  profile: "Mi perfil",
 };
 const getRouteName = computed(() => {
   return routeName[route.name];
@@ -347,8 +364,8 @@ const currentCommunnityRole = computed(() => {
 
 const accountFeatures = shallowRef([
   {
-    title: "Mi cuenta",
-    icon: IconUserAccount,
+    title: "Administración",
+    icon: IconAdmin,
     available: true,
     to: "/account",
   },
@@ -403,16 +420,7 @@ const CommunityFeatures = shallowRef([
     available: true,
     to: "/surveys",
   },
-  {
-    title: "Foro",
-    icon: IconSpeakerphone,
-    available: true,
-    to: "/communication",
-  },
-  
 ]);
-
-
 
 const isAdmin = computed(() => {
   if (user?.current_community?.community_role === "admin") {
@@ -428,36 +436,36 @@ const changeCommunity = (selected) => {
 };
 
 const setCurrent = (id) => {
-    try {
-        const response = http.put(`members/me/update/`, {
-            current_community: id
-        })
-        toast.add({
-            severity: 'success',
-            summary: 'OK',
-            detail: 'Has cambiado de Comunidad',
-            life: 3000
-        });
-       
-       window.location.reload();
-    } catch (error) {
-        toast.add({
-            severity: 'danger',
-            summary: 'Upps!! algo ha fallado',
-            detail: error,
-            life: 3000
-        });
-    }
-}
+  try {
+    const response = http.put(`members/me/update/`, {
+      current_community: id,
+    });
+    toast.add({
+      severity: "success",
+      summary: "OK",
+      detail: "Has cambiado de Comunidad",
+      life: 3000,
+    });
+
+    window.location.reload();
+  } catch (error) {
+    toast.add({
+      severity: "danger",
+      summary: "Upps!! algo ha fallado",
+      detail: error,
+      life: 3000,
+    });
+  }
+};
 
 const selectedCommunity = computed(() => {
-  return user?.available_communities?.find(
-    community => community.community_id === user?.current_community?.community_id
-  ) || null;
+  return (
+    user?.available_communities?.find(
+      (community) =>
+        community.community_id === user?.current_community?.community_id
+    ) || null
+  );
 });
-
-
-
 </script>
 <style>
 .smoth {

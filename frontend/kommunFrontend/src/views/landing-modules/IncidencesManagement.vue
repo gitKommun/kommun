@@ -7,7 +7,7 @@
     </div>
     <div class="w-full md:w-1/2 order-1 md:order-2">
       <h1
-        class="text-4xl md:text-5xl font-bold text-gray-800 mb-4 text-center md:text-left"
+        class="text-4xl md:text-5xl font-bold text-slate-900 mb-6 text-center md:text-left"
       >
         <span
           class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400"
@@ -15,14 +15,16 @@
         >
         <br />Simple y eficiente
       </h1>
-      <p class="text-lg text-gray-600 mb-8 text-center md:text-left">
+      <p class="text-lg text-slate-600 mb-8 text-center md:text-left">
         Aborda problemas en su contexto y gestiona todo con herramientas
         diseñadas para agilizar la comunicación y colaboración en tu comunidad.
       </p>
+      <Button severity="contrast"  raised size="large"> Solicitar una demo <IconChevronRight/> </Button>
     </div>
   </section>
 </template>
 
 <script setup>
 import InfiniteCarousel from "./InfiniteCarousel.vue";
+import IconChevronRight from '@/components/icons/IconChevronRight.vue';
 </script>

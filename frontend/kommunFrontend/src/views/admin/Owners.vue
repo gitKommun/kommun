@@ -29,7 +29,7 @@
       </div>
       <div class="px-4">
         <DataTable
-          :value="owners"
+          :value="filteredOwners"
           paginator
           :rows="20"
           :rowsPerPageOptions="[20, 40, 60, 100]"
@@ -153,7 +153,7 @@
   </div>
 </template>
 <script setup>
-import { ref, shallowRef, reactive, onMounted } from "vue";
+import { ref, computed } from "vue";
 import Main from "/src/layouts/Main.vue";
 import AddNewOwner from "/src/components/owners/AddNewOwner.vue";
 import { useHttp } from "/src/composables/useHttp.js";
@@ -292,6 +292,14 @@ const updateOwner = async () => {
   }
   showUpdateOwner.value = false;
 };
+
+//funcion computada para buscar ownwers
+const filteredOwners = computed(() => {
+  return owners.value.filter((owner) => {
+    return owner.name.toLowerCase().includes(search.value.toLowerCase());
+  });
+});
+
 
 function updateOwners() {
   console.log("update");

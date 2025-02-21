@@ -1,92 +1,133 @@
 <template>
-    <section class="flex flex-col items-center py-12">
-        <div class=" max-w-[1280px] flex flex-col justify-center items-center py-6 mb-8">
-            <h2 class="text-2xl mb-3 text-slate-950 font-bold">Lorem ipsum dolor sit amet, consectetur adipiscing elit</h2>
-            <p class="text-slate-950">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  <section class="flex flex-col items-center py-12">
+    <div
+      class="max-w-[1280px] flex flex-col justify-center items-center py-6 mb-8"
+    >
+      <h2
+        class="text-4xl md:text-5xl font-bold text-slate-900 mb-8 text-center md:text-left"
+      >
+        Un solo plan que se adapta a ti
+      </h2>
+      <p class="max-w-[900px] text-slate-900 text-center">
+        Gestiona todas tus comunidades con un plan flexible que crece contigo.
+        Sin complicaciones, sin tarifas ocultas. Paga solo por las comunidades
+        que administras y accede a todas las herramientas que necesitas para
+        optimizar tu trabajo y mejorar la comunicación con los vecinos.
+      </p>
+    </div>
+    <div class="max-w-[1280px] container">
+      <div class="bg-white rounded-2xl p-3 w-full">
+        <div class="w-full flex flex-col md:flex-row gap-3">
+          <div
+            class="w-full flex flex-col items-center bg-slate-50 rounded-2xl p-4 border border-slate-200"
+          >
+            <h3
+              class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-400"
+            >
+              Mensual
+            </h3>
+            <h1
+              class="text-6xl flex flex-col items-center font-bold text-center py-4"
+            >
+              2€
+              <span class="text-sm text-slate-500 font-regular"
+                >comunidad/mes</span
+              >
+            </h1>
+            <Button severity="contrast" size="large">Selecionar</Button>
+          </div>
+          <div
+            class="w-full flex flex-col items-center bg-slate-50 rounded-2xl p-4 border border-slate-200"
+          >
+            <h3
+              class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-400"
+            >
+              Anual
+            </h3>
+            <h1
+              class="text-6xl flex flex-col items-center font-bold text-center py-4"
+            >
+              18€
+              <span class="text-sm text-slate-500 font-regular"
+                >comunidad/año</span
+              >
+            </h1>
+            <Button severity="contrast" size="large">Selecionar</Button>
+          </div>
         </div>
-        <div class="">
-            <div class="flex justify-center max-w-[24rem] m-auto mb-8 lg:mb-16">
-                <div class="relative flex w-full p-2 bg-slate-900 rounded-full">
-                    <span class="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
-                        <span class="absolute inset-0 w-1/2 bg-cyan-500 rounded-full shadow-sm shadow-cyan-950/10 transform transition-transform duration-150 ease-in-out" :class="isAnnual ? 'translate-x-0' : 'translate-x-full'"></span>
-                    </span>
-                    <button
-                        class="relative flex-1 px-4 font-medium h-12 rounded-lg focus-visible:outline-none focus-visible:ring focus-visible:ring-cyan-300  transition-colors duration-150 ease-in-out"
-                        :class="isAnnual ? 'text-white' : 'text-slate-500 dark:text-slate-400'"
-                        @click="isAnnual = true"
-                        :aria-pressed="isAnnual"
-                    >
-                        Yearly 
-                        <span :class="isAnnual ? 'text-cyan-200' : 'text-slate-400'">-20%</span>
-                    </button>
-                    <button
-                        class="relative flex-1  px-4 font-medium h-12 rounded-lg focus-visible:outline-none focus-visible:ring focus-visible:ring-cyan-300  transition-colors duration-150 ease-in-out"
-                        :class="isAnnual ? 'text-slate-500' : 'text-white'"
-                        @click="isAnnual = false"
-                        :aria-pressed="isAnnual"
-                    >
-                        Monthly
-                    </button>
+
+        <div class="w-full flex flex-wrap justify-center gap-3 py-8">
+          <div
+            v-for="(feature, index) in features"
+            :key="index"
+            class="flex  gap-3 w-full md:basis-[calc(33.333%-0.667rem)] bg-slate-50 rounded-xl p-3"
+          >
+            <div class="size-10 min-w-10 border bg-white border-slate-200 rounded-xl flex items-center justify-center">
+              <component :is="feature.icon" class="text-indigo-500" />
             </div>
-        </div>
-        </div>
-        <div class="max-w-[1280px] container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-            <div class="bg-white rounded-2xl border border-slate-200 p-4 gap-x-3 flex hover:shadow-xl transition-all durations-300">
-                <div class="p-3 w-full">
-                    <h3 class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-yellow-400">Free</h3>
-                    <p class="text-slate-500 text-sm text-center">Ideal para pequeñas comunidades</p>
-                    <h1 class="text-6xl font-bold text-center py-4">0€ <span class="text-sm text-slate-500 font-regular">/mes</span></h1>
-                    <Button severity="contrast" size="large">Get started</Button>
-                    <div class="border-t border-slate-200 mt-3 py-3">
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Foro para miembros</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Votaciones</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Documentación</div>
-                    </div>
-                </div>
+            <div class="flex flex-col pt-2">
+              <span class="font-bold">{{ feature.name }}</span>
+              <span class="text-sm text-slate-500">{{
+                feature.description
+              }}</span>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 p-4 gap-x-3 flex hover:shadow-xl transition-all durations-300">
-                <div class="p-3 w-full">
-                    <h3 class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-cyan-400">Basic</h3>
-                    <p class="text-slate-500 text-sm text-center">Ideal para pequeñas comunidades</p>
-                    <h1 class="text-6xl font-bold text-center py-4">15€ <span class="text-sm text-slate-500 font-regular">/mes</span></h1>
-                    <Button severity="contrast" size="large">Get started</Button>
-                    <div class="border-t border-slate-200 mt-3 py-3">
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Foro para miembros</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Votaciones</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Documentación</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Incidencias</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Presupuestos</div>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl border border-slate-200 p-4 gap-x-3 flex hover:shadow-xl transition-all durations-300">
-                <div class="p-3 w-full">
-                    <h3 class="text-4xl text-center font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-pink-400">Advanced</h3>
-                    <p class="text-slate-500 text-sm text-center">Todo lo que tu comunidad necesita</p>
-                    <h1 class="text-6xl font-bold text-center py-4">25€ <span class="text-sm text-slate-500 font-regular">/mes</span></h1>
-                    <Button severity="contrast" size="large">Get started</Button>
-                    <div class="border-t border-slate-200 mt-3 py-3">
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Foro para miembros</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Votaciones</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Documentación</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Incidencias</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Presupuestos</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Reserva de espacios</div>
-                        <div class="flex py-2 text-sm text-slate-500"> <IconCircleCheck class="scale-75 text-green-500 mr-3"/> Proveedores</div>
-                    </div>
-                </div>
-            </div>   
+          </div>
         </div>
-    </section> 
+        
+      </div>
+    </div>
+  </section>
 </template>
 <script setup>
-import { ref } from 'vue';
-import IconCircleCheck from "/src/components/icons/IconCircleCheck.vue"
-
+import { ref } from "vue";
+import IconCircleCheck from "/src/components/icons/IconCircleCheck.vue";
+import IconSpeakerphone from "/src/components/icons/IconSpeakerphone.vue";
+import IconSurvey from "/src/components/icons/IconSurvey.vue";
+import IconFolders from "/src/components/icons/IconFolders.vue";
+import IconTool from "/src/components/icons/IconTool.vue";
+import IconZones from "/src/components/icons/IconZones.vue";
+import IconWorker from "/src/components/icons/IconWorker.vue";
 
 defineOptions({
-    name:'Pricinng'
-})
+  name: "Pricinng",
+});
+//variables
 
-const isAnnual = ref(true); // Estado inicial: anual
+const features = ref([
+  {
+    name: "Envio de comunicados",
+    description: "Envía comunicados a todos los vecinos de la comunidad.",
+    icon:IconSpeakerphone
+
+  },
+  {
+    name: "Votaciones online",
+    description: "Permite a los miembros votar en propuestas y decisiones.",
+    icon:IconSurvey
+  },
+  {
+    name: "Gestor documental",
+    description: "Permite a los miembros compartir documentos y recursos.",
+    icon:IconFolders
+  },
+  {
+    name: "Gestor de incidencias",
+    description: "Permite a los miembros reportar incidencias y problemas.",
+    icon:IconTool
+  },
+  {
+    name: "Reserva de espacios",
+    description: "Permite a los miembros reservar espacios comunes.",
+    icon:IconZones
+  },
+  //     {
+  //     name: 'Presupuestos',
+  //     description: 'Permite a los miembros crear presupuestos y solicitar financiación.',
+  // },
+  {
+    name: "Libro de proveedores",
+    description: "Directorio de proveedores de la comunidad.",
+    icon:IconWorker
+  },
+]);
 </script>

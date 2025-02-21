@@ -150,12 +150,23 @@ const timePeriods = ref([
     { label: 'Día Completo', value: 'DAY' }
 ])
 
+const formatTimeToString = (date) => {
+    return date.toTimeString().split(' ')[0].substring(0, 5); // Convierte a formato "HH:mm"
+};
+
 const createZone = () => {
-  if (zone.name != "") {
+  if (zone.value.name !== "") {
     try {
+      // Crear una copia del objeto zone y formatear los tiempos
+      const zoneData = {
+        ...zone.value,
+        usage_start: formatTimeToString(zone.value.usage_start),
+        usage_end: formatTimeToString(zone.value.usage_end)
+      };
+
       http.post(
         `common_areas/${user?.current_community?.community_id}/create/`,
-        zone.value
+        zoneData
       );
 
       toast.add({

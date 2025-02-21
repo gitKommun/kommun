@@ -1,9 +1,9 @@
 <template>
   <div
-    class="flex flex-col items-start border border-indigo-100 p-3 bg-indigo-50 rounded-2xl gap-x-3 mb-3 w-full relative transition-all duration-300"
+    class="flex flex-col items-start border border-purple-100 p-3 bg-purple-50 rounded-2xl gap-x-3 mb-3 w-full relative transition-all duration-300"
   >
     <div class="text-slate-500 text-xs">
-      <span>HASTA: {{ dateFormat(survey.start_date) }}</span>
+      <span>HASTA: {{ formatDate(survey.start_date) }}</span>
     </div>
     <div class="w-full flex font-bold mb-2">
       {{ survey.title }}
@@ -95,6 +95,8 @@ import UserSelector from "/src/components/UserSelector.vue";
 import { useHttp } from "/src/composables/useHttp.js";
 import { useToast } from "primevue/usetoast";
 import { useUserStore } from "/src/stores/useUserStore.js";
+import { formatDate } from "@/utils/dateUtils";
+
 defineOptions({
   name: "ActiveSurvey",
 });
@@ -116,13 +118,6 @@ const showSurvey = ref(false);
 const showDelegate = ref(false);
 const selectedOption = ref(null);
 const delegateTo = ref(null);
-const dateFormat = (itemDate) => {
-  const date = new Date(itemDate);
-  const day = String(date.getDate()).padStart(2, "0"); // Día con dos dígitos
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Mes con dos dígitos
-  const year = date.getFullYear(); // Año completo
-  return `${day}/${month}/${year}`;
-};
 
 const selectOption = (option) => {
   selectedOption.value = option;
@@ -134,7 +129,7 @@ const vote = async () => {
     await http.post(`votes/${user?.current_community?.community_id}/polls/${props.survey.vote_id}/vote/`, {
       person_id: user?.current_community?.community_person_id,
       option_ids: selectedOption.value?.option_id,
-      delegate_to: delegateTo.value,
+      delegated_to: delegateTo.value,
     });
 
     toast.add({

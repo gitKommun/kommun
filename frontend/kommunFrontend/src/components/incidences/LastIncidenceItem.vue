@@ -10,7 +10,7 @@
         <div class="font-semibold mb-3 flex flex-col flex-1 min-h-0">
             
             {{ incidence.title }}
-            <span class="text-xs text-slate-500 font-medium">{{ dateFormat(incidence.created_at) }}</span>
+            <span class="text-xs text-slate-500 font-medium">{{ formatDate(incidence.created_at) }}</span>
         </div>
         <div class="mt-auto flex border-t border-slate-200 py-1 gap-x-2">
             <div class="text-xs text-slate-500 flex">Ascensor,</div>
@@ -24,6 +24,7 @@ import IconFlag from '/src/components/icons/IconFlag.vue';
 import CustomTag from '/src/components/CustomTag.vue';
 import { PRIORITY_COLOR, INCIDENCE_STATUS_COLOR } from '/src/constants/colors.js';
 import { INCIDENCE_STATUS_LABEL } from '/src/constants/labels.js';
+import { formatDate } from "@/utils/dateUtils";
 
 defineOptions({
   name: 'LastIncidenceItem',
@@ -43,29 +44,6 @@ const priorityColor = {
     urgent:'red'
 }
 
-// const dateFormat = (itemDate) => {
-//   const date = new Date(itemDate);
-//   const day = String(date.getDate()).padStart(2, "0"); // Día con dos dígitos
-//   const month = String(date.getMonth() + 1).padStart(2, "0"); // Mes con dos dígitos
-//   const year = date.getFullYear(); // Año completo
-//   return `${day}/${month}/${year}`;
-// };
-function dateFormat(dateString) {
-  // Intenta crear un objeto Date directamente desde el string ISO
-  const date = new Date(dateString);
 
-  // Verifica si la fecha es válida
-  if (isNaN(date.getTime())) {
-    console.error("Fecha no válida:", dateString);
-    return "Fecha no válida";
-  }
-
-  // Formatea la fecha como DD/MM/YYYY
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript son 0-indexados
-  const year = date.getFullYear();
-
-  return `${day}/${month}/${year}`;
-}
 
 </script>

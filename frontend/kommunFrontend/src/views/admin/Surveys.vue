@@ -61,7 +61,7 @@
             <DataTable
               v-model:selection="selectedSurvey"
               selectionMode="single"
-              :value="surveys"
+              :value="filteredSurveys"
               paginator
               :rows="20"
               :rowsPerPageOptions="[20, 40, 60, 100]"
@@ -76,12 +76,12 @@
                 header="Inicio"
               >
                 <template #body="slotProps">
-                  {{ dateFormat(slotProps.data.start_date) }}
+                  {{ formatDate(slotProps.data.start_date) }}
                 </template>
               </Column>
               <Column field="end_date" sortable header="Fin">
                 <template #body="slotProps">
-                  {{ dateFormat(slotProps.data.end_date) }}
+                  {{ formatDate(slotProps.data.end_date) }}
                 </template>
               </Column>
               <Column header="Audiencia">
@@ -180,7 +180,7 @@ import { useUserStore } from "/src/stores/useUserStore.js";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { useHttp } from "/src/composables/useHttp.js";
-
+import { formatDate } from "@/utils/dateUtils";
 import Main from "/src/layouts/Main.vue";
 import AddNewSurvey from "/src/components/surveys/AddNewSurvey.vue";
 import IconClose from "/src/components/icons/IconClose.vue";
@@ -298,19 +298,18 @@ const getProcess = (users) => {
   return (answers * 100) / total;
 };
 
+
+//funcion para buscar surveys
+const filteredSurveys = computed(() => {
+  return surveys.value.filter((survey) => {
+    return survey.title.toLowerCase().includes(search.value.toLowerCase());
+  });
+});
+
 function updateItems() {
   setTimeout(() => {
     getSurveys();
   }, 300);
 }
-const dateFormat = (itemDate) => {
-  const date = new Date(itemDate);
-  return date
-    .toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .replace(/\//g, "/");
-};
+
 </script>

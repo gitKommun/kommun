@@ -7,6 +7,16 @@ export default function routes({ authGuard, guestGuard }) {
           component: () => import("../views/Landing.vue"),
         },
         {
+          path: "/pricing",
+          name: "pricing",
+          component: () => import("../views/Pricing.vue"),
+        },
+        {
+          path: "/contact",
+          name: "contact",
+          component: () => import("../views/Contact.vue"),
+        },
+        {
           path: "/login",
           name: "login",
           component: () => import("../views/auth/Login.vue"),
@@ -92,6 +102,11 @@ export default function routes({ authGuard, guestGuard }) {
           path: "/onboarding",
           name: "onboarding",
           component: () => import("../views/admin/Onboarding.vue"),
+        },
+        {
+          path: "/profile",
+          name: "profile",
+          component: () => import("../views/admin/Profile.vue"),
         },
         {
           path: "/:pathMatch(.*)*",
