@@ -265,8 +265,6 @@ class CommonAreaAvailableSlotsAPIView(APIView):
             usage_end_time = datetime.combine(datetime.min, common_area.usage_end)
             slot_duration_minutes = (usage_end_time - usage_start_time).seconds // 60
 
-        print(f"{common_area.time_unit} Duración del slot: {slot_duration_minutes} minutos")
-
         # Definir la franja horaria de la zona común
         if not common_area.usage_start or not common_area.usage_end:
             return Response({'error': 'El área común no tiene configurados los horarios de uso.'}, status=status.HTTP_400_BAD_REQUEST)
