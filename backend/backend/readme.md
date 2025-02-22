@@ -28,6 +28,16 @@ python manage.py populate_cp
 # Para cargar los roles disponibles en el sistema, ejecuta el siguiente comando:
 python manage.py populate_roles
 
+#DJANGO COMANDOS UNIVERSALES
+#Crear superuser para panel admin
+python manage.py createsuperuser
 
+# Estándares Utilizados en el Proyecto
+
+```python
+'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S',  # ISO 8601
+'DATE_FORMAT': '%Y-%m-%d',
+'TIME_FORMAT': '%H:%M',
+```
 
 
