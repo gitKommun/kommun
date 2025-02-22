@@ -165,6 +165,10 @@ def get_user_data(request):
 
         # Verificar si hay PersonCommunity con el mismo email del usuario en cualquier comunidad
         for person in PersonCommunity.objects.filter(email=user.email, user__isnull=True):
+            # Asignar el nombre que ha elegido el usuario en el registro
+            if user.name: person.name = user.name
+            if user.surnames: person.surnames = user.surnames
+            # Asignar el usuario a la instancia de PersonCommunity
             person.user = user
             person.save()
 
