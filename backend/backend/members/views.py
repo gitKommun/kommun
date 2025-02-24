@@ -18,6 +18,9 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 
 from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer, UserUpdateSerializer
 from .models import User
@@ -94,6 +97,58 @@ def check_auth_status(request):
     return JsonResponse({'is_authenticated': True})
 
 
+
+
+@swagger_auto_schema(
+    method='get',
+    responses={
+        200: openapi.Response(
+            description="User data retrieved successfully",
+            examples={
+                "application/json": {
+                    "email": "user@example.com",
+                    "name": "John",
+                    "surnames": "Doe",
+                    "language_config": "en",
+                    #"date_joined": "2023-01-01T00:00:00Z",
+                    "birthdate": "1990-12-31",
+                    "address": "123 Main St",
+                    "phone_number": "1234567890",
+                    "personal_id_number": "A1234567",
+                    "personal_id_type": "Passport",
+                    "current_community": {
+                        "community_id": 1,
+                        "community_name": "Community Name",
+                        "community_person_id": 1,
+                        "community_user_status": "active",
+                        "community_roles": ["owner", "admin"]
+                    },
+                    "available_communities": [
+                        {
+                            "community_id": 1,
+                            "community_name": "Community Name",
+                            "properties": [
+                                {
+                                    "property_id": 1,
+                                    "address": "123 Main St",
+                                    "type": "Apartment"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ),
+        401: openapi.Response(
+            description="User not authenticated",
+            examples={
+                "application/json": {
+                    "error": "Usuario no autenticado"
+                }
+            }
+        )
+    }
+)
 @api_view(['GET'])
 def get_user_data(request):
     if request.user.is_authenticated:
@@ -104,12 +159,16 @@ def get_user_data(request):
             'surnames': user.surnames,
     
             'language_config': user.language_config,
-            'date_joined': user.date_joined
+            #'date_joined': user.date_joined
         }
 
 
         # Verificar si hay PersonCommunity con el mismo email del usuario en cualquier comunidad
         for person in PersonCommunity.objects.filter(email=user.email, user__isnull=True):
+            # Asignar el nombre que ha elegido el usuario en el registro
+            if user.name: person.name = user.name
+            if user.surnames: person.surnames = user.surnames
+            # Asignar el usuario a la instancia de PersonCommunity
             person.user = user
             person.save()
 
@@ -130,7 +189,19 @@ def get_user_data(request):
                 # Obtener los nombres de los roles
                 roles = person_community.roles.all()
                 roles_names = [role.name for role in roles]
-                
+
+                birthdate = person_community.birthdate
+                adress = person_community.address
+                phone_number = person_community.phone_number
+                personal_id_number = person_community.personal_id_number
+                personal_id_type = person_community.personal_id_type
+
+                user_data['birthdate'] = birthdate.strftime('%Y-%m-%d') if birthdate else None
+                user_data['address'] = adress
+                user_data['phone_number'] = phone_number
+                user_data['personal_id_number'] = personal_id_number
+                user_data['personal_id_type'] = personal_id_type
+
             user_current_community_data = {
                 'community_id': user.current_community.community_id,
                 'community_name': user.current_community.name,
@@ -171,16 +242,68 @@ def get_user_data(request):
         return Response({'error': 'Usuario no autenticado'}, status=401)
     
 
-
 class UserUpdateAPIView(APIView):
+    """
+    Permite actualizar los datos del usuario autenticado.
+    
+    **Nota:**  
+    - Los datos de contacto del usuario (`email`, `name`, `surnames`, `birthdate`, `address`,  
+      `phone_number`, `personal_id_number`, `personal_id_type`) se actualizarán automáticamente  
+      en todas las instancias de `PersonCommunity` relacionadas con este usuario.
+    """
+
     permission_classes = [IsAuthenticated]
+
     def get_object(self):
         return self.request.user
 
+    @swagger_auto_schema(   
+        request_body=UserUpdateSerializer,
+        responses={
+            200: openapi.Response(
+                description="User and related PersonCommunity objects updated successfully",
+                examples={
+                    "application/json": {
+                        "email": "user@example.com",
+                        "name": "John",
+                        "surnames": "Doe",
+                        "birthdate": "1990-12-31",
+                        "address": "123 Main St",
+                        "phone_number": "1234567890",
+                        "personal_id_number": "A1234567",
+                        "personal_id_type": "Passport"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Invalid data",
+                examples={
+                    "application/json": {
+                        "error": "Invalid data"
+                    }
+                }
+            )
+        }
+    )
     def put(self, request):
         user = self.get_object()
         serializer = UserUpdateSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+
+            # Update related PersonCommunity objects
+            person_communities = PersonCommunity.objects.filter(user=user)
+            for person_community in person_communities:
+                person_community.email = user.email
+                person_community.name = user.name
+                person_community.surnames = user.surnames
+                person_community.birthdate = request.data.get('birthdate', person_community.birthdate)
+                person_community.address = request.data.get('address', person_community.address)
+                person_community.phone_number = request.data.get('phone_number', person_community.phone_number)
+                person_community.personal_id_number = request.data.get('personal_id_number', person_community.personal_id_number)
+                person_community.personal_id_type = request.data.get('personal_id_type', person_community.personal_id_type)
+                person_community.save()
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
