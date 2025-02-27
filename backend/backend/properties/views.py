@@ -323,6 +323,7 @@ class BulkCreatePropertiesFromCatastroAPIView(APIView):
                         city_code = inmueble['dt']['loine']['cp'] + inmueble['dt']['loine']['cm'].zfill(3)
                         province_code = inmueble['dt']['loine']['cp']
                         postal_code = inmueble['dt']['locs']['lous']['lourb'].get('dp')
+                        catastral_ref = ref_catastro
 
                         #print(f"city_code: {city_code}, province_code: {province_code}, postal_code: {postal_code}")
 
