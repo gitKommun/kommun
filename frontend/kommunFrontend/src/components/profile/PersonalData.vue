@@ -8,7 +8,7 @@
         variant="filled"
       />
       <InputText
-        v-model="form.surname"
+        v-model="form.surnames"
         placeholder="Apellidos"
         class="w-full"
         variant="filled"
@@ -22,7 +22,7 @@
         variant="filled"
       />
       <InputText
-        v-model="form.phone"
+        v-model="form.phone_number"
         placeholder="Teléfono"
         class="w-full"
         variant="filled"
@@ -31,7 +31,7 @@
     <div class="flex items-center py-4">
       <InputGroup>
         <Select
-          v-model="form.identificationType"
+          v-model="form.personal_id_type"
           :options="documentType"
           optionLabel="label"
           class="max-w-40"
@@ -40,7 +40,7 @@
           variant="filled"
         />
         <InputText
-          v-model="form.identificationNumber"
+          v-model="form.personal_id_number"
           placeholder="Número de identificación"
           class="max-w-64"
           variant="filled"
@@ -82,11 +82,11 @@ const { user } = useUserStore();
 //variables
 const form = ref({
   name: user.name,
-  surname: user.surnames,
+  surnames: user.surnames,
   email: user.email,
-  phone: user.phoneNumber,
-  identificationNumber: user.documentID ? user.documentID : "",
-  identificationType: user.documentType ? user.documentType : "",
+  phone_number: user.phone_number,
+  personal_id_number: user.personal_id_number ? user.personal_id_number : "",
+  personal_id_type: user.personal_id_type ? user.personal_id_type : "",
   allowSharing: user.contactIsPublic,
   roles: user.current_community.community_roles
 });

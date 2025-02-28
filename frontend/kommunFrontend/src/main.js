@@ -210,5 +210,7 @@ app.component('Rating', Rating)
 import Message from "primevue/message";
 app.component('Message', Message)
 
+import Chip from "primevue/chip";
+app.component('Chip', Chip)
 
 app.mount('#app');

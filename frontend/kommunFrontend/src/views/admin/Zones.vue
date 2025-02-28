@@ -155,6 +155,7 @@
                   :slot="slot"
                   :zone="selectedZone"
                   @update:reserve="comfirmReserve(slot)"
+                  @update:slots="getSlots()"
                   class="mb-2"
                 />
               </div>
@@ -386,18 +387,30 @@ const comfirmReserve = (slot) => {
       label: "Confirmar reserva",
       severity: "contrast",
     },
-    accept: () => {
-     http.post(`common_areas/${user?.current_community?.community_id}/${selectedZone.value.area_id}/reservations/create/`,{
-       neighbor: user?.current_community?.community_person_id,
-       start_time: startDate.toISOString().split('.')[0]+'Z',
-       end_time: endDate.toISOString().split('.')[0]+'Z',
-     });
-      toast.add({
-        severity: "success",
-        summary: "Ok",
-        detail: selectedZone.value.name+ " se reservado con exito",
-        life: 3000,
-      });
+    accept: async () => {
+      try {
+        await http.post(`common_areas/${user?.current_community?.community_id}/${selectedZone.value.area_id}/reservations/create/`,{
+          neighbor: user?.current_community?.community_person_id,
+          start_time: startDate.toISOString().split('.')[0]+'Z',
+          end_time: endDate.toISOString().split('.')[0]+'Z',
+        });
+        
+        toast.add({
+          severity: "success",
+          summary: "Ok",
+          detail: selectedZone.value.name+ " se ha reservado con éxito",
+          life: 3000,
+        });
+        
+        await getSlots(); // Actualizar los slots después de la reserva exitosa
+      } catch (error) {
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "No se ha podido crear la reserva",
+          life: 3000,
+        });
+      }
     },
     reject: () => {
       toast.add({
@@ -408,6 +421,7 @@ const comfirmReserve = (slot) => {
       });
     },
   });
+
 };
 
 const reservableZones = computed(() => {
