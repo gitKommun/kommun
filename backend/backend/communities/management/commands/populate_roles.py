@@ -5,7 +5,7 @@ class Command(BaseCommand):
     help = 'Populate the database with default roles'
 
     def handle(self, *args, **kwargs):
-        roles = ['owner', 'tenant', 'admin']
+        roles = ['owner', 'tenant', 'admin', 'board'], 
 
         for role_name in roles:
             role, created = Role.objects.get_or_create(name=role_name)

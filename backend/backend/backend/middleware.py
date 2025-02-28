@@ -71,7 +71,8 @@ class RoleBasedAccessMiddleware:
             '/members/register/',
             '/members/login/',
             '/members/logout/',
-            '/core/swagger/',    
+            '/core/swagger/',
+            '/core/redoc/',    
         ]
 
     def __call__(self, request):
