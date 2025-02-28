@@ -58,3 +58,7 @@ env.bak/
 venv.bak/
 site/
 docs/
+backend/mydatabase
+backend/mydatabase.sqlite3
+mydatabase.sqlite3
+mydatabase
