@@ -1,26 +1,20 @@
 <template>
   <div class="h-full w-full overflow-y-scroll">
-    <div class="pl-4 md:pl-16 py-6 flex sticky top-0  backdrop-blur z-10">
-      <div class="w-full text-slate-950 text-3xl font-bold truncate flex flex-col">
-          {{title}}
-          <span class="text-sm text-slate-500 font-medium">{{ user.current_community?.community_name }}</span>
-      </div>
-      <div class="w-full p-4 flex justify-end">
-        <AddNewCommunity @update:communities="updateItems" class="h-auto"/>  
-      </div>
-    </div>
-    <!-- search and view -->
-    <div v-if="communities.length" class="flex items-center justify-between pb-4 w-full max-w-4xl mx-auto px-4 ">
-      <InputText 
+    <div class="w-full p-4 flex justify-between">
+        <div class="flex gap-x-2">
+          <InputText 
           v-model="search" 
-          placeholder="Buscar" 
+          placeholder="Buscar"
+          size="small"
           variant="filled"/>
-      <SelectButton v-model="toggleView" :options="toggleViewOptions" optionLabel="value" >
-          <template #option="slotProps">
-              <IconGrid v-if="slotProps.option === 'card'"/>
-              <IconTable v-else/>
-          </template>
-      </SelectButton>
+          <SelectButton v-model="toggleView" :options="toggleViewOptions" optionLabel="value" :disabled="!communities.length" size="small">
+              <template #option="slotProps">
+                  <IconGrid v-if="slotProps.option === 'card'"/>
+                  <IconTable v-else/>
+              </template>
+          </SelectButton>
+        </div>
+        <AddNewCommunity @update:communities="updateItems" class="h-auto"/>  
     </div>
     <!-- search and view -->
     
@@ -141,7 +135,7 @@ defineOptions({
   name: 'Communities',
   layout: Main
 })
-const title = ref('Comunidades')
+
 
 //utils
 const http = useHttp();

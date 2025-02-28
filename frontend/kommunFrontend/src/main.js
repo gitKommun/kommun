@@ -30,22 +30,62 @@ import AnimateOnScroll from 'primevue/animateonscroll';
 app.directive('animateonscroll', AnimateOnScroll);
 
 app.use(PrimeVue, {
-    ripple:true,
-    theme: {
-        preset: {
-            ...Aura,
-            semantic: {
-                ...Aura.semantic,
-                ...kommunTheme
-            }
-        },
-        options: {
-            prefix: 'p',
-            darkModeSelector: '',
-            cssLayer: false
-        }
-    }, 
-    
+  ripple: true,
+  theme: {
+    preset: {
+      ...Aura,
+      semantic: {
+        ...Aura.semantic,
+        ...kommunTheme,
+      },
+    },
+    options: {
+      prefix: "p",
+      darkModeSelector: "",
+      cssLayer: false,
+    },
+  },
+  locale: {
+    monthNames: [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ],
+    dayNames: [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+      "Domingo"
+    ],
+    monthNamesShort: [
+      "Ene",
+      "Feb",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dic",
+    ],
+    dayNamesShort: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+    dayNamesMin: ["L", "M", "X", "J", "V", "S", "D"],
+  },
 });
 app.use(ToastService);
 app.use(ConfirmationService);
@@ -68,6 +108,9 @@ app.component('Toast', Toast);
 
 import Checkbox from 'primevue/checkbox';
 app.component('Checkbox', Checkbox)
+
+import RadioButton from "primevue/radiobutton";
+app.component("RadioButton", RadioButton);
 
 import InputNumber from 'primevue/inputnumber';
 app.component('InputNumber', InputNumber)
@@ -143,12 +186,31 @@ app.component('ProgressBar', ProgressBar)
 import SelectButton from 'primevue/selectbutton';
 app.component('SelectButton', SelectButton)
 
-
 import ConfirmDialog from 'primevue/confirmdialog';
 app.component('ConfirmDialog', ConfirmDialog)
 
 import MeterGroup from 'primevue/metergroup';
 app.component('MeterGroup', MeterGroup)
 
+
+import Tabs from "primevue/tabs";
+import TabList from "primevue/tablist";
+import Tab from "primevue/tab";
+import TabPanels from "primevue/tabpanels";
+import TabPanel from "primevue/tabpanel";
+app.component('Tabs', Tabs)
+app.component('TabList', TabList)
+app.component('Tab', Tab)
+app.component('TabPanels', TabPanels)
+app.component('TabPanel', TabPanel)
+
+import Rating from "primevue/rating";
+app.component('Rating', Rating)
+
+import Message from "primevue/message";
+app.component('Message', Message)
+
+import Chip from "primevue/chip";
+app.component('Chip', Chip)
 
 app.mount('#app');

@@ -1,10 +1,10 @@
 <template>
     <div class="w-full">
-        <div class="w-full bg-slate-50 p-3 flex gap-x-3 rounded-xl cursor-pointer text-sm font-normal items-center group hover:bg-lime-50 transition-all duration-150"
+        <div class="w-full bg-slate-50 p-3 flex gap-x-3 rounded-xl cursor-pointer text-sm font-normal items-center group hover:bg-indigo-50 transition-all duration-150"
             @click="showCreateFolder =!showCreateFolder"
         >
-            <IconFolderAdd class="group-hover:text-lime-500 transition-all duration-150"/>
-            <span class="group-hover:text-lime-500 transition-all duration-150">Nueva carpeta</span>
+            <IconFolderAdd class="group-hover:text-indigo-500 transition-all duration-150"/>
+            <span class="group-hover:text-indigo-500 transition-all duration-150">Nueva carpeta</span>
         </div>
         <Dialog v-model:visible="showCreateFolder" modal header="Crear nueva carpeta" class="w-96">
             <div class="">

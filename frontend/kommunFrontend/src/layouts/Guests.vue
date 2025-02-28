@@ -1,116 +1,179 @@
 <template>
-    <div class="h-full w-full relative">
-        <transition
-            enter-from-class="-mt-16"
-            enter-active-class="transitiona-all ease-in-out duration-150"
-            move-class="transitiona-all bounce-transition duration-300"
-            >
-        <header v-if="AppearMenu" class="absolute top-0 w-full text-slate-950 backdrop-blur bg-black/30 z-20 ">
-            <div class="container mx-auto flex items-center justify-between py-2 px-6">
-                <RouterLink to="/">
-                    <span class="flex items-center">
-                        <img alt="Kommun logo" class="h-8" src="@/assets/lg_l.svg"  />
-                        <span class="text-white font-bold ml-2">Kommun</span>
-                    </span>
-                </RouterLink>
-                <!-- <div class="hidden md:flex items-center space-x-4">
-                    <RouterLink to="/">
-                        <Button label="Features" severity="secondary" text size="small" class="text-white"/>
-                    </RouterLink>
-                    <RouterLink to="/">
-                        <Button label="About" severity="secondary" text size="small"/>
-                    </RouterLink>
-                    <RouterLink to="/">
-                        <Button label="Pricing" severity="secondary" text size="small"/>
-                    </RouterLink>
-                    <RouterLink to="/">
-                        <Button label="Contact" severity="secondary" text size="small"/>
-                    </RouterLink>
-                    
-                </div> -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <router-link :to="{name:'login'}">
-                        <Button label="Login" severity="contrast" outlined size="small"/>
-                    </router-link >
-                    <router-link :to="{name:'register'}">
-                        <Button 
-                            label="Registro" 
-                            severity="contrast" 
-                            raised 
-                            size="small"/>
-                    </router-link>
- 
-                </div>
-                <div class="md:hidden flex items-center">
-                    <Button outlined severity="contrast" @click="showMobileMenu">    
-                        <IconClose v-if="showMenu"/>
-                        <IconMenu v-else/>
-                    </Button>
-                    
-                </div>
+  <div class="h-full w-full relative">
+    <transition
+      enter-from-class="-mt-16"
+      enter-active-class="transitiona-all ease-in-out duration-150"
+      move-class="transitiona-all bounce-transition duration-300"
+    >
+      <div
+        class="w-full px-3 md:px-24 absolute top-0 mt-6 z-50 flex justify-center"
+      >
+        <header
+          v-if="AppearMenu"
+          class="w-full max-w-[1280px] text-slate-950 backdrop-blur bg-white/30 rounded-2xl border border-slate-200"
+        >
+          <div
+            class="container mx-auto flex items-center justify-between py-2 px-4"
+          >
+            <RouterLink to="/">
+              <span class="flex items-center">
+                <img
+                  alt="Kommun logo"
+                  class="h-7"
+                  src="@/assets/logo_kommun.svg"
+                />
+              </span>
+            </RouterLink>
+            <div class="hidden md:flex items-center space-x-4">
+              <RouterLink to="/blog">
+                <Button
+                  label="Blog"
+                  severity="contrast"
+                  text
+                  size="small"
+                  class="w-full"
+                />
+              </RouterLink>
+              <RouterLink to="/pricing">
+                <Button label="Pricing" severity="contrast" text size="small" />
+              </RouterLink>
+              <RouterLink to="/contact">
+                <Button label="Contact" severity="contrast" text size="small" />
+              </RouterLink>
             </div>
+            <div class="hidden md:flex items-center space-x-4">
+              <router-link :to="{ name: 'login' }">
+                <Button label="Login" severity="secondary" size="small">
+                  Login
+                  <span
+                    class="w-5 h-5 text-slate-400 bg-slate-300 rounded text-xxs"
+                    >L</span
+                  >
+                </Button>
+              </router-link>
+              <router-link :to="{ name: 'register' }">
+                <Button
+                  label="Registro"
+                  severity="contrast"
+                  raised
+                  size="small"
+                />
+              </router-link>
+            </div>
+            <div class="md:hidden flex items-center">
+              <Button outlined severity="contrast" @click="showMobileMenu">
+                <IconClose v-if="showMenu" />
+                <IconMenu v-else />
+              </Button>
+            </div>
+          </div>
         </header>
-        </transition>
-        <transition
-            enter-active-class="transition-all transition-slow ease-out overflow-hidden"
-            leave-active-class="transition-all transition-slow ease-in overflow-hidden"
-            enter-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-class="opacity-100"
-            leave-to-class="opacity-0"
-            mode="out-in"
-            >
-            <div v-if="showMenu" class="absolute top-0 mt-16 z-10 md:hidden items-center justify-between flex w-full lg:flex lg:w-auto lg:order-1 bg-white rounded-2xl shadow-xl">
-                <div class="flex flex-col mt-4 font-medium w-full lg:flex-row lg:space-x-8 lg:mt-0 p-4">
-                    <RouterLink :to="{name:'features'}">
-                        <Button label="Features" severity="secondary" text/>
-                    </RouterLink>
-                    <RouterLink :to="{name:'features'}">
-                        <Button label="About" severity="secondary" text/>
-                    </RouterLink>
-                    <RouterLink :to="{name:'features'}">
-                        <Button label="Pricing" severity="secondary" text/>
-                    </RouterLink>
-                    <RouterLink :to="{name:'features'}">
-                        <Button label="Contact" severity="secondary" text/>
-                    </RouterLink>
-                    <router-link :to="{name:'login'}">
-                        <Button label="Login" severity="contrast" outlined/>
-                    </router-link >
-                    <router-link :to="{name:'register'}">
-                        <Button label="Registro" severity="contrast" raised/>
-                    </router-link>
-                </div>   
-            </div>
-        </transition>
-        <div class="flex justify-center">
-            <!-- <RouterView /> -->
-            <Landing/>
+      </div>
+    </transition>
+    <transition
+      enter-active-class="transition-all transition-slow ease-out overflow-hidden"
+      leave-active-class="transition-all transition-slow ease-in overflow-hidden"
+      enter-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-class="opacity-100"
+      leave-to-class="opacity-0"
+      mode="out-in"
+    >
+      <div
+        v-if="showMenu"
+        class="absolute top-0 mt-16 z-10 md:hidden items-center justify-between flex w-full lg:flex lg:w-auto lg:order-1 bg-white rounded-2xl shadow-xl"
+      >
+        <div
+          class="flex flex-col mt-4 font-medium w-full lg:flex-row lg:space-x-8 lg:mt-0 p-4 gap-y-3"
+        >
+          <RouterLink to="/blog">
+            <Button
+              label="Blog"
+              severity="contrast"
+              text
+              size="small"
+              class="w-full"
+            />
+          </RouterLink>
+          <RouterLink to="/pricing">
+            <Button
+              label="Pricing"
+              severity="contrast"
+              text
+              size="small"
+              class="w-full"
+            />
+          </RouterLink>
+          <RouterLink to="/contact">
+            <Button
+              label="Contact"
+              severity="contrast"
+              text
+              size="small"
+              class="w-full"
+            />
+          </RouterLink>
+          <router-link :to="{ name: 'login' }">
+            <Button
+              label="Login"
+              severity="secondary"
+              size="small"
+              class="w-full"
+            />
+          </router-link>
+          <router-link :to="{ name: 'register' }">
+            <Button
+              label="Registro"
+              severity="contrast"
+              raised
+              size="small"
+              class="w-full"
+            />
+          </router-link>
         </div>
-        
+      </div>
+    </transition>
+    <div class="flex justify-center">
+      <slot />
     </div>
+  </div>
 </template>
 <script setup>
-    import { ref } from 'vue';
-    import Landing from "/src/views/Landing.vue"
-    import IconMenu from "/src/components/icons/IconMenu.vue"
-    import IconClose from "/src/components/icons/IconClose.vue"
-    
+import { ref, onMounted, onUnmounted } from "vue";
+import IconMenu from "/src/components/icons/IconMenu.vue";
+import IconClose from "/src/components/icons/IconClose.vue";
+import { useRouter } from "vue-router";
 
-
-    defineOptions({
-        name: 'Guests',       
-    });
+defineOptions({
+  name: "Guests",
+});
+//utils
+const router = useRouter();
+//variables
 const showMenu = ref(false);
 const AppearMenu = ref(false);
-    
-    const showMobileMenu = () => {
-        showMenu.value = !showMenu.value
-    }
 
+const showMobileMenu = () => {
+  showMenu.value = !showMenu.value;
+};
 
-    setTimeout(() => {
-        AppearMenu.value=true
-    }, 500);
+setTimeout(() => {
+  AppearMenu.value = true;
+}, 500);
 
+//detectar si pulsa la tecla "L" para redirigir a la pagina de login
+const handleKeyPress = (event) => {
+  if (event.key === "l" || event.key === "L") {
+    router.push("/login");
+  }
+};
+
+// Agregar y remover el event listener
+onMounted(() => {
+  window.addEventListener("keydown", handleKeyPress);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyPress);
+});
 </script>

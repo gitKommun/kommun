@@ -3,7 +3,7 @@
         <Select
         v-model="selected"
         :options="owners"
-        optionLabel="fullName"
+        optionLabel="full_name"
         variant="filled"
         placeholder="Seleccionar propietario"
         class="w-full"
@@ -20,14 +20,22 @@ import { useUserStore } from '/src/stores/useUserStore.js';
 defineOptions({
     name: 'UserSelector',
 })
+const props = defineProps({
+        owner: {
+            type: Object
+    },
+        exclude: {
+            type: Array,
+            default: {}
+        }
+});
     //utils
     const http = useHttp();
     const { user } = useUserStore();    
 
 //variables
-    const owners = ref([]);
     const selected = ref(null);
-
+    const owners = ref([]);
     // const props = defineProps({
     //     property: {
     //         type: Object,
@@ -36,19 +44,16 @@ defineOptions({
     const emit = defineEmits(['update:selected']);
 
     watch(selected, (newValue) => {
-        // console.log('nv',newValue)
         emit('update:selected', newValue);   
     })
+    
 
 
     const getOwners = async () => {
         try {
 
         const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
-            owners.value = response.data.map((owner) => ({
-                ...owner,
-                fullName: `${owner.name} ${owner.surnames}`.trim(), // Concatenar name y surname
-            }));
+            owners.value = response.data
         
         } catch (error) {
             console.log(error)

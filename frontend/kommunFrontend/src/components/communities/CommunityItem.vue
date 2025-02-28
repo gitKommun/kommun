@@ -1,41 +1,41 @@
 <template>
-    <div v-if="hasInfo" class="flex flex-col min-h-80 items-center border border-slate-200 p-2 rounded-2xl gap-x-3 mb-3 w-full md:max-w-72 bg-slate-100  hover:shadow-lg hover:bg-slate-50 relative group transition-all duration-300">
-        <div class="h-24 w-full bg-slate-200 rounded-lg relative">
-          
+    <div v-if="hasInfo" class="flex flex-col min-h-80 items-center border border-slate-200 p-2 rounded-2xl gap-x-3 mb-3 w-full md:max-w-72 bg-slate-50 hover:shadow-lg hover:-translate-y-3 relative group transition-all duration-300">
+        <div class="h-10 w-full flex items-start justify-between rounded-lg mb-3 pl-2">
+          <IconCommunity class="text-indigo-500 scale-175 ml-4 mt-6"/>
             <CustomTag
             v-if="isCurrent"
-            class="absolute top-0 left-0 ml-2 mt-2 shadow-green-700"
+            
             :solid="true"
             :color="'green'"
             >
             Actual
             </CustomTag>
         </div>
-        <div class="py-2 flex w-full px-1 font-semibold">
+        <div class="py-2 flex w-full px-4 font-semibold mt-3">
             <span v-if="info.name">
                 {{ info.name }}
             </span>
             <span v-else>Communidad sin nombre</span> 
         </div>
-        <div class="py-2 flex w-full px-1 text-sm text-slate-400">
+        <div class="py-2 flex w-full px-4 text-sm text-slate-400">
             <span v-if="info.address">
                 {{ info.address }}
             </span>
             <span v-else>Sin dirrección</span> 
         </div>        
-        <div class="py-1 flex w-full px-1 text-xs text-slate-400 uppercase ">
+        <div class="py-1 flex w-full px-4 text-xs text-slate-400 uppercase ">
             <span v-if="info.properties">
                 Propiedades: <span class="ml-1">{{ info.properties }}</span>
             </span>
             <span v-else>Sin propiedades</span>
         </div>
-        <div  class="py-1 flex w-full px-1 text-xs text-slate-400 uppercase ">
+        <div  class="py-1 flex w-full px-4 text-xs text-slate-400 uppercase ">
             <span v-if="info.catastral_ref">
                 Ref: <span class="ml-1">{{ info.catastral_ref }}</span>
             </span>
             <span v-else>Sin referecia catastral</span>
         </div>
-        <div class="py-1 flex w-full px-1 text-xs text-slate-400 uppercase ">
+        <div class="py-1 flex w-full px-4 text-xs text-slate-400 uppercase ">
             <span v-if=" info.profiles">
                 Vecinos: <span class="ml-1">{{ info.profiles }}</span>
             </span>
@@ -71,6 +71,7 @@ import { useRouter } from 'vue-router';
 
 import CustomTag from '/src/components/CustomTag.vue'
 import IconSettings from '/src/components/icons/IconSettings.vue'
+import IconCommunity from '/src/components/icons/IconCommunity.vue'
 
 
 
@@ -141,7 +142,7 @@ async function getInfo () {
 
 getInfo();
 const configCommunity = () => {
-    route.push({ name: 'settings', params: { id:props.community.community_id } })
+    route.push({ name: 'community_settings', params: { id:props.community.community_id } })
 }
 
 const hasInfo = computed(()=> {
