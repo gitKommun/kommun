@@ -10,31 +10,63 @@
     </div>
     <div class="w-full flex justify-between items-center">
       <div class="text-slate-500 text-sm">
-        <!-- soy delegado -->
-        <template v-if="isDelegated">
-          <CustomAvatar :name="'juan Palomo'" size="small" />
-          <span class="text-sm text-slate-500"> Juan Palomo </span>
-          <span>te ha delegado su voto</span>
+        <!-- Si he delegado mi voto -->
+        <template v-if="isMyDirectSurvey && myDelegationStatus.isDelegated">
+          <CustomTag>
+            Delegado a: <span class="ml-1 font-bold">{{ myDelegationStatus.delegatedTo.fullName }}</span>
+          </CustomTag>
         </template>
-        <!-- me han delegado -->
-        <template v-if="iAmDelegated">
-          <span class="mr-1">Voto delegado a</span>
-          <CustomAvatar :name="'juan Palomo'" size="small" />
-          <span class="text-sm text-slate-500"> Juan Palomo </span>
+
+        <!-- Si soy delegado -->
+        <template v-if="amIDelegated && delegator">
+          <CustomTag color="purple">
+            Delegado por: <span class="ml-1 font-bold">{{ delegator.fullName }}</span>
+          </CustomTag>
         </template>
       </div>
       <div class="flex gap-2">
-        <Button 
-        v-if="!isDelegated" 
-        severity="contrast" 
-        outlined 
-        size="small"
-        @click="showDelegate = !showDelegate"
-        >Delegar</Button
-        >
-        <Button @click="showSurvey = true" severity="contrast" size="small"
-          >Votar</Button
-        >
+        <!-- Si soy usuario directo y no he delegado -->
+        <template v-if="isMyDirectSurvey && !myDelegationStatus.isDelegated">
+          <Button 
+            severity="contrast" 
+            outlined 
+            size="small"
+            @click="showDelegate = true"
+          >
+            Delegar
+          </Button>
+          <Button 
+            severity="contrast" 
+            size="small"
+            @click="showSurvey = true"
+          >
+            Votar
+          </Button>
+        </template>
+
+        <!-- Si he delegado mi voto -->
+        <template v-if="isMyDirectSurvey && myDelegationStatus.isDelegated">
+          <Button 
+            severity="danger" 
+            outlined 
+            size="small"
+            :disabled="!myDelegationStatus.canCancelDelegation"
+            @click="cancelDelegation"
+          >
+            Anular delegación
+          </Button>
+        </template>
+
+        <!-- Si soy delegado -->
+        <template v-if="amIDelegated">
+          <Button 
+            severity="contrast" 
+            size="small"
+            @click="showSurvey = true"
+          >
+            Votar como delegado
+          </Button>
+        </template>
       </div>
     </div>
     <Dialog v-model:visible="showSurvey" modal header="Votación" class="w-128">
@@ -74,7 +106,7 @@
       class="w-96"
     >
       <div class="mb-4">
-        <UserSelector @update:selected="(owner) => selectionDelegate(owner)" />
+        <UserSelector @update:selected="(owner) => selectionDelegate(owner)" :exclude="user?.current_community?.community_person_id" />
       </div>
       <div class="flex justify-end gap-x-4">
         <Button
@@ -90,7 +122,7 @@
 </template>
 <script setup>
 import { ref, computed, toRaw } from "vue";
-import CustomAvatar from "/src/components/CustomAvatar.vue";
+import CustomTag from "/src/components/CustomTag.vue";
 import UserSelector from "/src/components/UserSelector.vue";
 import { useHttp } from "/src/composables/useHttp.js";
 import { useToast } from "primevue/usetoast";
@@ -104,20 +136,50 @@ defineOptions({
 const props = defineProps({
   survey: {
     type: Object,
+    required: true
   },
 });
-//utils
+
 const http = useHttp();
 const toast = useToast();
 const { user } = useUserStore();
 
-//variables
-const isDelegated = ref(false);
-const iAmDelegated = ref(false);
+// Estados
 const showSurvey = ref(false);
 const showDelegate = ref(false);
 const selectedOption = ref(null);
 const delegateTo = ref(null);
+
+// Computed Properties
+// 1. Verificar si soy el usuario de esta survey
+const isMyDirectSurvey = computed(() => {
+  return props.survey.users.person_community_id === user.current_community.community_person_id;
+});
+
+// 2. Verificar si soy el delegado
+const amIDelegated = computed(() => {
+  return props.survey.users.delegate_to?.person_community_id === user.current_community.community_person_id;
+});
+
+// 3. Estado de delegación
+const myDelegationStatus = computed(() => {
+  if (!isMyDirectSurvey.value) return { isDelegated: false, delegatedTo: null, canCancelDelegation: false };
+  
+  return {
+    isDelegated: Boolean(props.survey.users.delegate_to),
+    delegatedTo: props.survey.users.delegate_to,
+    canCancelDelegation: props.survey.users.answer.length === 0
+  };
+});
+
+// 4. Información del delegador (si soy delegado)
+const delegator = computed(() => {
+  if (!amIDelegated.value) return null;
+  return {
+    person_community_id: props.survey.users.person_community_id,
+    fullName: props.survey.users.fullName
+  };
+});
 
 const selectOption = (option) => {
   selectedOption.value = option;
@@ -125,7 +187,6 @@ const selectOption = (option) => {
 
 const vote = async () => {
   try {
-   
     await http.post(`votes/${user?.current_community?.community_id}/polls/${props.survey.vote_id}/vote/`, {
       person_id: user?.current_community?.community_person_id,
       option_ids: selectedOption.value?.option_id,
@@ -148,20 +209,36 @@ const vote = async () => {
       detail: 'Ocurrió un error al procesar tu voto',
       life: 3000
     });
-    console.error('Error al votar:', error);
   }
 };
-//saber si me han delegado el voto
-const delegatedToMe = computed(() => {
-  return props.survey.delegated_to === user.currentCommunity.community_person_id;
-});
-//saber si yo he delegado el voto
-const delegatedByMe = computed(() => {
-  return props.survey.delegated_to !== null;
-});
+
+const cancelDelegation = async () => {
+  try {
+    await http.post(`votes/${user?.current_community?.community_id}/polls/${props.survey.vote_id}/vote/`, {
+      person_id: user?.current_community?.community_person_id,
+      delegated_to: null,
+    });
+
+    toast.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Delegación anulada correctamente',
+      life: 3000
+    });
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Ocurrió un error al anular la delegación',
+      life: 3000
+    });
+  }
+};
 
 const selectionDelegate = (delegate) => {
-  console.log(delegate);
   delegateTo.value = delegate.person_id;
 };
+
+console.log('delegatedByMe:', props.survey.users);
+console.log('myDelegatedTo:', myDelegationStatus.delegatedTo);
 </script>

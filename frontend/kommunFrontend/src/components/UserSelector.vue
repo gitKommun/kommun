@@ -23,7 +23,11 @@ defineOptions({
 const props = defineProps({
         owner: {
             type: Object
-        },
+    },
+        exclude: {
+            type: Array,
+            default: {}
+        }
 });
     //utils
     const http = useHttp();

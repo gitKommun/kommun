@@ -278,16 +278,42 @@ const demoData = {
 // funcion computada para devolver las surveys que están abiertas y en las cuales estoy como user o como delegado
 
 const getMyOpenSurveys = computed(() => {
-  return surveys.value.filter(
-    (survey) =>
-      survey.status === "open" &&
-      survey.users.some(
-        (userObj) =>
-          userObj.person_community_id ===
-          user?.current_community?.community_person_id
-      ) //si soy el asignado
-    // survey.users.some(userObj => userObj.delegate_to.user_id === user?.current_community?.community_person_id) //si me lo han delegado
-  );
+  return surveys.value
+    .filter(survey => survey.status === "open")
+    .flatMap(survey => {
+      const mySurveys = [];
+      
+      // Buscar si soy participante directo
+      const myDirectParticipation = survey.users.find(
+        userObj => userObj.person_community_id === user?.current_community?.community_person_id
+      );
+      
+      // Si soy participante directo, añadir la survey con mi usuario
+      if (myDirectParticipation) {
+        mySurveys.push({
+          ...survey,
+          users: myDirectParticipation,
+          participationType: 'direct'
+        });
+      }
+      
+      // Buscar todos los usuarios que me han delegado su voto
+      const delegatedToMe = survey.users.filter(
+        userObj => 
+          userObj.delegate_to?.person_community_id === user?.current_community?.community_person_id
+      );
+      
+      // Añadir una entrada por cada delegación
+      delegatedToMe.forEach(delegator => {
+        mySurveys.push({
+          ...survey,
+          users: delegator,
+          participationType: 'delegated'
+        });
+      });
+      
+      return mySurveys;
+    });
 });
 
 const getProcess = (users) => {
