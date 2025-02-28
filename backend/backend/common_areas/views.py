@@ -1,4 +1,3 @@
-
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import make_aware, is_naive
 from datetime import datetime, timedelta
@@ -297,8 +296,8 @@ class CommonAreaAvailableSlotsAPIView(APIView):
 
             if reserved:
                 available_slots.append({
-                    'slot_start': current_time.strftime("%H:%M"),
-                    'slot_end': slot_end.strftime("%H:%M"),
+                    'slot_start': current_time.strftime("%Y-%m-%dT%H:%MZ"),
+                    'slot_end': slot_end.strftime("%Y-%m-%dT%H:%MZ"),
                     'reserved': True,
                     'reservation_id': reserved.reservation_id,
                     'neighbor': {
@@ -308,8 +307,8 @@ class CommonAreaAvailableSlotsAPIView(APIView):
                 })
             else:
                 available_slots.append({
-                    'slot_start': current_time.strftime("%H:%M"),
-                    'slot_end': slot_end.strftime("%H:%M"),
+                    'slot_start': current_time.strftime("%Y-%m-%dT%H:%MZ"),
+                    'slot_end': slot_end.strftime("%Y-%m-%dT%H:%MZ"),
                     'reserved': False,
                     'reservation_id': None,
                     'neighbor': None
