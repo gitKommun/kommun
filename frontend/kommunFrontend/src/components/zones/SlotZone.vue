@@ -10,7 +10,7 @@
       <span
         class="test-slate-500"
         :class="{ 'line-through text-red-500': slot.reserved }"
-        >{{ slot.slot_start }} - {{ slot.slot_end }}</span
+        >{{ formatTime(slot.slot_start) }} - {{ formatTime(slot.slot_end) }}</span
       >
       <CustomTag :color="color">{{
         slot.reserved ? "Reservado" : "Libre"
@@ -32,6 +32,7 @@ import { useHttp } from "/src/composables/useHttp.js";
 import { useUserStore } from "/src/stores/useUserStore.js";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
+import { formatTime } from "@/utils/dateUtils";
 
 import CustomTag from "/src/components/CustomTag.vue";
 import CustomAvatar from "/src/components/CustomAvatar.vue";
@@ -59,15 +60,6 @@ const color = computed(() => {
   return props.slot.reserved ? "red" : "green";
 });
 
-//miscelanea
-const formatTime = (time) => {
-  const date = new Date(time);
-  return date.toLocaleTimeString("es-ES", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-};
 
 const reserveSlot = () => {
   if (props.slot.reserved) {
@@ -76,23 +68,6 @@ const reserveSlot = () => {
   emit("update:reserve", true);
 };
 
-function dateFormat(dateString) {
-  // Intenta crear un objeto Date directamente desde el string ISO
-  const date = new Date(dateString);
-  console.log(date);
-  // Verifica si la fecha es válida
-  if (isNaN(date.getTime())) {
-    console.error("Fecha no válida:", dateString);
-    return "Fecha no válida";
-  }
-
-  // Formatea la fecha como DD/MM/YYYY
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript son 0-indexados
-  const year = date.getFullYear();
-
-  return `${day}/${month}/${year}`;
-}
 
 const deleteReserve = () => {
   confirm.require({
@@ -100,10 +75,10 @@ const deleteReserve = () => {
       "Anular reserva de " +
       props.zone.name +
       " de " +
-      props.slot.slot_start +
+      formatTime(props.slot.slot_start) +
       " a " +
-      props.slot.slot_end +
-      "\n¿ Quieres confirmar la anulación?",
+      formatTime(props.slot.slot_end) +
+      "\n ¿Quieres confirmar la anulación?",
     header: "Anulación de reserva ",
     rejectProps: {
       label: "Cancelar",

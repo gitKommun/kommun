@@ -35,25 +35,26 @@
                 :key="i"
                 class="flex items-center gap-x-2"
               >
-              <template v-if="rate.rating >= 1">
-                <div class="w-44 flex justify-end">
-                  <IconStarFill
-                    class="scale-50 text-slate-900"
-                    v-for="star in rate.rating"
-                    :key="rate.rating"
-                  />
-                </div>
-                <div
-                  class="w-full h-2 bg-slate-200 relative rounded-sm overflow-hidden"
-                >
+                <template v-if="rate.rating >= 1">
+                  <div class="w-44 flex justify-end">
+                    <IconStarFill
+                      class="scale-50 text-slate-900"
+                      v-for="star in rate.rating"
+                      :key="rate.rating"
+                    />
+                  </div>
                   <div
-                    class="absolute h-2 bg-slate-500 rounded-sm"
-                    :style="{ width: rate.value + '%' }"
-                  ></div>
-                </div>
-                <div class="w-8 text-xs text-slate-500">{{ rate.value }}%</div>
-              </template>
-                
+                    class="w-full h-2 bg-slate-200 relative rounded-sm overflow-hidden"
+                  >
+                    <div
+                      class="absolute h-2 bg-slate-500 rounded-sm"
+                      :style="{ width: rate.value + '%' }"
+                    ></div>
+                  </div>
+                  <div class="w-8 text-xs text-slate-500">
+                    {{ rate.value }}%
+                  </div>
+                </template>
               </div>
             </div>
             <div
@@ -124,7 +125,10 @@
             size="small"
             variant="filled"
           />
-          <AddNewProvider @update:providers="updateItems" class="h-auto" />
+          <div class="flex gap-x-2">
+            <ProviderFilters />
+            <AddNewProvider @update:providers="updateItems" class="h-auto" />
+          </div>
         </div>
         <DataTable
           :value="providers"
@@ -186,7 +190,7 @@ import Loading from "@/components/Loading.vue";
 import Main from "/src/layouts/Main.vue";
 import { PROVIDER_COLOR, PROVIDER_HEX } from "/src/constants/colors.js";
 import { PROVIDER_LABEL } from "/src/constants/labels.js";
-import AddNewProvider from "@/components/properties/AddNewProvider.vue";
+import AddNewProvider from "@/components/providers/AddNewProvider.vue";
 
 import IconBolt from "@/components/icons/IconBolt.vue";
 import IconDroplet from "@/components/icons/IconDroplet.vue";
@@ -203,6 +207,7 @@ import IconScale from "@/components/icons/IconScale.vue";
 import IconPaint from "@/components/icons/IconPaint.vue";
 import IconBucketDroplet from "@/components/icons/IconBucketDroplet.vue";
 import IconStarFill from "@/components/icons/IconStarFill.vue";
+import ProviderFilters from "@/components/providers/ProviderFilters.vue";
 
 defineOptions({
   name: "Providers",

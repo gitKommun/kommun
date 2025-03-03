@@ -242,7 +242,7 @@ import { useUserStore } from "/src/stores/useUserStore.js";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { useConfirm } from "primevue/useconfirm";
-import { formatDate } from "@/utils/dateUtils";
+import { formatDateYYYYMMDD,formatDate, formatTime } from "@/utils/dateUtils";
 import Loading from "/src/components/Loading.vue";
 import EmptyTask from "/src/components/emptys/EmptyTask.vue";
 import IconPlus from "/src/components/icons/IconPlus.vue";
@@ -366,17 +366,9 @@ const deleteZone = (id) => {
 
 //reservar slot
 const comfirmReserve = (slot) => {
-  const startDate = new Date(bookDate.value);
-  const endDate = new Date(bookDate.value);
   
-  const [startHours, startMinutes] = slot.slot_start.split(':');
-  const [endHours, endMinutes] = slot.slot_end.split(':');
-  
-  startDate.setHours(parseInt(startHours), parseInt(startMinutes), 0, 0);
-  endDate.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
-
   confirm.require({
-    message: "Reservar de "+slot.slot_start+" a "+slot.slot_end+" el día "+formatDate(bookDate.value)+"¿ Quieres confirmar la reserva?",
+    message: "Reservar de "+formatTime(slot.slot_start)+" a "+formatTime(slot.slot_end)+" el día "+formatDate(bookDate.value)+"¿ Quieres confirmar la reserva?",
     header: "Reservar "+selectedZone.value.name,
     rejectProps: {
       label: "Cancelar",
@@ -391,8 +383,8 @@ const comfirmReserve = (slot) => {
       try {
         await http.post(`common_areas/${user?.current_community?.community_id}/${selectedZone.value.area_id}/reservations/create/`,{
           neighbor: user?.current_community?.community_person_id,
-          start_time: startDate.toISOString().split('.')[0]+'Z',
-          end_time: endDate.toISOString().split('.')[0]+'Z',
+          start_time: slot.slot_start,
+          end_time: slot.slot_end,
         });
         
         toast.add({
@@ -443,7 +435,7 @@ function updateItems() {
 const getSlots = async () => {
   // Crear un objeto con la fecha formateada
   const dateOption = {
-    date: dateFormat(bookDate.value)
+    date: formatDateYYYYMMDD(bookDate.value)
   };
   
   try {
@@ -489,29 +481,5 @@ onMounted(() => {
   updateItems();
 });
 
-//miscelanea
-const formatTime = (time) => {
-  const date = new Date(time);
-  return date.toLocaleTimeString("es-ES", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-};
 
-function dateFormat(dateString) {
-  const date = new Date(dateString);
-  
-  if (isNaN(date.getTime())) {
-    console.error("Fecha no válida:", dateString);
-    return "Fecha no válida";
-  }
-
-  // Formatea la fecha como YYYY-MM-DD
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
 </script>

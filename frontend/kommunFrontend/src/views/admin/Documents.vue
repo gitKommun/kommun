@@ -89,7 +89,9 @@
                 ></span
               >
             </div>
-            <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 content-start gap-3 pb-4">
+            <div
+              class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 content-start gap-3 pb-4"
+            >
               <FolderItem
                 v-for="folder in folders"
                 :key="folder.folder_id"
@@ -112,7 +114,7 @@
             </div>
 
             <div class="w-full" key="table">
-              <DataTable 
+              <DataTable
                 :value="documents"
                 :loading="isUpdating"
                 dataKey="document_id"
@@ -128,23 +130,31 @@
                     </span>
                   </template>
                 </Column>
-                
+
                 <Column field="upload_user" header="Propietario">
                   <template #body="{ data }">
                     <span class="flex items-center">
-                      <span class="min-w-8 mr-1">
+                      <!-- <span class="min-w-8 mr-1">
                         <Avatar label="k" shape="circle" />
-                      </span>
+                      </span> -->
+                      <CustomAvatar
+                        :name="data.upload_user?.Fullname || 'Kommun'"
+                        class="mr-1"
+                      />
                       <span class="text-xs text-slate-400 truncate">
                         {{ data.upload_user?.Fullname || "Kommun" }}
                       </span>
                     </span>
                   </template>
                 </Column>
-                
+
                 <Column field="upload_date" header="Fecha" />
-                
-                <Column header="Acciones" :exportable="false" style="min-width:8rem">
+
+                <Column
+                  :rowEditor="true"
+                  style="width: 10%; min-width: 8rem"
+                  bodyStyle="text-align:right"
+                >
                   <template #body="{ data }">
                     <Dropdown strategy="fixed">
                       <template #reference="{ open }">
@@ -157,7 +167,9 @@
                       </template>
 
                       <template #content="{ close }">
-                        <div class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm">
+                        <div
+                          class="w-40 rounded-2xl bg-white p-3 shadow-2xl gap-y-2 text-sm"
+                        >
                           <div
                             class="flex items-center gap-x-2 p-2 rounded-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer"
                             @click="downloadFile(data)"
@@ -187,9 +199,17 @@
   </div>
 </template>
 <script setup>
-import { ref, watch, onMounted, shallowRef, nextTick, computed, onUnmounted } from "vue";
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import {
+  ref,
+  watch,
+  onMounted,
+  shallowRef,
+  nextTick,
+  computed,
+  onUnmounted,
+} from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
 
 import AddContent from "/src/components/documents/AddContent.vue";
 import FolderItem from "/src/components/documents/FolderItem.vue";
@@ -206,6 +226,7 @@ import Dropdown from "/src/components/Dropdown.vue";
 import IconDotsHorizontal from "/src/components/icons/IconDotsHorizontal.vue";
 import IconTrash from "/src/components/icons/IconTrash.vue";
 import IconDownload from "/src/components/icons/IconDownload.vue";
+import CustomAvatar from "@/components/CustomAvatar.vue";
 
 import { useHttp } from "/src/composables/useHttp.js";
 import { useUserStore } from "/src/stores/useUserStore.js";
@@ -223,7 +244,7 @@ const documents = ref([]);
 const foldersLoading = ref(true);
 const selectedFolder = ref(null);
 const path = ref([]);
-const search = ref('');
+const search = ref("");
 const isUpdating = ref(false);
 
 //utils
@@ -237,13 +258,15 @@ onMounted(() => {
 
 async function getFolders() {
   if (isUpdating.value) return;
-  
+
   isUpdating.value = true;
   foldersLoading.value = true;
-  
+
   try {
     const response = await http.get(
-      `documents/${user?.current_community?.community_id}/folders/${selectedFolder?.value?.folder_id || 0}/`
+      `documents/${user?.current_community?.community_id}/folders/${
+        selectedFolder?.value?.folder_id || 0
+      }/`
     );
 
     // Actualizar los datos en un solo nextTick para evitar múltiples renders
@@ -252,7 +275,6 @@ async function getFolders() {
       documents.value = response.data.documents || [];
       path.value = response.data.path || [];
     });
-
   } catch (error) {
     toast.add({
       severity: "error",
@@ -299,19 +321,19 @@ const downloadFile = async ({ document_id, name }) => {
     const response = await http.get(
       `documents/${user?.current_community?.community_id}/d/${document_id}/download/`,
       {
-        responseType: 'blob',
+        responseType: "blob",
         headers: {
-          'Accept': '*/*',
-        }
+          Accept: "*/*",
+        },
       }
     );
-    
+
     const blob = new Blob([response.data], {
-      type: response.headers['content-type'] || 'application/octet-stream'
+      type: response.headers["content-type"] || "application/octet-stream",
     });
 
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = name;
     document.body.appendChild(a);
@@ -319,7 +341,7 @@ const downloadFile = async ({ document_id, name }) => {
 
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-    
+
     toast.add({
       severity: "success",
       summary: "Ok",
@@ -327,7 +349,7 @@ const downloadFile = async ({ document_id, name }) => {
       life: 3000,
     });
   } catch (error) {
-    console.error('Error al descargar:', error);
+    console.error("Error al descargar:", error);
     toast.add({
       severity: "error",
       summary: "Upps!! algo ha fallado",
@@ -338,8 +360,11 @@ const downloadFile = async ({ document_id, name }) => {
 };
 
 // Opcional: watch para debugging
-watch(documents, (newVal) => {
-  console.log('Documents updated:', newVal.length);
-}, { deep: true });
-
+watch(
+  documents,
+  (newVal) => {
+    console.log("Documents updated:", newVal.length);
+  },
+  { deep: true }
+);
 </script>

@@ -56,3 +56,28 @@ export const formatDateTime = (dateTime) => {
     const date = new Date(dateTime);
     return `${date.toLocaleDateString()} ${formatTimeToString(date)}`;
 }; 
+
+/**
+ * Formatea una fecha a string en formato local
+ * @param {Date|string} date - Fecha a formatear
+ * @returns {string} Ejemplo para España: "08:00"
+ */
+export const formatTime = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toTimeString().split(' ')[0].substring(0, 5);
+};
+
+/**
+ * Formatea una fecha a string en formato local
+ * @param {Date|string} date - Fecha a formatear
+ * @returns {string} Ejemplo para España: "2024-03-25"
+ */
+export const formatDateYYYYMMDD = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};

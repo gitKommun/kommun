@@ -25,8 +25,8 @@ const props = defineProps({
             type: Object
     },
         exclude: {
-            type: Array,
-            default: {}
+            type: Number,
+            default: null
         }
 });
     //utils
@@ -51,10 +51,9 @@ const props = defineProps({
 
     const getOwners = async () => {
         try {
-
-        const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
-            owners.value = response.data
-        
+            const response = await http.get(`communities/${user?.current_community?.community_id}/neighbors/`);
+            // Filtrar el usuario excluido si existe
+            owners.value = response.data.filter(owner => owner.person_id !== props.exclude);
         } catch (error) {
             console.log(error)
         }
