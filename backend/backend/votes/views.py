@@ -150,7 +150,7 @@ class CastVoteAPIView(APIView):
             return Response({'error': 'No tienes permiso para votar en esta votación.'}, status=status.HTTP_403_FORBIDDEN)
 
         # 📌 **Caso 1: Anulación de delegación**
-        if 'delegated_to' in request.data and not request.data['delegated_to']:
+        if 'delegated_to' in request.data and request.data['delegated_to'] is None:  # Solo si explícitamente es null
             vote_record, created = VoteRecord.objects.get_or_create(
                 vote=vote, 
                 neighbor=owner_neighbor
@@ -190,14 +190,10 @@ class CastVoteAPIView(APIView):
         if not all(option_id in valid_option_ids for option_id in option_ids):
             return Response({'error': 'Una o más opciones seleccionadas no son válidas.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 🔹 **Obtener o crear el registro del voto**
+        # 🔹 **Obtener o crear el registro del voto manteniendo la delegación existente**
         vote_record, created = VoteRecord.objects.get_or_create(vote=vote, neighbor=owner_neighbor)
-
-        # Si ya había un voto delegado y ahora el propietario vota, eliminar la delegación
-        if vote_record.delegated_to:
-            vote_record.delegated_to = None
-
-        # Asignar opciones al voto
+        
+        # Asignar opciones al voto sin modificar delegated_to
         vote_record.options.set(Option.objects.filter(vote=vote, option_id__in=option_ids))
         vote_record.timestamp = timezone.now()
         vote_record.recorded_by = request.user
