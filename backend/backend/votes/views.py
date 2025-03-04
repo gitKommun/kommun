@@ -102,31 +102,31 @@ class CreateVoteAPIView(APIView):
 
 class CastVoteAPIView(APIView):
     @swagger_auto_schema(
-        operation_description="Registrar un voto en una votación específica. Se puede votar directamente, delegar el voto o registrar un voto delegado.",
+        operation_description="""
+        Registrar o modificar un voto en una votación específica.
+        - Para votar directamente: enviar option_ids
+        - Para delegar el voto: enviar delegated_to con el person_id del delegado
+        - Para anular una delegación: enviar delegated_to como null o vacío
+        """,
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=['person_id'],
             properties={
-                'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del vecino en la comunidad (propietario del voto)."),
+                'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del vecino en la comunidad (propietario del voto)"),
                 'option_ids': openapi.Schema(
                     type=openapi.TYPE_ARRAY,
                     items=openapi.Schema(type=openapi.TYPE_INTEGER),
-                    description="Lista de IDs relativos de las opciones seleccionadas (opcional si se delega el voto)."
+                    description="Lista de IDs relativos de las opciones seleccionadas (opcional si se delega el voto)"
                 ),
-                'delegated_to': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del vecino al que se delega el voto (opcional).")
-            },
+                'delegated_to': openapi.Schema(
+                    type=openapi.TYPE_INTEGER, 
+                    description="ID relativo del vecino al que se delega el voto. Enviar null o vacío para anular la delegación",
+                    x_nullable=True
+                )
+            }
         ),
-        responses={
-            201: openapi.Response(description="Voto registrado con éxito."),
-            400: openapi.Response(description="Error al registrar el voto."),
-            403: openapi.Response(description="El usuario no tiene permiso para votar."),
-        },
-        manual_parameters=[
-            openapi.Parameter('IDcommunity', openapi.IN_PATH, description="ID de la comunidad", type=openapi.TYPE_STRING),
-            openapi.Parameter('vote_id', openapi.IN_PATH, description="ID de la votación dentro de la comunidad", type=openapi.TYPE_INTEGER),
-        ]
+        responses={201: "Operación exitosa"}
     )
-
     def post(self, request, IDcommunity, vote_id):
         # Obtener la comunidad y la votación
         community = get_object_or_404(Community, community_id=IDcommunity)
@@ -149,7 +149,22 @@ class CastVoteAPIView(APIView):
            not VoteRecord.objects.filter(vote=vote, delegated_to=user_neighbor).exists():
             return Response({'error': 'No tienes permiso para votar en esta votación.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # 📌 **Caso 1: Delegación del voto**
+        # 📌 **Caso 1: Anulación de delegación**
+        if 'delegated_to' in request.data and not request.data['delegated_to']:
+            vote_record, created = VoteRecord.objects.get_or_create(
+                vote=vote, 
+                neighbor=owner_neighbor
+            )
+            vote_record.delegated_to = None
+            vote_record.timestamp = timezone.now()
+            vote_record.recorded_by = request.user
+            vote_record.save()
+
+            return Response({
+                'message': f'Delegación de voto anulada para {owner_neighbor.name} {owner_neighbor.surnames}.'
+            }, status=status.HTTP_201_CREATED)
+
+        # 📌 **Caso 2: Nueva delegación**
         if delegated_to_id:
             delegated_to = get_object_or_404(PersonCommunity, community=community, person_id=delegated_to_id)
 
@@ -162,7 +177,7 @@ class CastVoteAPIView(APIView):
 
             return Response({'message': f'Voto de {owner_neighbor.name} {owner_neighbor.surnames} delegado correctamente a {delegated_to.name} {delegated_to.surnames}.'}, status=status.HTTP_201_CREATED)
 
-        # 📌 **Caso 2: Registro de un voto (directo o delegado)**
+        # 📌 **Caso 3: Registro de voto**
         if not option_ids:
             return Response({'error': 'Debes seleccionar al menos una opción o delegar el voto.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -360,102 +375,7 @@ class CommunityVotesListAPIView(APIView):
 
         return Response(votes_data, status=status.HTTP_200_OK)
 
-class OLDCommunityVotesListAPIView(APIView):
-    @swagger_auto_schema(
-        operation_description="Obtiene el listado de todas las votaciones de una comunidad, con un resumen de votos por cada opción y el estado de la votación.",
-        responses={
-            200: openapi.Response(
-                description="Lista de votaciones de la comunidad",
-                examples={
-                    "application/json": [
-                        {
-                            "vote_id": 1,
-                            "title": "Presupuesto 2023",
-                            "description": "Aprobación del presupuesto",
-                            "start_date": "2023-10-01T10:00:00Z",
-                            "end_date": "2023-10-31T23:59:00Z",
-                            "status": "open",
-                            "options": [
-                                {"option_id": 1, "option_text": "A favor", "vote_count": 30},
-                                {"option_id": 2, "option_text": "En contra", "vote_count": 10}
-                            ],
-                            "pending_votes": 15
-                        },
-                        {
-                            "vote_id": 2,
-                            "title": "Renovación de la piscina",
-                            "description": "Renovación de las instalaciones de la piscina",
-                            "start_date": "2023-09-01T10:00:00Z",
-                            "end_date": "2023-09-30T23:59:00Z",
-                            "status": "closed",
-                            "options": [
-                                {"option_id": 1, "option_text": "A favor", "vote_count": 45},
-                                {"option_id": 2, "option_text": "En contra", "vote_count": 5}
-                            ],
-                            "pending_votes": 0
-                        }
-                    ]
-                }
-            ),
-            404: "Comunidad no encontrada"
-        }
-    )
-    def get(self, request, IDcommunity):
-        # Filtrar votaciones por comunidad
-        votes = Vote.objects.filter(community__community_id=IDcommunity)
 
-        # Lista para almacenar la información de cada votación
-        votes_data = []
-        current_time = timezone.now()
-
-        for vote in votes:
-            # Determinar el estado de la votación
-            if vote.start_date > current_time:
-                vote_status = "not_started"
-            elif vote.end_date < current_time or vote.eligible_voters.count() == vote.vote_records.count():
-                vote_status = "closed"
-            else:
-                vote_status = "open"
-
-            #Usuarios que ya han votado
-            users_voted = []
-            users_pending = []
-            
-            for vote_record in VoteRecord.objects.filter(vote=vote):
-                users_voted.append({
-                    "vote_owner": vote_record.neighbor,
-                    "vote_delegated_to": vote_record.delegated_to
-                    })
-
-
-            # Resumen de votos por cada opción
-            options_summary = []
-            for option in vote.options.all():
-                vote_count = VoteRecord.objects.filter(vote=vote, options=option).count()
-                options_summary.append({
-                    "option_id": option.option_id,
-                    "option_text": option.option_text,
-                    "vote_count": vote_count
-                })
-
-            # Calcular votos pendientes
-            pending_votes = vote.eligible_voters.count() - vote.vote_records.count()
-            neighbors_pending_vote = vote.eligible_voters
-
-            # Agregar datos de la votación al resultado final
-            votes_data.append({
-                "vote_id": vote.vote_id,
-                "title": vote.title,
-                "description": vote.description,
-                "start_date": vote.start_date,
-                "end_date": vote.end_date,
-                "status": vote_status,
-                "options": options_summary,
-                "pending_votes": pending_votes,
-                "users_voted": users_voted
-            })
-
-        return Response(votes_data, status=status.HTTP_200_OK)
 
 class VoteDetailAPIView(APIView):
     @swagger_auto_schema(
