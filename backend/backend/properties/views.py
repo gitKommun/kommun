@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -15,9 +16,10 @@ import requests
 
 from .models import  Property, PropertyRelationship
 from .serializers import  PropertySerializer, PropertyRelationshipSerializer, PropertyDetailSerializer, PropertyOwnerSerializer
-from communities.models import Community, PersonCommunity
+from communities.models import Community, PersonCommunity, Role
 from communities.serializers import PersonCommunitySerializer, PersonCommunityNeighborsSerializer
 from core.models import Municipality, Province, PostalCode
+from members.models import User
 
 
 
@@ -514,5 +516,80 @@ class DeletePropertyRelationshipAPIView(APIView):
         relationship_instance.delete()
 
         return Response({'message': 'Relationship deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class AddTenantToPropertyAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="""
+        Añade un inquilino a una propiedad.
+        - Crea el PersonCommunity con rol 'tenant'
+        - Crea la relación PropertyRelationship con la propiedad
+        """,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['property_id', 'name', 'surnames', 'email'],
+            properties={
+                'property_id': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID relativo de la propiedad en la comunidad"
+                ),
+                'name': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Nombre del inquilino"
+                ),
+                'surnames': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Apellidos del inquilino"
+                ),
+                'email': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Email del inquilino"
+                ),
+                'phone_number': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Teléfono del inquilino"
+                )
+            }
+        ),
+        responses={
+            201: "Inquilino añadido correctamente",
+            400: "Datos inválidos",
+            404: "Propiedad no encontrada"
+        }
+    )
+    def post(self, request, community_id):
+        # Obtener la comunidad y la propiedad
+        community = get_object_or_404(Community, community_id=community_id)
+        property = get_object_or_404(
+            Property, 
+            community=community,
+            property_id=request.data.get('property_id')
+        )
+
+        # Crear PersonCommunity para el inquilino
+        tenant_role = Role.objects.get(name='tenant')
+        person_community = PersonCommunity.objects.create(
+            community=community,
+            name=request.data['name'],
+            surnames=request.data['surnames'],
+            email=request.data['email'],
+            phone_number=request.data.get('phone_number')
+        )
+        person_community.roles.add(tenant_role)
+
+        # Crear PropertyRelationship
+        property_relationship = PropertyRelationship.objects.create(
+            property=property,
+            person=person_community,
+            type='tenant'
+        )
+
+        return Response({
+            'message': 'Inquilino añadido correctamente',
+            'person_community_id': person_community.person_id,
+            'property_relationship_id': property_relationship.id
+        }, status=status.HTTP_201_CREATED)
     
 

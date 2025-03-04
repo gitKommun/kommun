@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import PropertyUpdateAPIView, PropertyCreateAPIView, PropertyDeleteAPIView, BulkUploadPropertiesView, BulkCreatePropertiesFromCatastroAPIView, DeleteAllPropertiesAPIView
-from .views import CreatePropertyRelationshipAPIView, DeletePropertyRelationshipAPIView, ListPropertiesWithOwnerAPIView
+from .views import CreatePropertyRelationshipAPIView, DeletePropertyRelationshipAPIView, ListPropertiesWithOwnerAPIView, AddTenantToPropertyAPIView
 
 
 urlpatterns = [
@@ -21,5 +21,11 @@ urlpatterns = [
     #Property relationship URLS
     path('<str:IDcommunity>/property-relationship/create/', CreatePropertyRelationshipAPIView.as_view(), name='create-property-relationship'), #POST/crear relacion
     path('<str:IDcommunity>/property-relationship/delete/', DeletePropertyRelationshipAPIView.as_view(), name='delete-property-relationship'), #DELETE/borrar
+
+
+
+    path('<str:community_id>/add-tenant-to-property/', 
+         AddTenantToPropertyAPIView.as_view(), 
+         name='add-tenant-to-property'),
 ]
 
