@@ -46,6 +46,8 @@ class ListPropertiesWithOwnerAPIView(APIView):
                                 type=openapi.TYPE_OBJECT,
                                 properties={
                                     'person_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'name': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'surnames': openapi.Schema(type=openapi.TYPE_STRING),
                                     'fullname': openapi.Schema(type=openapi.TYPE_STRING),
                                     'email': openapi.Schema(type=openapi.TYPE_STRING),
                                     'roles': openapi.Schema(
@@ -60,6 +62,8 @@ class ListPropertiesWithOwnerAPIView(APIView):
                                     type=openapi.TYPE_OBJECT,
                                     properties={
                                         'person_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                        'name': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'surnames': openapi.Schema(type=openapi.TYPE_STRING),
                                         'fullname': openapi.Schema(type=openapi.TYPE_STRING),
                                         'email': openapi.Schema(type=openapi.TYPE_STRING),
                                         'roles': openapi.Schema(
@@ -88,6 +92,8 @@ class ListPropertiesWithOwnerAPIView(APIView):
                 owner = owner_relationship.person
                 owner_data = {
                     'person_id': owner.person_id,
+                    'name': owner.name,
+                    'surnames': owner.surnames,
                     'fullname': f"{owner.name} {owner.surnames}",
                     'email': owner.email,
                     'roles': [role.name for role in owner.roles.all()]
@@ -101,6 +107,8 @@ class ListPropertiesWithOwnerAPIView(APIView):
                 tenant = tenant_relationship.person
                 tenants_data.append({
                     'person_id': tenant.person_id,
+                    'name': tenant.name,
+                    'surnames': tenant.surnames,
                     'fullname': f"{tenant.name} {tenant.surnames}",
                     'email': tenant.email,
                     'roles': [role.name for role in tenant.roles.all()]
