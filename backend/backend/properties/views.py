@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -15,9 +16,10 @@ import requests
 
 from .models import  Property, PropertyRelationship
 from .serializers import  PropertySerializer, PropertyRelationshipSerializer, PropertyDetailSerializer, PropertyOwnerSerializer
-from communities.models import Community, PersonCommunity
+from communities.models import Community, PersonCommunity, Role
 from communities.serializers import PersonCommunitySerializer, PersonCommunityNeighborsSerializer
 from core.models import Municipality, Province, PostalCode
+from members.models import User
 
 
 
@@ -35,53 +37,45 @@ class ListPropertiesWithOwnerAPIView(APIView):
                     items=openapi.Schema(
                         type=openapi.TYPE_OBJECT,
                         properties={
-                            'property_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo de la propiedad"),
-                            'address_complete': openapi.Schema(type=openapi.TYPE_STRING, description="Dirección completa de la propiedad"),
-                            'surface_area': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_DECIMAL, description="Superficie de la propiedad"),
-                            'participation_coefficient': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_DECIMAL, description="Coeficiente de participación"),
-                            'usage': openapi.Schema(type=openapi.TYPE_STRING, description="Uso de la propiedad"),
+                            'property_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'address_complete': openapi.Schema(type=openapi.TYPE_STRING),
+                            'surface_area': openapi.Schema(type=openapi.TYPE_NUMBER),
+                            'participation_coefficient': openapi.Schema(type=openapi.TYPE_NUMBER),
+                            'usage': openapi.Schema(type=openapi.TYPE_STRING),
                             'owner': openapi.Schema(
                                 type=openapi.TYPE_OBJECT,
                                 properties={
-                                    'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del perfil en la comunidad"),
-                                    'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del propietario"),
-                                    'surnames': openapi.Schema(type=openapi.TYPE_STRING, description="Apellidos del propietario"),
+                                    'person_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'fullname': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'email': openapi.Schema(type=openapi.TYPE_STRING),
                                     'roles': openapi.Schema(
                                         type=openapi.TYPE_ARRAY,
-                                        items=openapi.Schema(type=openapi.TYPE_STRING),
-                                        description="Roles asociados al propietario"
+                                        items=openapi.Schema(type=openapi.TYPE_STRING)
                                     )
-                                },
-                                description="Información del propietario de la propiedad"
+                                }
                             ),
                             'tenant': openapi.Schema(
                                 type=openapi.TYPE_ARRAY,
                                 items=openapi.Schema(
                                     type=openapi.TYPE_OBJECT,
                                     properties={
-                                        'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del perfil en la comunidad"),
-                                        'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del inquilino"),
-                                        'surnames': openapi.Schema(type=openapi.TYPE_STRING, description="Apellidos del inquilino"),
+                                        'person_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                        'fullname': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'email': openapi.Schema(type=openapi.TYPE_STRING),
                                         'roles': openapi.Schema(
                                             type=openapi.TYPE_ARRAY,
-                                            items=openapi.Schema(type=openapi.TYPE_STRING),
-                                            description="Roles asociados al inquilino"
+                                            items=openapi.Schema(type=openapi.TYPE_STRING)
                                         )
                                     }
-                                ),
-                                description="Lista de inquilinos de la propiedad"
+                                )
                             )
                         }
                     )
                 )
-            ),
-            404: openapi.Response(description="Comunidad no encontrada.")
+            )
         }
     )
-
-
     def get(self, request, IDcommunity):
-        # Obtener todas las propiedades de la comunidad
         properties = Property.objects.filter(community__community_id=IDcommunity)
         properties_data = []
 
@@ -91,15 +85,26 @@ class ListPropertiesWithOwnerAPIView(APIView):
             owner_data = None
 
             if owner_relationship and owner_relationship.person:
-                #owner_data = PersonCommunitySerializer(owner_relationship.person).data
-                owner_data = PersonCommunityNeighborsSerializer(owner_relationship.person).data
+                owner = owner_relationship.person
+                owner_data = {
+                    'person_id': owner.person_id,
+                    'fullname': f"{owner.name} {owner.surnames}",
+                    'email': owner.email,
+                    'roles': [role.name for role in owner.roles.all()]
+                }
 
             # Buscar si hay inquilinos en la propiedad
             tenants = PropertyRelationship.objects.filter(property=property, type='tenant')
             tenants_data = []
 
-            for tenant in tenants:
-                tenants_data.append(PersonCommunityNeighborsSerializer(tenant.person).data)
+            for tenant_relationship in tenants:
+                tenant = tenant_relationship.person
+                tenants_data.append({
+                    'person_id': tenant.person_id,
+                    'fullname': f"{tenant.name} {tenant.surnames}",
+                    'email': tenant.email,
+                    'roles': [role.name for role in tenant.roles.all()]
+                })
 
             # Serializar los datos de la propiedad y agregar el owner
             property_data = PropertyOwnerSerializer(property).data
@@ -514,5 +519,80 @@ class DeletePropertyRelationshipAPIView(APIView):
         relationship_instance.delete()
 
         return Response({'message': 'Relationship deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class AddTenantToPropertyAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="""
+        Añade un inquilino a una propiedad.
+        - Crea el PersonCommunity con rol 'tenant'
+        - Crea la relación PropertyRelationship con la propiedad
+        """,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['property_id', 'name', 'surnames', 'email'],
+            properties={
+                'property_id': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID relativo de la propiedad en la comunidad"
+                ),
+                'name': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Nombre del inquilino"
+                ),
+                'surnames': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Apellidos del inquilino"
+                ),
+                'email': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Email del inquilino"
+                ),
+                'phone_number': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Teléfono del inquilino"
+                )
+            }
+        ),
+        responses={
+            201: "Inquilino añadido correctamente",
+            400: "Datos inválidos",
+            404: "Propiedad no encontrada"
+        }
+    )
+    def post(self, request, community_id):
+        # Obtener la comunidad y la propiedad
+        community = get_object_or_404(Community, community_id=community_id)
+        property = get_object_or_404(
+            Property, 
+            community=community,
+            property_id=request.data.get('property_id')
+        )
+
+        # Crear PersonCommunity para el inquilino
+        tenant_role = Role.objects.get(name='tenant')
+        person_community = PersonCommunity.objects.create(
+            community=community,
+            name=request.data['name'],
+            surnames=request.data['surnames'],
+            email=request.data['email'],
+            phone_number=request.data.get('phone_number')
+        )
+        person_community.roles.add(tenant_role)
+
+        # Crear PropertyRelationship
+        property_relationship = PropertyRelationship.objects.create(
+            property=property,
+            person=person_community,
+            type='tenant'
+        )
+
+        return Response({
+            'message': 'Inquilino añadido correctamente',
+            'person_community_id': person_community.person_id,
+            'property_relationship_id': property_relationship.id
+        }, status=status.HTTP_201_CREATED)
     
 
