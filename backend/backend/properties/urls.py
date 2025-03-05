@@ -1,12 +1,11 @@
 from django.urls import path
 
-from .views import PropertyUpdateAPIView, list_properties, PropertyCreateAPIView, PropertyDeleteAPIView, BulkUploadPropertiesView, BulkCreatePropertiesFromCatastroAPIView, DeleteAllPropertiesAPIView
+from .views import PropertyUpdateAPIView, PropertyCreateAPIView, PropertyDeleteAPIView, BulkUploadPropertiesView, BulkCreatePropertiesFromCatastroAPIView, DeleteAllPropertiesAPIView
 from .views import CreatePropertyRelationshipAPIView, DeletePropertyRelationshipAPIView, ListPropertiesWithOwnerAPIView
 
 
 urlpatterns = [
-    #Property URLS O
-    #path('<str:IDcommunity>/', list_properties, name='list-properties'), #GET/listar propiedades
+    #Property URLS 
     path('<str:IDcommunity>/', ListPropertiesWithOwnerAPIView.as_view(), name='properties-with-owner'),
 
     path('<str:IDcommunity>/create/', PropertyCreateAPIView.as_view(), name='add-property'), #POST/añadir propiedad

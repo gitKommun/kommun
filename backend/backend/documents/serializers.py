@@ -61,7 +61,9 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
         model = Document
         fields = ['name', 'file', 'community', 'folder_id', 'upload_user']
 
-
+    def create(self, validated_data):
+        print(validated_data)  # 🔍 Verifica qué datos está guardando realmente
+        return super().create(validated_data)
 
 
 class FolderDetailSerializer(serializers.ModelSerializer):

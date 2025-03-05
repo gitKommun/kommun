@@ -16,7 +16,6 @@ class Claim(models.Model):
         ('maintenance', 'Maintenance'),
         ('cleaning', 'Cleaning'),
         ('security', 'Security'),
-        # Agregar más categorías según sea necesario
     ]
     
     PRIORITY_CHOICES = [
@@ -41,6 +40,8 @@ class Claim(models.Model):
     #image = models.ImageField(upload_to='claims_images/', null=True, blank=True)
     #assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_claims')
     #assignet_toName = models.CharField(max_length=255, null=True, blank=True) 
+    current_status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    last_status_change = models.DateTimeField()
 
     def __str__(self):
         return f"{self.title} - {self.status}"
@@ -60,6 +61,7 @@ class ClaimStatusRecord(models.Model):
     status = models.CharField(max_length=20, choices=Claim.STATUS_CHOICES)
     changed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='status_changes')
     timestamp = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField()
 
     def __str__(self):
         return f"{self.claim.title} - {self.status} at {self.timestamp}"
@@ -67,6 +69,12 @@ class ClaimStatusRecord(models.Model):
     @property
     def changed_by_full_name(self):
         return f"{self.changed_by.name} {self.changed_by.surnames}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['claim', 'timestamp']),
+            models.Index(fields=['status', 'timestamp'])
+        ]
 
 class ClaimComment(models.Model):
     claim_comment_id = models.PositiveIntegerField()

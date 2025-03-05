@@ -18,10 +18,7 @@
       >
     </div>
     <div class="">
-      <Button size="small" text>
-        <IconPlus class="scale-75" />
-        Añadir inquilino
-      </Button>
+      <AddNewTenant @update:owners="assignTenant()" />
     </div>
   </div>
 </template>
@@ -30,6 +27,7 @@ import { ref } from "vue";
 import CustomTag from "/src/components/CustomTag.vue";
 import { USAGES } from "/src/constants/colors.js";
 import IconPlus from "/src/components/icons/IconPlus.vue";
+import AddNewTenant from "/src/components/owners/AddNewTenant.vue";
 
 defineOptions({
   name: "PropertyCard",
@@ -44,5 +42,34 @@ const props = defineProps({
 
 const usageTagColor = (usage) => {
   return USAGES[usage];
+};
+
+const assignTenant = async () => {
+
+  try {
+    await http.post(
+      `properties/${user?.current_community?.community_id}/add-tenant-to-property/`,
+      {
+        property_id: form.value.property_id,
+        person_id: selectedOwner.value.person_id,
+        type: 'owner', //no se pueden asignar admins ?
+      }
+    );
+    toast.add({
+      severity: "success",
+      summary: "Ok",
+      detail: "Prpietario vinculado con exito",
+      life: 3000,
+    });
+    getProperties();
+    showAddOwner.value = false;
+  } catch (error) {
+    toast.add({
+      severity: "error",
+      summary: "Upps!! algo ha fallado",
+      detail: error,
+      life: 3000,
+    });
+  }
 };
 </script>

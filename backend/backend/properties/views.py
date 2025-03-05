@@ -16,34 +16,20 @@ import requests
 from .models import  Property, PropertyRelationship
 from .serializers import  PropertySerializer, PropertyRelationshipSerializer, PropertyDetailSerializer, PropertyOwnerSerializer
 from communities.models import Community, PersonCommunity
-from communities.serializers import PersonCommunitySerializer
+from communities.serializers import PersonCommunitySerializer, PersonCommunityNeighborsSerializer
 from core.models import Municipality, Province, PostalCode
 
 
-# Create your views here.
+
 ### Property managemente views ###
-@swagger_auto_schema(
-    method='get',
-    operation_description="Obtiene la lista de propiedades asociadas a una comunidad específica.",
-    responses={
-        200: PropertySerializer(many=True),
-        404: 'Comunidad no encontrada'
-    }
-)
-@api_view(['GET'])
-def list_properties(request, IDcommunity):
-    community = get_object_or_404(Community, community_id=IDcommunity)
-    properties = Property.objects.filter(community=community)
-    serializer = PropertyDetailSerializer(properties, many=True)
-    return Response(serializer.data)
 
 
 class ListPropertiesWithOwnerAPIView(APIView):
     @swagger_auto_schema(
-        operation_description="Obtener el listado de propiedades con su propietario asociado (owner) en una comunidad específica.",
+        operation_description="Obtener el listado de propiedades con su propietario y inquilinos asociados en una comunidad específica.",
         responses={
             200: openapi.Response(
-                description="Lista de propiedades con el propietario (owner) asociado.",
+                description="Lista de propiedades con el propietario (owner) e inquilinos (tenants) asociados.",
                 schema=openapi.Schema(
                     type=openapi.TYPE_ARRAY,
                     items=openapi.Schema(
@@ -60,8 +46,6 @@ class ListPropertiesWithOwnerAPIView(APIView):
                                     'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del perfil en la comunidad"),
                                     'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del propietario"),
                                     'surnames': openapi.Schema(type=openapi.TYPE_STRING, description="Apellidos del propietario"),
-                                    'email': openapi.Schema(type=openapi.TYPE_STRING, description="Correo electrónico del propietario"),
-                                    'user_status': openapi.Schema(type=openapi.TYPE_STRING, description="Estado del propietario en la comunidad"),
                                     'roles': openapi.Schema(
                                         type=openapi.TYPE_ARRAY,
                                         items=openapi.Schema(type=openapi.TYPE_STRING),
@@ -69,6 +53,23 @@ class ListPropertiesWithOwnerAPIView(APIView):
                                     )
                                 },
                                 description="Información del propietario de la propiedad"
+                            ),
+                            'tenant': openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(
+                                    type=openapi.TYPE_OBJECT,
+                                    properties={
+                                        'person_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID relativo del perfil en la comunidad"),
+                                        'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nombre del inquilino"),
+                                        'surnames': openapi.Schema(type=openapi.TYPE_STRING, description="Apellidos del inquilino"),
+                                        'roles': openapi.Schema(
+                                            type=openapi.TYPE_ARRAY,
+                                            items=openapi.Schema(type=openapi.TYPE_STRING),
+                                            description="Roles asociados al inquilino"
+                                        )
+                                    }
+                                ),
+                                description="Lista de inquilinos de la propiedad"
                             )
                         }
                     )
@@ -90,12 +91,20 @@ class ListPropertiesWithOwnerAPIView(APIView):
             owner_data = None
 
             if owner_relationship and owner_relationship.person:
-                owner_data = PersonCommunitySerializer(owner_relationship.person).data
+                #owner_data = PersonCommunitySerializer(owner_relationship.person).data
+                owner_data = PersonCommunityNeighborsSerializer(owner_relationship.person).data
+
+            # Buscar si hay inquilinos en la propiedad
+            tenants = PropertyRelationship.objects.filter(property=property, type='tenant')
+            tenants_data = []
+
+            for tenant in tenants:
+                tenants_data.append(PersonCommunityNeighborsSerializer(tenant.person).data)
 
             # Serializar los datos de la propiedad y agregar el owner
             property_data = PropertyOwnerSerializer(property).data
             property_data['owner'] = owner_data
-
+            property_data['tenant'] = tenants_data
             properties_data.append(property_data)
 
         return Response(properties_data, status=status.HTTP_200_OK)
