@@ -54,6 +54,7 @@
                 :survey="survey"
                 v-for="survey in getMyOpenSurveys"
                 :key="survey.vote_id"
+                @update:surveys="updateItems"
               />
             </div>
           </div>

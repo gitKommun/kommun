@@ -2,7 +2,10 @@
     <Fieldset legend="Mis propiedades">
         <template v-if="myProperties.length">
             <div class="flex flex-col gap-4">
-                <PropertyCard v-for="property in myProperties" :key="property.id" :property="property" />
+                <PropertyCard v-for="property in myProperties" 
+                :key="property.id" 
+                :property="property" 
+                @update:tenants="getProperties()" />
             </div>
         </template>
         <template v-else>

@@ -93,7 +93,7 @@
           </div>
         </div>
         <div class="flex justify-end">
-          <Button @click="vote" severity="contrast" class="w-full"
+          <Button @click="vote()" severity="contrast" class="w-full"
             >Votar</Button
           >
         </div>
@@ -139,10 +139,11 @@ const props = defineProps({
     required: true
   },
 });
-
+//utils
 const http = useHttp();
 const toast = useToast();
 const { user } = useUserStore();
+const emit = defineEmits(["update:surveys"]);
 
 // Estados
 const showSurvey = ref(false);
@@ -202,6 +203,7 @@ const vote = async () => {
 
     showSurvey.value = false;
     showDelegate.value = false;
+    emit("update:surveys", true);
   } catch (error) {
     toast.add({
       severity: 'error',
@@ -225,6 +227,8 @@ const cancelDelegation = async () => {
       detail: 'Delegación anulada correctamente',
       life: 3000
     });
+
+    emit("update:surveys", true);
   } catch (error) {
     toast.add({
       severity: 'error',

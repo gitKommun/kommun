@@ -6,7 +6,8 @@
         <MyProperties/>
       </div>
     </Content>
-    
+    <ConfirmDialog></ConfirmDialog>
+    <Toast />
   </div>  
 </template>
 <script setup>
@@ -27,17 +28,7 @@ defineOptions({
   name: 'account',
   layout: Main
 })
-const title = ref('Mi perfil')
 
-const form = ref({
-    name: user.name,
-    surname: user.surnames,
-    email: user.email,
-    phone: user.phoneNumber,
-    identificationNumber: user.documentID ?user.documentID : '',
-    identificationType: user.documentType ?user.documentType : '',
-    allowSharing:user.contactIsPublic   
-})
 
 
 </script>

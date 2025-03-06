@@ -1,11 +1,12 @@
 <template>
   <div class="">
-    <Button size="small" text @click="showCreateOwner = !showCreateOwner">
-      <IconPlus class="scale-75" />
+    <div class="flex items-center justify-center gap-x-2 text-sm px-2 py-2 rounded-md bg-slate-100 cursor-pointer text-indigo-500 hover:bg-indigo-50 transition-all duration-300 hover:text-indigo-700"
+     @click="showCreateTenant = !showCreateTenant">
+      <IconUserAdd class="scale-75" />
       Añadir inquilino
-    </Button>
+    </div>
     <Dialog
-      v-model:visible="showCreateOwner"
+      v-model:visible="showCreateTenant"
       modal
       header="Añadir inquilino"
       class="w-96"
@@ -36,12 +37,12 @@
         <Button
           text
           severity="secondary"
-          @click="showCreateOwner = !showCreateOwner"
+          @click="showCreateTenant = !showCreateTenant"
           label="Cancelar"
         />
         <Button
           severity="contrast"
-          @click="createOwner"
+          @click="createTenant"
           :loading="ownerCreateLoading"
           label="Crear"
         />
@@ -50,8 +51,8 @@
   </div>
 </template>
 <script setup>
-import { ref, watch, computed } from "vue";
-import IconPlus from "/src/components/icons/IconPlus.vue";
+import { ref, computed } from "vue";
+import IconUserAdd from "/src/components/icons/IconUserAdd.vue";
 import { useHttp } from "/src/composables/useHttp.js";
 import { useUserStore } from "/src/stores/useUserStore.js";
 import { useToast } from "primevue/usetoast";
@@ -60,39 +61,42 @@ defineOptions({
   name: "AddNewTenant",
 });
 
-//variables
-const showCreateOwner = ref(false);
-const ownerCreateLoading = ref(false);
-const form = ref({
-  name: "",
-  surname: "",
-  email: "",
-  password: "1234",
-  roles: ["tenant"],
+const props = defineProps({
+  propertyId: {
+    type: String,
+    required: true,
+  },
 });
 
+//variables
+const showCreateTenant = ref(false);
+const tenantCreateLoading = ref(false);
+const form = ref({
+  property_id: props.propertyId,
+  name: "",
+  surnames: "",
+  email: "",
+});
 
 //utils
 const http = useHttp();
 const { user } = useUserStore();
 const toast = useToast();
-const emit = defineEmits(["update:owners"]);
+const emit = defineEmits(["update:tenants"]);
 
-const createOwner = async () => {
-  const member = {
-    profiles: [form.value],
-  };
-  ownerCreateLoading.value = true;
+const createTenant = async () => {
+
+  tenantCreateLoading.value = true;
   if (validatedForm) {
     try {
-      const respone = await http.post(
-        `communities/${user?.current_community?.community_id}/neighbors/add/`,
-        member
+      await http.post(
+        `properties/${user?.current_community?.community_id}/add-tenant-to-property/`,
+        form.value
       );
       toast.add({
         severity: "success",
         summary: "Ok",
-        detail: "Has creado un nuevo propietario",
+        detail: "Has creado un nuevo inquilino",
         life: 3000,
       });
     } catch (error) {
@@ -103,23 +107,21 @@ const createOwner = async () => {
         life: 3000,
       });
     }
-    showCreateOwner.value = false;
-    ownerCreateLoading.value = false;
+    showCreateTenant.value = false;
+    tenantCreateLoading.value = false;
     form.value = {
-      name: "",
-      surname: "",
-      email: "",
-      password: "1234",
-      roles: ["tenant"],
+       property_id: props.propertyId,
+  name: "",
+  surnames: "",
+  email: "",
     };
-    emit("update:owners", true);
+    emit("update:tenants", true);
   }
 };
 const validatedForm = computed(() => {
   return (
     form.name.value.trim() !== "" &&
-    form.surname.value.trim() !== "" &&
-    form.role.value.trim() !== "" &&
+    form.surnames.value.trim() !== "" &&
     form.email.value.trim() !== ""
   );
 });
