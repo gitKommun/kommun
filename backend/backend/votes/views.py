@@ -287,6 +287,8 @@ class CommunityVotesListAPIView(APIView):
                             "start_date": "2023-10-01T10:00:00Z",
                             "end_date": "2023-10-31T23:59:00Z",
                             "status": "open",
+                            "vote_type": "simple",  
+                            "options": [{"option_id": 1, "option_text": "A favor"}],
                             "users": [
                                 {
                                     "person_community_id": 5,
@@ -365,6 +367,7 @@ class CommunityVotesListAPIView(APIView):
                 "start_date": vote.start_date,
                 "end_date": vote.end_date,
                 "status": vote_status,
+                "vote_type": vote.vote_type,
                 "options": OptionSerializer(vote.options.all(), many=True).data,
                 "users": users_list
             })
