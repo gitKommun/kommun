@@ -52,4 +52,39 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.name} {self.surnames}"
 
+class Notification(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    notification_id = models.IntegerField(editable=False)  # ID relativo al usuario
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField(blank=True, null=True)
+    link = models.CharField(max_length=500, blank=True, null=True)
+    category = models.CharField(blank=True, null=True, max_length=50)
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        # Asegurar que notification_id es único para cada usuario
+        unique_together = ['recipient', 'notification_id']
+
+    def save(self, *args, **kwargs):
+        if not self.notification_id:  # Solo asignar ID al crear
+            # Obtener el último ID para este usuario
+            last_notification = Notification.objects.filter(
+                recipient=self.recipient
+            ).order_by('notification_id').last()
+            
+            # Asignar el siguiente ID
+            self.notification_id = (last_notification.notification_id + 1) if last_notification else 1
+            
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.recipient.email} - {self.title} ({self.notification_id})"
+    
+    def mark_as_read(self):
+        self.read = True
+        self.save(update_fields=["read"])
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User
+from .models import User, Notification
 
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
@@ -22,3 +22,28 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email',)
 
 admin.site.register(User, UserAdmin)
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'recipient', 'title', 'category', 'created_at', 'read')
+    list_filter = ('read', 'category')
+    search_fields = ('title', 'message', 'recipient__email')
+    ordering = ('-created_at',)
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Destinatario', {
+            'fields': ('recipient',)
+        }),
+        ('Contenido', {
+            'fields': ('title', 'message', 'link')
+        }),
+        ('Clasificación', {
+            'fields': ('category',)
+        }),
+        ('Estado', {
+            'fields': ('read', 'created_at')
+        }),
+    )
+    
+    readonly_fields = ('created_at',)
