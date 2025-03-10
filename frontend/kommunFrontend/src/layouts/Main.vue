@@ -194,7 +194,7 @@
             <div
               class="h-8 w-8 rounded-xl hover:bg-slate-100 flex items-center justify-center"
             >
-              <IconInbox />
+              <InboxNotifications />
             </div>
             <Dropdown strategy="fixed">
               <template #reference="{ open }">
@@ -272,6 +272,7 @@ import CustomAvatar from "/src/components/CustomAvatar.vue";
 import CustomTag from "@/components/CustomTag.vue";
 import { ROLES } from "/src/constants/colors.js";
 import CommunitySelector from "/src/components/CommunitySelector.vue";
+import InboxNotifications from "/src/components/InboxNotifications.vue";
 
 defineOptions({
   name: "home",

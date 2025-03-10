@@ -107,9 +107,10 @@ const emit = defineEmits(["update:tenants"]);
 
 //variables
 const form = ref({
-  name: props.tenant.fullname,
+  name: props.tenant.name,
   surnames: props.tenant.surnames,
   email: props.tenant.email,
+  roles: props.tenant.roles,
 });
 const showEditTenant = ref(false);
 

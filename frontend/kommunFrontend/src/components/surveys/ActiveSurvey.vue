@@ -84,9 +84,9 @@
             @click="selectOption(el)"
             class="border hover:bg-slate-100 rounded-lg p-3 w-full transition-all duration-300"
             :class="
-              selectedOption?.option_id === el.option_id
+              selectedOption?.some(option => option === el.option_id)
                 ? 'border-green-500 bg-green-50 text-green-500 font-semibold'
-                : 'border-slate-200 '
+                : 'border-slate-200'
             "
           >
             {{ el.option_text }}
@@ -115,7 +115,7 @@
           @click="showDelegate = !showDelegate"
           label="Cancelar"
         />
-        <Button severity="contrast" @click="vote()" label="Delegar" />
+        <Button severity="contrast" @click="delegation()" label="Delegar" />
       </div>
     </Dialog>
   </div>
@@ -148,7 +148,7 @@ const emit = defineEmits(["update:surveys"]);
 // Estados
 const showSurvey = ref(false);
 const showDelegate = ref(false);
-const selectedOption = ref(null);
+const selectedOption = ref([]); 
 const delegateTo = ref(null);
 
 // Computed Properties
@@ -183,10 +183,40 @@ const delegator = computed(() => {
 });
 
 const selectOption = (option) => {
-  selectedOption.value = option;
+  if (selectedOption.value.some(opt => opt.option_id === option.option_id)) {
+    selectedOption.value = selectedOption.value.filter(opt => opt.option_id !== option.option_id);
+  } else {
+    selectedOption.value.push(option.option_id);
+  }
 };
 
 const vote = async () => {
+  try {
+    await http.post(`votes/${user?.current_community?.community_id}/polls/${props.survey.vote_id}/vote/`, {
+      person_id: user?.current_community?.community_person_id,
+      option_ids: selectedOption.value,
+    });
+
+    toast.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Voto registrado correctamente',
+      life: 3000
+    });
+
+    showSurvey.value = false;
+    showDelegate.value = false;
+    emit("update:surveys", true);
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Ocurrió un error al procesar tu voto',
+      life: 3000
+    });
+  }
+};
+const delegation = async () => {
   try {
     await http.post(`votes/${user?.current_community?.community_id}/polls/${props.survey.vote_id}/vote/`, {
       person_id: user?.current_community?.community_person_id,
@@ -197,7 +227,7 @@ const vote = async () => {
     toast.add({
       severity: 'success',
       summary: 'Éxito',
-      detail: delegateTo.value ? 'Voto delegado correctamente' : 'Voto registrado correctamente',
+      detail:'Voto delegado correctamente' ,
       life: 3000
     });
 
@@ -243,6 +273,4 @@ const selectionDelegate = (delegate) => {
   delegateTo.value = delegate.person_id;
 };
 
-console.log('delegatedByMe:', props.survey.users);
-console.log('myDelegatedTo:', myDelegationStatus.delegatedTo);
 </script>

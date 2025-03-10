@@ -115,7 +115,14 @@
                   <IconUserAdd class="text-slate-500" />
                 </div>
                 <div v-else class="text-underline" @click="openAddOwner(slotProps.data)">
-                  {{ slotProps.data.owner.full_name }}
+                  {{ slotProps.data.owner.fullname }}
+                </div>
+              </template>
+            </Column>
+            <Column header="Inquilinos">
+              <template #body="slotProps">
+                <div v-for="tenant in slotProps.data.tenant" :key="tenant.id">
+                  {{ tenant.fullname }}
                 </div>
               </template>
             </Column>
