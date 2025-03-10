@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -23,7 +24,7 @@ from drf_yasg import openapi
 
 
 from .serializers import UserRegistrationSerializer, UserSerializer, UserLoginSerializer, UserUpdateSerializer
-from .models import User
+from .models import User, Notification
 from communities.models import Community, PersonCommunity, Role
 from communities.serializers import CommunitySerializer
 from properties.models import Property, PropertyRelationship
@@ -97,8 +98,6 @@ def check_auth_status(request):
     return JsonResponse({'is_authenticated': True})
 
 
-
-
 @swagger_auto_schema(
     method='get',
     responses={
@@ -135,7 +134,8 @@ def check_auth_status(request):
                                 }
                             ]
                         }
-                    ]
+                    ],
+                    "unread_notifications": 2
                 }
             }
         ),
@@ -237,6 +237,14 @@ def get_user_data(request):
 
         user_data['available_communities'] = user_communities_data
 
+        # Contar notificaciones sin leer
+        unread_count = Notification.objects.filter(
+            recipient=user,
+            read=False
+        ).count()
+        
+        user_data['unread_notifications'] = unread_count
+
         return Response(user_data)
     else:
         return Response({'error': 'Usuario no autenticado'}, status=401)
@@ -307,3 +315,183 @@ class UserUpdateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+def create_notification(recipient, title, message, link=None, category=None, ):
+    """
+    Crea una notificación para un usuario.
+
+    :param recipient: Usuario destinatario (User instance)
+    :param title: Título de la notificación
+    :param message: Contenido del mensaje
+    :param link: (Opcional) Enlace a la acción
+    """
+    
+    # Crear la notificación en la plataforma
+  
+    Notification.objects.create(
+            recipient=recipient,
+            title=title,
+            category=category,
+            message=message,
+            link=link,
+        )
+
+
+class UserNotificationsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Obtiene las notificaciones del usuario.",
+        manual_parameters=[
+            openapi.Parameter(
+                'unread_only', 
+                openapi.IN_QUERY, 
+                description="Si es true, devuelve solo notificaciones no leídas",
+                type=openapi.TYPE_BOOLEAN,
+                required=False
+            ),
+            openapi.Parameter(
+                'offset', 
+                openapi.IN_QUERY, 
+                description="Número de notificaciones a saltar",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+            openapi.Parameter(
+                'limit', 
+                openapi.IN_QUERY, 
+                description="Número máximo de notificaciones a devolver",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+                default=20
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Lista de notificaciones",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'count': openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="Número total de notificaciones"
+                        ),
+                        'next': openapi.Schema(
+                            type=openapi.TYPE_BOOLEAN,
+                            description="Indica si hay más notificaciones disponibles"
+                        ),
+                        'notifications': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'notification_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'title': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'message': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'link': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'category': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'created_at': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'read': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                                    'type': openapi.Schema(type=openapi.TYPE_STRING)
+                                }
+                            )
+                        )
+                    }
+                )
+            )
+        }
+    )
+    def get(self, request):
+        # Obtener parámetros de la query
+        unread_only = request.query_params.get('unread_only', 'false').lower() == 'true'
+        offset = int(request.query_params.get('offset', 0))
+        limit = int(request.query_params.get('limit', 20))
+
+        # Construir query base
+        notifications = Notification.objects.filter(recipient=request.user)
+        
+        # Filtrar por no leídas si se solicita
+        if unread_only:
+            notifications = notifications.filter(read=False)
+
+        # Obtener cuenta total
+        total_count = notifications.count()
+
+        # Aplicar paginación
+        notifications = notifications.order_by('-created_at')[offset:offset + limit + 1]
+        
+        # Verificar si hay más resultados
+        has_next = len(notifications) > limit
+        notifications = notifications[:limit]  # Eliminar el elemento extra
+
+        # Formatear respuesta
+        notifications_data = [
+            {
+                'notification_id': notification.notification_id,
+                'title': notification.title,
+                'message': notification.message,
+                'link': notification.link,
+                'category': notification.category,
+                'created_at': notification.created_at.strftime('%Y-%m-%d %H:%M'),
+                'read': notification.read,
+            }
+            for notification in notifications
+        ]
+
+        return Response({
+            'count': total_count,
+            'next': has_next,
+            'notifications': notifications_data
+        })
+
+class MarkNotificationsReadAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Marca como leídas las notificaciones especificadas usando sus IDs relativos al usuario.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['notification_ids'],
+            properties={
+                'notification_ids': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_INTEGER),
+                    description="Lista de IDs relativos de notificaciones a marcar como leídas"
+                )
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Notificaciones actualizadas correctamente",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'message': openapi.Schema(type=openapi.TYPE_STRING),
+                        'updated_count': openapi.Schema(type=openapi.TYPE_INTEGER)
+                    }
+                )
+            ),
+            400: "IDs de notificación no proporcionados",
+            404: "Una o más notificaciones no encontradas"
+        }
+    )
+    def post(self, request):
+        notification_ids = request.data.get('notification_ids', [])
+        
+        if not notification_ids:
+            return Response(
+                {'error': 'Debe proporcionar al menos un ID de notificación'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Actualizar usando notification_id en lugar de id
+        updated_count = Notification.objects.filter(
+            notification_id__in=notification_ids,
+            recipient=request.user,
+            read=False
+        ).update(read=True)
+
+        return Response({
+            'message': 'Notificaciones actualizadas correctamente',
+            'updated_count': updated_count
+        })

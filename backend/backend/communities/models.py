@@ -47,6 +47,15 @@ class Community(models.Model):
     def __str__(self):
         return f"{self.name} - {self.city}, {self.province} "
 
+    def get_admins_users(self):
+        # Get PersonCommunity objects that have admin role and a valid user
+        return self.people.filter(
+            roles__name='admin',
+            user__isnull=False
+        ).select_related('user').values_list('user', flat=True).distinct()
+        print(f'Admins users: {admins_users}')
+    
+
 class Role(models.Model):
     name = models.CharField(max_length=30, unique=True)
 

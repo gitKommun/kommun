@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 from django.urls import path, include
 
@@ -13,5 +12,5 @@ urlpatterns = [
     path('finance/', include('finance.urls')),
     path('votes/', include('votes.urls')),
     path('core/', include('core.urls')),
-    path('suppliers/', include('suppliers.urls')),
+    path('suppliers/', include('suppliers.urls', namespace='suppliers')),
 ]
