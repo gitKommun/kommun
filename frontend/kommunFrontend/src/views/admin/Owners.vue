@@ -209,6 +209,7 @@ const tagLabel = {
   owner: "Propietario",
   tenant: "Inquilino",
   temp: "Temporal",
+  board: "Gestor",
 };
 const rolesTagLabel = (rol) => {
   return tagLabel[rol];
@@ -216,6 +217,7 @@ const rolesTagLabel = (rol) => {
 const userTypes = ref([
   { label: "Administrador", value: "admin" },
   { label: "Propietario", value: "owner" },
+  { label: "Gestor", value: "board" },
 ]);
 const showUpdateOwner = ref(false);
 //get owners

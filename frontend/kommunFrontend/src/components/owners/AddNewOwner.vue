@@ -89,6 +89,7 @@ const form = ref({
 const userTypes = ref([
   { label: "Administrador", value: "admin" },
   { label: "Propietario", value: "owner" },
+   { label: "Gestor", value: "board" },
   // { label: 'Inquilino', value: 'tenant' },
   // {label:'Temporal',value:'temp'},
 ]);

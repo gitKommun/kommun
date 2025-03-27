@@ -15,10 +15,11 @@ export const USAGES_HEX = {
 };
 
 export const ROLES = {
-    admin: 'blue',
-    owner: 'lime',
+    admin: 'violet',
+    owner: 'blue',
     tenant: 'amber',
-    temp:'orange'
+    temp:'orange',
+    board:'emerald'
 };
 
 export const PRIORITY_COLOR = {

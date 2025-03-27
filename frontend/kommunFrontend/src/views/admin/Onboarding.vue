@@ -1,9 +1,7 @@
 <template>
     <div class="h-screen w-screen bg-slate-100  flex justify-center items-center p-4">
         <div class="w-full h-full bg-white rounded-2xl shadow-2xl p-3 overflow-y-scroll">
-            <div class="flex items-center justify-center w-full pt-16 pb-8">
-                <img alt="Kommun logo" class="h-48" src="@/assets/construcction.svg"  />
-            </div>
+          
             <div class="font-bold text-3xl w-full flex justify-center mb-3">
                 ¡Vamos a construir tu primera comunidad!
             </div>
