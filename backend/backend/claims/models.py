@@ -43,10 +43,7 @@ class Claim(models.Model):
     #assignet_toName = models.CharField(max_length=255, null=True, blank=True) 
 
     current_status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    last_status_change = models.DateTimeField()
-
-
-
+    last_status_change = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.title} - {self.status}"
