@@ -3,13 +3,23 @@
 /core/swagger/
 /core/redoc/
 
-# Instrucciones para Poblar Datos Iniciales
+
+
+
 
 # Requisitos Previos
 # Asegúrate de haber configurado correctamente el entorno de Django y de haber ejecutado las migraciones de base de datos:
 python manage.py makemigrations
 python manage.py migrate
 
+
+# Instrucciones para Poblar Datos Iniciales (user, roles, provincias, comunidad etc..)
+python manage.py init_db
+
+
+
+
+# Instrucciones para Poblar Datos Iniciales PARCIALMENTE (son los que ya esta poblando init_db)
 # Poblar Provincias
 # Para cargar las provincias en la base de datos, ejecuta el siguiente comando:
 python manage.py populate_provinces

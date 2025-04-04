@@ -337,7 +337,8 @@ class CommunityVotesListAPIView(APIView):
                 # Determinar el delegado (si existe)
                 delegated_record = VoteRecord.objects.filter(vote=vote, delegated_to=neighbor).first()
                 delegate_to = None
-                if vote_record.delegated_to:
+                delegate_to = None
+                if vote_record and vote_record.delegated_to:
                     delegate_to = {
                         "person_community_id": vote_record.delegated_to.person_id,
                         "fullName": f"{vote_record.delegated_to.name} {vote_record.delegated_to.surnames}"
@@ -465,7 +466,7 @@ class VoteDetailAPIView(APIView):
             {
                 'neighbor_id': neighbor.person_id,
                 'neighbor_name': f"{neighbor.name} {neighbor.surnames}",
-                'delegated_to_name': None  # Puedes ajustar si necesitas información específica sobre el delegado
+                'delegated_to_name': None
             }
             for neighbor in pending_voters
         ]
@@ -476,7 +477,7 @@ class VoteDetailAPIView(APIView):
                 'neighbor_name': f"{record.neighbor.name} {record.neighbor.surnames}",
                 'delegated_to_name': f"{record.delegated_to.name} {record.delegated_to.surnames}" if record.delegated_to else None,
                 'options_selected': [opt.option_text for opt in record.options.all()],
-                'timestamp': record.timestamp
+                'timestamp': record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
             }
             for record in vote.vote_records.select_related('neighbor', 'delegated_to').prefetch_related('options')
         ]
